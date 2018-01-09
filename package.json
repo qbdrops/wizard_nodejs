@@ -1,7 +1,7 @@
 {
-  "name": "infinitechain_client",
+  "name": "infinitechain_server",
   "version": "0.0.1",
-  "description": "Infinitechain Client SDK",
+  "description": "Infinitechain Server SDK",
   "main": "bundle.js",
   "scripts": {
     "test": "./node_modules/mocha/bin/mocha",
