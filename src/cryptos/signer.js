@@ -13,7 +13,7 @@ class Signer {
   }
 
   sign = async (message) => {
-    let ethMsgHash = this._getEthMegHash(message);
+    let ethMsgHash = this._getEthMsgHash(message);
     let signature = EthUtils.ecsign(ethMsgHash, Buffer.from(this.key, 'hex'));
 
     return {
@@ -24,7 +24,7 @@ class Signer {
   }
 
   verify = async (message, signature) => {
-    let ethMsgHash = this._getEthMegHash(message);
+    let ethMsgHash = this._getEthMsgHash(message);
     let publicKey = EthUtils.ecrecover(ethMsgHash, signature.v, signature.r, signature.s);
     return publicKey;
   }
@@ -37,7 +37,7 @@ class Signer {
     return EthUtils.privateToAddress(this.key).toString('hex');
   }
 
-  _getEthMegHash (message) {
+  _getEthMsgHash (message) {
     let msgHash = EthUtils.sha3(message);
     let prefix = new Buffer('\x19Ethereum Signed Message:\n');
     let ethMsgHash = EthUtils.sha3(Buffer.concat([prefix, new Buffer(String(msgHash.length)), msgHash]));
