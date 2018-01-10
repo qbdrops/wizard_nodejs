@@ -39,7 +39,7 @@ class Server {
 
   sendTransactions = async (txs) => {
     let sidechain = this.ifc.sidechain;
-    return sidechain.sendTransactions(txs);
+    return await sidechain.sendTransactions(txs);
   }
 
   commitTransactions = async () => {

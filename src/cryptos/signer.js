@@ -1,6 +1,5 @@
 import EthUtils from 'ethereumjs-util';
-// import keythereum from 'keythereum';
-import Wallet from 'ethereumjs-wallet';
+import keythereum from 'keythereum';
 
 class Signer {
   constructor () {
@@ -9,9 +8,7 @@ class Signer {
 
   generateKeyPair = async () => {
     if (!this.key) {
-      // this.key = keythereum.create({ keyBytes: 32, ivBytes: 16 }).privateKey;
-      let wallet = Wallet.generate();
-      this.key = wallet.getPrivateKeyString().substring(2); // Remove '0x'
+      this.key = keythereum.create({ keyBytes: 32, ivBytes: 16 }).privateKey;
     }
   }
 

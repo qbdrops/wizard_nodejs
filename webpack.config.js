@@ -23,5 +23,6 @@ module.exports = {
       '@': path.resolve('src'),
       '@@': path.resolve('.')
     }
-  }
+  },
+  target: 'node'
 };
