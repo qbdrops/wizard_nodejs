@@ -41,7 +41,7 @@ IFC
 ifc = new IFCBuilder().setStorage("/path").setNodeUrl("http://0.0.0.0:3000").setWeb3Url("http://0.0.0.0:8545").build()
 
 // Crypto
-ifc.crypto.generateKeyPair()
+ifc.crypto.getOrNewKeyPair()
 sig = ifc.crypto.sign('foo')
 ifc.crypto.verify('foo', sig)
 cipher = ifc.crypto.encrypt('foo')
