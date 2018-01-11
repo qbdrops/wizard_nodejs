@@ -12,7 +12,7 @@ rawTransaction = {
   from: '0x49aabbbe9141fe7a80804bdf01473e250a3414cb',
   to: '0x5b9688b5719f608f1cb20fdc59626e717fbeaa9a',
   value: 100,
-  localSequenceNumer: 99,
+  localSequenceNumber: 99,
   stageHeight: 3,
   data: {
     foo: 'bar',
