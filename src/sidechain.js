@@ -12,11 +12,13 @@ class Sidechain {
     this._nodeUrl = opt.nodeUrl;
     this._ifc = ifc;
 
-    let IFCContractAddress = this._getIFCContractAddress;
+    this._getIFCContractAddress().
+      then((IFCContractAddress) => {
+        this._web3 = new Web3(new Web3.providers.HttpProvider(this._web3Url));
+        this._ifcObj = this._web3.eth.contract(ifcJSON.abi).at(IFCContractAddress);
+        this.stageObjCache = [];
+      });
 
-    this._web3 = new Web3(new Web3.providers.HttpProvider(this._web3Url));
-    this._ifcObj = this._web3.eth.contract(ifcJSON.abi).at(IFCContractAddress);
-    this.stageObjCache = [];
   }
 
   pendingStages = async () => {
@@ -96,9 +98,10 @@ class Sidechain {
   }
 
   _getIFCContractAddress = async () => {
-    let url = this._nodeUrl + '/getIFCContractAddress';
-    let res = await axios.get(url).body;
-    return res;
+    let url = this._nodeUrl + '/contract/address/ifc';
+    let address = await axios.get(url).
+      then((res) => res.data.address);
+    return address;
   }
 
   _getOrNewStageObj = async (stageHash) => {

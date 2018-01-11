@@ -3,7 +3,7 @@ module.exports = {
     {
       'constant': true,
       'inputs': [],
-      'name': 'sideChainRootHash',
+      'name': 'rootHash',
       'outputs': [
         {
           'name': '',
@@ -11,64 +11,22 @@ module.exports = {
         }
       ],
       'payable': false,
+      'stateMutability': 'view',
       'type': 'function'
     },
     {
       'constant': false,
       'inputs': [],
-      'name': 'exonerate',
+      'name': 'setCompleted',
       'outputs': [],
       'payable': false,
+      'stateMutability': 'nonpayable',
       'type': 'function'
     },
     {
       'constant': true,
       'inputs': [],
-      'name': 'treeHeight',
-      'outputs': [
-        {
-          'name': '',
-          'type': 'uint256'
-        }
-      ],
-      'payable': false,
-      'type': 'function'
-    },
-    {
-      'constant': true,
-      'inputs': [],
-      'name': 'getErrorTIDs',
-      'outputs': [
-        {
-          'name': '',
-          'type': 'bytes32[]'
-        }
-      ],
-      'payable': false,
-      'type': 'function'
-    },
-    {
-      'constant': true,
-      'inputs': [],
-      'name': 'sideChainOwner',
-      'outputs': [
-        {
-          'name': '',
-          'type': 'address'
-        }
-      ],
-      'payable': false,
-      'type': 'function'
-    },
-    {
-      'constant': true,
-      'inputs': [
-        {
-          'name': '',
-          'type': 'uint256'
-        }
-      ],
-      'name': 'errorTIDs',
+      'name': 'stageHash',
       'outputs': [
         {
           'name': '',
@@ -76,68 +34,7 @@ module.exports = {
         }
       ],
       'payable': false,
-      'type': 'function'
-    },
-    {
-      'constant': true,
-      'inputs': [],
-      'name': 'obj_time',
-      'outputs': [
-        {
-          'name': '',
-          'type': 'uint256'
-        }
-      ],
-      'payable': false,
-      'type': 'function'
-    },
-    {
-      'constant': true,
-      'inputs': [
-        {
-          'name': 'idx',
-          'type': 'uint256'
-        }
-      ],
-      'name': 'getSibling',
-      'outputs': [
-        {
-          'name': '',
-          'type': 'uint256'
-        }
-      ],
-      'payable': false,
-      'type': 'function'
-    },
-    {
-      'constant': true,
-      'inputs': [],
-      'name': 'exr_time',
-      'outputs': [
-        {
-          'name': '',
-          'type': 'uint256'
-        }
-      ],
-      'payable': false,
-      'type': 'function'
-    },
-    {
-      'constant': true,
-      'inputs': [
-        {
-          'name': 'tid',
-          'type': 'bytes32'
-        }
-      ],
-      'name': 'getObjectorNodeIndex',
-      'outputs': [
-        {
-          'name': '',
-          'type': 'uint256'
-        }
-      ],
-      'payable': false,
+      'stateMutability': 'view',
       'type': 'function'
     },
     {
@@ -151,107 +48,73 @@ module.exports = {
         }
       ],
       'payable': false,
-      'type': 'function'
-    },
-    {
-      'constant': false,
-      'inputs': [],
-      'name': 'judge',
-      'outputs': [],
-      'payable': false,
+      'stateMutability': 'view',
       'type': 'function'
     },
     {
       'constant': true,
-      'inputs': [
-        {
-          'name': '',
-          'type': 'uint256'
-        }
-      ],
-      'name': 'indexMerkleTree',
+      'inputs': [],
+      'name': 'getObjectionableTxHashes',
       'outputs': [
         {
           'name': '',
-          'type': 'bytes32'
+          'type': 'bytes32[]'
         }
       ],
       'payable': false,
+      'stateMutability': 'view',
       'type': 'function'
     },
     {
       'constant': false,
       'inputs': [
         {
-          'name': 'tid',
-          'type': 'bytes32'
-        },
-        {
-          'name': 'scid',
-          'type': 'bytes32'
-        },
-        {
-          'name': 'content',
-          'type': 'bytes32'
-        },
-        {
-          'name': 'v',
-          'type': 'uint8'
-        },
-        {
-          'name': 'r',
-          'type': 'bytes32'
-        },
-        {
-          'name': 's',
+          'name': '_txHash',
           'type': 'bytes32'
         }
       ],
-      'name': 'takeObjection',
+      'name': 'resolveObjections',
       'outputs': [],
       'payable': false,
+      'stateMutability': 'nonpayable',
       'type': 'function'
     },
     {
-      'constant': true,
+      'constant': false,
       'inputs': [
         {
-          'name': '',
-          'type': 'uint256'
-        }
-      ],
-      'name': 'list',
-      'outputs': [
-        {
-          'name': '',
+          'name': '_txHash',
           'type': 'bytes32'
-        }
-      ],
-      'payable': false,
-      'type': 'function'
-    },
-    {
-      'constant': true,
-      'inputs': [
+        },
         {
-          'name': '',
-          'type': 'uint256'
+          'name': '_customer',
+          'type': 'address'
         }
       ],
-      'name': 'leafNode',
-      'outputs': [
-        {
-          'name': 'dataLength',
-          'type': 'uint256'
-        }
-      ],
+      'name': 'addObjectionableTxHash',
+      'outputs': [],
       'payable': false,
+      'stateMutability': 'nonpayable',
       'type': 'function'
     },
     {
       'constant': true,
       'inputs': [],
-      'name': 'sideChainTemplate',
+      'name': 'isSettle',
+      'outputs': [
+        {
+          'name': '',
+          'type': 'bool'
+        }
+      ],
+      'payable': false,
+      'stateMutability': 'view',
+      'type': 'function'
+    },
+    {
+      'constant': true,
+      'inputs': [],
+      'name': 'owner',
       'outputs': [
         {
           'name': '',
@@ -259,6 +122,21 @@ module.exports = {
         }
       ],
       'payable': false,
+      'stateMutability': 'view',
+      'type': 'function'
+    },
+    {
+      'constant': true,
+      'inputs': [],
+      'name': 'lib',
+      'outputs': [
+        {
+          'name': '',
+          'type': 'address'
+        }
+      ],
+      'payable': false,
+      'stateMutability': 'view',
       'type': 'function'
     },
     {
@@ -276,40 +154,16 @@ module.exports = {
           'type': 'address'
         },
         {
-          'name': 'hashOfContent',
-          'type': 'bytes32'
+          'name': 'objectionSuccess',
+          'type': 'bool'
         },
         {
-          'name': 'objectionSuccess',
+          'name': 'getCompensation',
           'type': 'bool'
         }
       ],
       'payable': false,
-      'type': 'function'
-    },
-    {
-      'constant': false,
-      'inputs': [
-        {
-          'name': 'IMTidx',
-          'type': 'uint256[]'
-        },
-        {
-          'name': 'IMTnodeHash',
-          'type': 'bytes32[]'
-        },
-        {
-          'name': 'LFDidx',
-          'type': 'uint256[]'
-        },
-        {
-          'name': 'lfd',
-          'type': 'bytes32[]'
-        }
-      ],
-      'name': 'setting',
-      'outputs': [],
-      'payable': false,
+      'stateMutability': 'view',
       'type': 'function'
     },
     {
@@ -323,25 +177,18 @@ module.exports = {
         }
       ],
       'payable': false,
+      'stateMutability': 'view',
       'type': 'function'
     },
     {
       'constant': true,
-      'inputs': [],
-      'name': 'deposit',
-      'outputs': [
+      'inputs': [
         {
           'name': '',
           'type': 'uint256'
         }
       ],
-      'payable': false,
-      'type': 'function'
-    },
-    {
-      'constant': true,
-      'inputs': [],
-      'name': 'sideChainID',
+      'name': 'objectionableTxHashes',
       'outputs': [
         {
           'name': '',
@@ -349,59 +196,77 @@ module.exports = {
         }
       ],
       'payable': false,
+      'stateMutability': 'view',
+      'type': 'function'
+    },
+    {
+      'constant': true,
+      'inputs': [],
+      'name': 'objectionTime',
+      'outputs': [
+        {
+          'name': '',
+          'type': 'uint256'
+        }
+      ],
+      'payable': false,
+      'stateMutability': 'view',
+      'type': 'function'
+    },
+    {
+      'constant': false,
+      'inputs': [
+        {
+          'name': '_txHash',
+          'type': 'bytes32'
+        }
+      ],
+      'name': 'resolveCompensation',
+      'outputs': [],
+      'payable': false,
+      'stateMutability': 'nonpayable',
+      'type': 'function'
+    },
+    {
+      'constant': true,
+      'inputs': [],
+      'name': 'finalizedTime',
+      'outputs': [
+        {
+          'name': '',
+          'type': 'uint256'
+        }
+      ],
+      'payable': false,
+      'stateMutability': 'view',
       'type': 'function'
     },
     {
       'inputs': [
         {
-          'name': '_addr',
+          'name': '_stageHash',
+          'type': 'bytes32'
+        },
+        {
+          'name': '_rootHash',
+          'type': 'bytes32'
+        },
+        {
+          'name': '_lib',
           'type': 'address'
         },
         {
-          'name': 'scid',
-          'type': 'bytes32'
-        },
-        {
-          'name': 'rh',
-          'type': 'bytes32'
-        },
-        {
-          'name': 'th',
+          'name': '_objectionTimePeriod',
           'type': 'uint256'
         },
         {
-          'name': 'objection_time',
-          'type': 'uint256'
-        },
-        {
-          'name': 'exonerate_time',
+          'name': '_finalizedTimePeriod',
           'type': 'uint256'
         }
       ],
-      'payable': true,
+      'payable': false,
+      'stateMutability': 'nonpayable',
       'type': 'constructor'
-    },
-    {
-      'anonymous': false,
-      'inputs': [
-        {
-          'indexed': true,
-          'name': '_owner',
-          'type': 'address'
-        },
-        {
-          'indexed': true,
-          'name': '_scid',
-          'type': 'bytes32'
-        },
-        {
-          'indexed': false,
-          'name': '_func',
-          'type': 'bytes4'
-        }
-      ],
-      'name': 'SideChainEvent',
-      'type': 'event'
     }
   ]
 };
