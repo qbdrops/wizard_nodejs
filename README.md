@@ -38,13 +38,13 @@ IFC
 ## Example
 ```javascript
 // Use IFCBuilder to create an ifc object
-let ifc = new IFCBuilder().setStorage("/path").setNodeUrl("http://0.0.0.0:3000").setWeb3Url("http://0.0.0.0:8545").build()
+ifc = new IFCBuilder().setStorage("/path").setNodeUrl("http://0.0.0.0:3000").setWeb3Url("http://0.0.0.0:8545").build()
 
 // Crypto
-ifc.crypto.generateKeyPair()
-let sig = ifc.crypto.sign('foo')
+ifc.crypto.getOrNewKeyPair()
+sig = ifc.crypto.sign('foo')
 ifc.crypto.verify('foo', sig)
-let cipher = ifc.crypto.encrypt('foo')
+cipher = ifc.crypto.encrypt('foo')
 ifc.crypto.decrypt(cipher)
 ```
 
