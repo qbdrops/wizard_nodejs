@@ -58,7 +58,6 @@ rawTransaction = {
   }
 }
 
-ifc.server.signTransaction(rawTransaction)
 tx = ifc.server.signTransaction(rawTransaction)
 ifc.server.sendTransactions([tx])
 
