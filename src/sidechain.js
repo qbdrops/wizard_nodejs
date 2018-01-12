@@ -6,40 +6,64 @@ import axios from 'axios';
 
 class Sidechain {
   constructor (opt, ifc) {
-    assert(opt.web3Url != undefined, 'Opt shouldd include web3Url.');    
+    assert(opt.web3Url != undefined, 'Opt shouldd include web3Url.');
     assert(opt.nodeUrl != undefined, 'Opt shouldd include nodeUrl.');
+
     this._web3Url = opt.web3Url;
     this._nodeUrl = opt.nodeUrl;
+    this.fetchContract();
     this._ifc = ifc;
+    this.stageCache = [];
+  }
 
-    let IFCContractAddress = this._getIFCContractAddress;
+  async fetchContract () {
+    let contractAddress = null;
+    try {
+      let res = await this.getContractAddress();
+      contractAddress = res.data.address;
+      console.log(contractAddress);
+    } catch (e) {
+      console.error(e);
+    }
+
+    assert(contractAddress, 'Can not fetch contract address.');
+    this.contractAddress = contractAddress;
 
     this._web3 = new Web3(new Web3.providers.HttpProvider(this._web3Url));
-    this._ifcObj = this._web3.eth.contract(ifcJSON.abi).at(IFCContractAddress);
-    this.stageObjCache = [];
+    this._ifcContract = this._web3.eth.contract(ifcJSON.abi).at(contractAddress);
   }
 
-  pendingStages = async () => {
+  getContractAddress = () => {
+    let url = this._nodeUrl + '/contract/address/ifc';
+    return axios.get(url);
+  }
+
+  pendingStages = () => {
     let url = this._nodeUrl + '/pending/stages';
-    let res = await axios.get(url).
-      then((res) => console.log(res));
-    return res;
+    return axios.get(url);
   }
 
-  pendingTransactions = async () => {
+  pendingTransactions = () => {
     let url = this._nodeUrl + '/pending/transactions';
-    let res = await axios.get(url).
-      then((res) => console.log(res));
-    return res;
+    return axios.get(url);
   }
 
   getIFCContract = async () => {
-    return this._ifcObj;
+    return this._ifcContract;
   }
 
   getStage = async (stageHash) => {
-    let stageObj = this._getOrNewStageObj(stageHash);
-    return stageObj;
+    if(this.stageCache[stageHash]) {
+      return this.stageCache[stageHash];
+    }
+
+    let stageContractAddress = await this._ifcContract.contract.getBlockAddress(stageHash);
+    assert(stageContractAddress != 0, 'This stage contract does not exist.');
+
+    let stageContract = this._web3.eth.contract(stageJSON.abi).at(stageContractAddress);
+    this.stageCache[stageHash] = stageContract;
+
+    return stageContract;
   }
 
   getStageRootHash = async (stageHash) => {
@@ -47,75 +71,41 @@ class Sidechain {
     return stage.rootHash();
   }
 
-  getLatestStageHeight = async () => {
+  getLatestStageHeight = () => {
     let url = this._nodeUrl + '/latest/stage/height';
-    let res = await axios.get(url).
-      then((res) => console.log(res));
-    return res;
+    return axios.get(url);
   }
 
-  getTransaction = async (scTxHash) => {
+  getTransaction = (scTxHash) => {
     let url = this._nodeUrl + '/transaction';
-    let res = await axios.get(url, {
-      params: {
-        scTxHash: scTxHash
-      }
-    }).
-      then((res) => console.log(res));
-    return res;
+    return axios.get(url, {
+      scTxHash: scTxHash
+    });
   }
 
-  getSlice = async (stageHeight, txHash) => {
+  getSlice = (stageHeight, txHash) => {
     let url = this._nodeUrl + '/slice';
-    let res = await axios.get(url, {
-      params: {
-        stage_height: stageHeight,
-        tx_hash: txHash
-      }
-    }).
-      then((res) => console.log(res));
-    return res;
+    return axios.get(url, {
+      stage_height: stageHeight,
+      tx_hash: txHash
+    });
   }
 
-  sendTransactions = async (txs) => {
+  sendTransactions = (txs) => {
     let url = this._nodeUrl + '/send/transactions';
-    let res = await axios.post(url, {
-      params: {
-        txs: txs
-      }
-    }).
-      then((res) => console.log(res));
-    return res;
+    return axios.post(url, {
+      txs: txs
+    });
   }
 
-  commitTransactions = async () => {
+  commitTransactions = () => {
     let url = this._nodeUrl + '/commit/transactions';
-    let res = await axios.post(url).
-      then((res) => console.log(res));
-    return res;
+    return axios.post(url);
   }
 
   _getIFCContractAddress = async () => {
     let url = this._nodeUrl + '/getIFCContractAddress';
-    let res = await axios.get(url).body;
-    return res;
-  }
-
-  _getOrNewStageObj = async (stageHash) => {
-    // Check if stageObj is in cache
-    if(this.stageObjCache[stageHash]) {
-      return this.stageObjCache[stageHash];
-    }
-
-    let stageContractAddress = await this._ifcObj.contract.getBlockAddress(stageHash);
-    assert(stageContractAddress != 0, 'This stage contract does not exist.');
-
-    let stageObj = this._web3.eth.contract(stageJSON.abi).at(stageContractAddress);
-
-    // Cache stageObj
-    this.stageObjCache[stageHash] = stageObj;
-
-    return stageObj;
+    return axios.get(url);
   }
 }
 

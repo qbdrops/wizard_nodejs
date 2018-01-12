@@ -1,33 +1,63 @@
-import KeyStore from '@/stores/key-store';
+import Cipher from '@/cryptos/cipher';
+import Signer from '@/cryptos/signer';
 
 class Crypto {
-  constructor (cryptoConfig, ifc) {
-    this.ifc = ifc;
-    this._keyStore = new KeyStore();
+  constructor () {
+    this._cipher = new Cipher();
+    this._signer = new Signer();
   }
 
-  generateKeyPair = async () => {
-    await this._keyStore.generateKeyPair();
+  getOrNewKeyPair = () => {
+    let eccPrivateKey = this._signer.getOrNewKeyPair();
+    let rsaPrivateKey = this._cipher.getOrNewKeyPair();
+
+    return {
+      eccPrivateKey: eccPrivateKey,
+      rsaPrivateKey: rsaPrivateKey
+    };
   }
 
-  sign = async (message) => {
-    return await this._keyStore._signer.sign(message);
+  importSignerKey = (eccPrivateKey) => {
+    this._signer.importPrivateKey(eccPrivateKey);
   }
 
-  verify = async (message, signature) => {
-    return await this._keyStore._signer.verify(message, signature);
+  importCipherKey = (rsaPrivateKey) => {
+    this._cipher.importPrivateKey(rsaPrivateKey);
   }
 
-  encrypt = async (message, publicKey = null) => {
-    return await this._keyStore._cipher.encrypt(message, publicKey);
+  sign = (message) => {
+    return this._signer.sign(message);
   }
 
-  decrypt = async (cipherMessage, privateKey = null) => {
-    return await this._keyStore._cipher.decrypt(cipherMessage, privateKey);
+  verify = (message, signature) => {
+    return this._signer.verify(message, signature);
   }
 
-  getCipherPublicKey () {
-    return this._keyStore._cipher.getPublicKey();
+  encrypt = (message, publicKey = null) => {
+    return this._cipher.encrypt(message, publicKey);
+  }
+
+  decrypt = (cipherMessage, privateKey = null) => {
+    return this._cipher.decrypt(cipherMessage, privateKey);
+  }
+
+  getSignerAddress = () => {
+    return this._signer.getAddress();
+  }
+
+  keyInfo () {
+    let eccPrivateKey = this._signer.getPrivateKey();
+    let eccPublicKey = this._signer.getPublicKey();
+    let address = this._signer.getAddress();
+    let rsaPrivateKey = this._cipher.getPrivateKey();
+    let rsaPublicKey = this._cipher.getPublicKey();
+    return {
+      eccPrivateKey: eccPrivateKey,
+      eccPublicKey: eccPublicKey,
+      address: address,
+      rsaPrivateKey: rsaPrivateKey,
+      rsaPublicKey: rsaPublicKey
+    };
   }
 }
 

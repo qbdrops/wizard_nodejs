@@ -6,42 +6,41 @@ class Signer {
     this.key = null;
   }
 
-  generateKeyPair = async () => {
+  getOrNewKeyPair = () => {
     if (!this.key) {
       this.key = keythereum.create({ keyBytes: 32, ivBytes: 16 }).privateKey;
     }
+
+    return '0x' + this.key.toString('hex');
   }
 
-  sign = async (message) => {
-    let ethMsgHash = this._getEthMsgHash(message);
-    let signature = EthUtils.ecsign(ethMsgHash, Buffer.from(this.key, 'hex'));
-
-    return {
-      r: '0x' + signature.r.toString('hex'),
-      s: '0x' + signature.s.toString('hex'),
-      v: signature.v
-    };
+  importPrivateKey = (privateKey) => {
+    this.key = Buffer.from(privateKey, 'hex');
   }
 
-  verify = async (message, signature) => {
-    let ethMsgHash = this._getEthMsgHash(message);
-    let publicKey = EthUtils.ecrecover(ethMsgHash, signature.v, signature.r, signature.s);
-    return publicKey;
+  sign = (msgHash) => {
+    return EthUtils.ecsign(msgHash, this.key);
   }
 
-  getPublicKey () {
-    return EthUtils.privateToPublic(this.key).toString('hex');
-  }
-
-  getAddress () {
-    return EthUtils.privateToAddress(this.key).toString('hex');
-  }
-
-  _getEthMsgHash (message) {
+  verify = (message, signature) => {
     let msgHash = EthUtils.sha3(message);
     let prefix = new Buffer('\x19Ethereum Signed Message:\n');
     let ethMsgHash = EthUtils.sha3(Buffer.concat([prefix, new Buffer(String(msgHash.length)), msgHash]));
-    return ethMsgHash;
+    let publicKey = EthUtils.ecrecover(ethMsgHash, signature.v, signature.r, signature.s);
+    let address = '0x' + EthUtils.pubToAddress(publicKey).toString('hex');
+    return address;
+  }
+
+  getPrivateKey () {
+    return '0x' + this.key.toString('hex');
+  }
+
+  getPublicKey () {
+    return '0x' + EthUtils.privateToPublic(this.key).toString('hex');
+  }
+
+  getAddress () {
+    return '0x' + EthUtils.privateToAddress(this.key).toString('hex');
   }
 }
 

@@ -6,7 +6,7 @@ import Event from '@/event';
 import Crypto from '@/crypto';
 
 import Sidechain from '@/sidechain';
-
+import axios from 'axios';
 import assert from 'assert';
 
 class IFCBuilder {
@@ -35,7 +35,7 @@ class IFCBuilder {
     return this;
   }
 
-  build () {
+  build = () => {
     let clientConfig = {
       web3Url: this._web3Url,
       nodeUrl: this._nodeUrl,
