@@ -42,10 +42,25 @@ ifc = new IFCBuilder().setStorage("/path").setNodeUrl("http://0.0.0.0:3000").set
 
 // Crypto
 ifc.crypto.getOrNewKeyPair()
-sig = ifc.crypto.sign('foo')
-ifc.crypto.verify('foo', sig)
-cipher = ifc.crypto.encrypt('foo')
-ifc.crypto.decrypt(cipher)
+ifc.crypto.keyInfo()
+ifc.crypto.importSignerKey('2af10f5713dd24bcdbf117024eb1506ff52b7084a392a30169790713add35ede')
+
+rawTransaction = {
+  from: '0x49aabbbe9141fe7a80804bdf01473e250a3414cb',
+  to: '0x5b9688b5719f608f1cb20fdc59626e717fbeaa9a',
+  value: 100,
+  localSequenceNumber: 99,
+  stageHeight: 3,
+  data: {
+    foo: 'bar',
+    pkUser: '-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA5SxAR4lIyHg3vF/DbWKq\nZfedueCC6TpSMmD3LMZ2vhvI8cO1ydmDRTngJlgiKCcQFGGRcDqI5vxBfE4vdCy/\nDFw1zTiT9pPLUWGZNT4YxlcdFUJ26b4YqRHUk8Tfg4YNSUTaNKaj2VKj3NyLrchN\neunMWeLj+QlfdjV5zUkOy9pbMj0co1gDAK85jnO8NJupycWyA/ezfpaoTfJj2Ijd\n2b0+nCWCdWw8oWBJH9uXhCetbTI2QjYYOXj77aICrr2OUH4OkiZMoiIXAIV0D+P9\nysa6hgFzv5xAlO39mOnnu4wRoYJIIaHZyvNMVkdt4ZavZPuTuAQIPODy8/n19QWq\nRQIDAQAB\n-----END PUBLIC KEY-----',
+    pkStakeholder: '-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAiQgP8iTDok0b1JSIPmbE\nzCKSphTfHm57Mu3LIgz9PD3vfcVW43sqAMOkelRijqmUpNLW0OBYzNIgH7sIIrhG\n89zXxXG/s4ewrbcbJn8XhotFoJQFLzBFovgYv34v3ZYmlCZsApWAtXkxWveq54FJ\nsQFrUWA+J/FNkp4uqu2Ekenn8OnuYYn25LdZPiUugOPMrALk4hS6nDSBmfVSPPka\nDilawdZwjkQGH9uu8pOFYG+oT1q9MYahrkmRzY05Q4zHOhB8HPzsbz0HpuwanXga\n/HqEmvBn0EJs+SrkZZmyZ6bjz1Izx8Io67HEje9JUeV6qDLE/ZQ/PXoRLnqg3Yqd\nIwIDAQAB\n-----END PUBLIC KEY-----'
+  }
+}
+
+tx = ifc.server.signTransaction(rawTransaction)
+ifc.server.sendTransactions([tx])
+
 ```
 
 尚未加

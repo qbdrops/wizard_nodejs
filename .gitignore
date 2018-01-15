@@ -2,3 +2,4 @@ node_modules/
 lib/
 env.js
 bundle.js
+*.DS_Store
