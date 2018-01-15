@@ -95,7 +95,8 @@ class Server {
   finalize = async (stageHeight) => {
     try {
       let url = this._nodeUrl + '/finalize';
-      let res = await axios.put(url, { stageHeight: stageHeight });
+      let stageHash = '0x' + EthUtils.sha3(stageHeight.toString()).toString('hex');
+      let res = await axios.put(url, { stage_hash: stageHash });
       return res.data;
     } catch (e) {
       console.log(e);
