@@ -100,10 +100,10 @@ class Server {
     }
   }
 
-  exonerate = async (txHash) => {
+  exonerate = async (stageHeight, txHash) => {
     try {
       let url = this._nodeUrl + '/exonerate';
-      let res = await axios.post(url, { tx_hash: txHash });
+      let res = await axios.post(url, { stage_height: stageHeight, tx_hash: txHash });
       return res.data;
     } catch (e) {
       console.log(e);
