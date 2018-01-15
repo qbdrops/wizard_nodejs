@@ -89,14 +89,21 @@ class Server {
     }
   }
 
-  exonerate () {
-  }
-
   finalize = async (stageHeight) => {
     try {
       let url = this._nodeUrl + '/finalize';
       let stageHash = '0x' + EthUtils.sha3(stageHeight.toString()).toString('hex');
       let res = await axios.put(url, { stage_hash: stageHash });
+      return res.data;
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  exonerate = async (txHash) => {
+    try {
+      let url = this._nodeUrl + '/exonerate';
+      let res = await axios.post(url, { tx_hash: txHash });
       return res.data;
     } catch (e) {
       console.log(e);
