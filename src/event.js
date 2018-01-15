@@ -7,7 +7,7 @@ class Event {
 
   watchAddNewStage (cb) {
     this.ifc.sidechain.getIFCContract()
-      .then((IFCContract)=>IFCContract.AddNewStage(this._opt).watch((err ,result) => {
+      .then((IFCContract) => IFCContract.AddNewStage(this._opt).watch((err ,result) => {
         if(err) {console.trace;}
         cb(err,result);
       }))
@@ -16,7 +16,7 @@ class Event {
 
   watchObjection (cb) {
     this.ifc.sidechain.getIFCContract()
-      .then((IFCContract)=>IFCContract.TakeObjection(this._opt).watch((err ,result) => {
+      .then((IFCContract) => IFCContract.TakeObjection(this._opt).watch((err ,result) => {
         if(err) {console.trace;}
         cb(err,result);
       }))
@@ -25,7 +25,7 @@ class Event {
 
   watchExonerate (cb) {
     this.ifc.sidechain.getIFCContract()
-      .then((IFCContract)=>IFCContract.Exonerate(this._opt).watch((err ,result) => {
+      .then((IFCContract) => IFCContract.Exonerate(this._opt).watch((err ,result) => {
         if(err) {console.trace;}
         cb(err,result);
       }))
@@ -34,13 +34,12 @@ class Event {
 
   watchFinalize (cb) {
     this.ifc.sidechain.getIFCContract()
-      .then((IFCContract)=>IFCContract.Finalize(this._opt).watch((err ,result) => {
+      .then((IFCContract) => IFCContract.Finalize(this._opt).watch((err ,result) => {
         if(err) {console.trace;}
         cb(err,result);
       }))
       .catch(console.trace);
   }
-
 }
 
 export default Event;

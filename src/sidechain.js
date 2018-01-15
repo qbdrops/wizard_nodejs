@@ -11,34 +11,12 @@ class Sidechain {
 
     this._web3Url = opt.web3Url;
     this._nodeUrl = opt.nodeUrl;
-    this.fetchContract();
+    this._fetchContract();
     this._ifc = ifc;
     this.stageCache = [];
   }
 
-  async fetchContract () {
-    let contractAddress = null;
-    try {
-      let res = await this.getContractAddress();
-      contractAddress = res.data.address;
-      console.log(contractAddress);
-    } catch (e) {
-      console.error(e);
-    }
-
-    assert(contractAddress, 'Can not fetch contract address.');
-    this.contractAddress = contractAddress;
-
-    this._web3 = new Web3(new Web3.providers.HttpProvider(this._web3Url));
-    this._ifcContract = this._web3.eth.contract(ifcJSON.abi).at(contractAddress);
-  }
-
-  getContractAddress = () => {
-    let url = this._nodeUrl + '/contract/address/ifc';
-    return axios.get(url);
-  }
-
-  pendingStages = () => {
+  pendingStages = async () => {
     let url = this._nodeUrl + '/pending/stages';
     return axios.get(url);
   }
@@ -83,16 +61,25 @@ class Sidechain {
     });
   }
 
-  getSlice = (stageHeight, txHash) => {
-    let url = this._nodeUrl + '/slice';
-    return axios.get(url, {
-      stage_height: stageHeight,
-      tx_hash: txHash
-    });
+  _fetchContract = async () => {
+    let contractAddress = null;
+    try {
+      let res = await this._getContractAddress();
+      contractAddress = res.data.address;
+      console.log(contractAddress);
+    } catch (e) {
+      console.error(e);
+    }
+
+    assert(contractAddress, 'Can not fetch contract address.');
+    this.contractAddress = contractAddress;
+
+    this._web3 = new Web3(new Web3.providers.HttpProvider(this._web3Url));
+    this._ifcContract = this._web3.eth.contract(ifcJSON.abi).at(contractAddress);
   }
 
-  _getIFCContractAddress = async () => {
-    let url = this._nodeUrl + '/getIFCContractAddress';
+  _getContractAddress = async () => {
+    let url = this._nodeUrl + '/contract/address/ifc';
     return axios.get(url);
   }
 }
