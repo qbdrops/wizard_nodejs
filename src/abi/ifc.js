@@ -23,7 +23,6 @@ module.exports = {
       'name': 'takeObjection',
       'outputs': [],
       'payable': false,
-      'stateMutability': 'nonpayable',
       'type': 'function'
     },
     {
@@ -53,7 +52,6 @@ module.exports = {
       'name': 'exonerate',
       'outputs': [],
       'payable': false,
-      'stateMutability': 'nonpayable',
       'type': 'function'
     },
     {
@@ -71,7 +69,6 @@ module.exports = {
       'name': 'payPenalty',
       'outputs': [],
       'payable': false,
-      'stateMutability': 'nonpayable',
       'type': 'function'
     },
     {
@@ -90,7 +87,6 @@ module.exports = {
         }
       ],
       'payable': false,
-      'stateMutability': 'view',
       'type': 'function'
     },
     {
@@ -109,7 +105,6 @@ module.exports = {
         }
       ],
       'payable': false,
-      'stateMutability': 'view',
       'type': 'function'
     },
     {
@@ -123,7 +118,6 @@ module.exports = {
         }
       ],
       'payable': false,
-      'stateMutability': 'view',
       'type': 'function'
     },
     {
@@ -137,7 +131,6 @@ module.exports = {
       'name': 'finalize',
       'outputs': [],
       'payable': false,
-      'stateMutability': 'nonpayable',
       'type': 'function'
     },
     {
@@ -151,7 +144,6 @@ module.exports = {
         }
       ],
       'payable': false,
-      'stateMutability': 'view',
       'type': 'function'
     },
     {
@@ -170,7 +162,6 @@ module.exports = {
         }
       ],
       'payable': false,
-      'stateMutability': 'view',
       'type': 'function'
     },
     {
@@ -188,7 +179,6 @@ module.exports = {
       'name': 'addNewStage',
       'outputs': [],
       'payable': false,
-      'stateMutability': 'nonpayable',
       'type': 'function'
     },
     {
@@ -202,18 +192,15 @@ module.exports = {
         }
       ],
       'payable': false,
-      'stateMutability': 'view',
       'type': 'function'
     },
     {
       'inputs': [],
       'payable': true,
-      'stateMutability': 'payable',
       'type': 'constructor'
     },
     {
       'payable': true,
-      'stateMutability': 'payable',
       'type': 'fallback'
     },
     {

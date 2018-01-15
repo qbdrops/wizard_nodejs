@@ -11,7 +11,6 @@ module.exports = {
         }
       ],
       'payable': false,
-      'stateMutability': 'view',
       'type': 'function'
     },
     {
@@ -20,7 +19,6 @@ module.exports = {
       'name': 'setCompleted',
       'outputs': [],
       'payable': false,
-      'stateMutability': 'nonpayable',
       'type': 'function'
     },
     {
@@ -34,7 +32,6 @@ module.exports = {
         }
       ],
       'payable': false,
-      'stateMutability': 'view',
       'type': 'function'
     },
     {
@@ -48,7 +45,6 @@ module.exports = {
         }
       ],
       'payable': false,
-      'stateMutability': 'view',
       'type': 'function'
     },
     {
@@ -62,7 +58,6 @@ module.exports = {
         }
       ],
       'payable': false,
-      'stateMutability': 'view',
       'type': 'function'
     },
     {
@@ -76,7 +71,6 @@ module.exports = {
       'name': 'resolveObjections',
       'outputs': [],
       'payable': false,
-      'stateMutability': 'nonpayable',
       'type': 'function'
     },
     {
@@ -94,7 +88,6 @@ module.exports = {
       'name': 'addObjectionableTxHash',
       'outputs': [],
       'payable': false,
-      'stateMutability': 'nonpayable',
       'type': 'function'
     },
     {
@@ -108,7 +101,6 @@ module.exports = {
         }
       ],
       'payable': false,
-      'stateMutability': 'view',
       'type': 'function'
     },
     {
@@ -122,7 +114,6 @@ module.exports = {
         }
       ],
       'payable': false,
-      'stateMutability': 'view',
       'type': 'function'
     },
     {
@@ -136,7 +127,6 @@ module.exports = {
         }
       ],
       'payable': false,
-      'stateMutability': 'view',
       'type': 'function'
     },
     {
@@ -163,7 +153,6 @@ module.exports = {
         }
       ],
       'payable': false,
-      'stateMutability': 'view',
       'type': 'function'
     },
     {
@@ -177,7 +166,6 @@ module.exports = {
         }
       ],
       'payable': false,
-      'stateMutability': 'view',
       'type': 'function'
     },
     {
@@ -196,7 +184,6 @@ module.exports = {
         }
       ],
       'payable': false,
-      'stateMutability': 'view',
       'type': 'function'
     },
     {
@@ -210,7 +197,6 @@ module.exports = {
         }
       ],
       'payable': false,
-      'stateMutability': 'view',
       'type': 'function'
     },
     {
@@ -224,7 +210,6 @@ module.exports = {
       'name': 'resolveCompensation',
       'outputs': [],
       'payable': false,
-      'stateMutability': 'nonpayable',
       'type': 'function'
     },
     {
@@ -238,7 +223,6 @@ module.exports = {
         }
       ],
       'payable': false,
-      'stateMutability': 'view',
       'type': 'function'
     },
     {
@@ -265,7 +249,6 @@ module.exports = {
         }
       ],
       'payable': false,
-      'stateMutability': 'nonpayable',
       'type': 'constructor'
     }
   ]

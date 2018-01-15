@@ -13,7 +13,7 @@ class Server {
     this._nodeUrl = serverConfig.nodeUrl;
   }
 
-  validateRawTx = (rawTx) => {
+  validateRawTransaction = (rawTx) => {
     if (!rawTx.hasOwnProperty('from') ||
         !rawTx.hasOwnProperty('to') ||
         !rawTx.hasOwnProperty('value') ||
@@ -34,7 +34,7 @@ class Server {
   }
 
   signTransaction = (rawTx) => {
-    assert(this.validateRawTx(rawTx), 'Wrong rawTx format.');
+    assert(this.validateRawTransaction(rawTx), 'Wrong rawTx format.');
 
     let stageHash = EthUtils.sha3(rawTx.stageHeight.toString()).toString('hex');
 
