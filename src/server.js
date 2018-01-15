@@ -1,10 +1,16 @@
 import EthUtils from 'ethereumjs-util';
+import axios from 'axios';
 import assert from 'assert';
 
 class Server {
   constructor (serverConfig, ifc) {
     this.serverConfig = serverConfig;
     this.ifc = ifc;
+
+    assert(serverConfig.web3Url != undefined, 'Opt should include web3Url.');    
+    assert(serverConfig.nodeUrl != undefined, 'Opt should include nodeUrl.');
+    this._web3Url = serverConfig.web3Url;
+    this._nodeUrl = serverConfig.nodeUrl;
   }
 
   validateRawTx = (rawTx) => {
@@ -41,7 +47,7 @@ class Server {
     let msgHash = EthUtils.sha3(message);
     let prefix = new Buffer('\x19Ethereum Signed Message:\n');
     let ethMsgHash = EthUtils.sha3(Buffer.concat([prefix, new Buffer(String(msgHash.length)), msgHash]));
-    
+
     console.log(ethMsgHash.toString('hex'));
     let signature = this.ifc.crypto.sign(ethMsgHash);
 
@@ -63,31 +69,36 @@ class Server {
     };
   }
 
-  exonerate () {
-
-  }
-
-  finalize () {
-
-  }
-
   sendTransactions = async (txs) => {
     try {
-      let sidechain = this.ifc.sidechain;
-      let res = await sidechain.sendTransactions(txs);
+      let url = this._nodeUrl + '/send/transactions';
+      let res = await axios.post(url, { txs: txs });
       return res.data;
     } catch (e) {
-      console.error(e);
+      console.log(e);
     }
   }
 
   commitTransactions = async () => {
     try {
-      let sidechain = this.ifc.sidechain;
-      let res = await sidechain.commitTransations();
+      let url = this._nodeUrl + '/commit/transactions';
+      let res = await axios.post(url);
       return res.data;
     } catch (e) {
-      console.error(e);
+      console.log(e);
+    }
+  }
+
+  exonerate () {
+  }
+
+  finalize = async (stageHeight) => {
+    try {
+      let url = this._nodeUrl + '/finalize';
+      let res = await axios.put(url, { stageHeight: stageHeight });
+      return res.data;
+    } catch (e) {
+      console.log(e);
     }
   }
 

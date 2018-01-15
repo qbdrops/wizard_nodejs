@@ -91,18 +91,6 @@ class Sidechain {
     });
   }
 
-  sendTransactions = (txs) => {
-    let url = this._nodeUrl + '/send/transactions';
-    return axios.post(url, {
-      txs: txs
-    });
-  }
-
-  commitTransactions = () => {
-    let url = this._nodeUrl + '/commit/transactions';
-    return axios.post(url);
-  }
-
   _getIFCContractAddress = async () => {
     let url = this._nodeUrl + '/getIFCContractAddress';
     return axios.get(url);
