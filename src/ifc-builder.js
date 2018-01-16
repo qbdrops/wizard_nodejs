@@ -7,11 +7,6 @@ import Crypto from '@/crypto';
 import Sidechain from '@/sidechain';
 
 class IFCBuilder {
-  setStorage (storage) {
-    this._storage = storage;
-    return this;
-  }
-
   setNodeUrl (url) {
     this._nodeUrl = url;
     return this;
