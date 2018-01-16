@@ -21,8 +21,8 @@ class Sidechain {
     return axios.get(url);
   }
 
-  pendingTransactions = () => {
-    let url = this._nodeUrl + '/pending/transactions';
+  pendingPayments = () => {
+    let url = this._nodeUrl + '/pending/payments';
     return axios.get(url);
   }
 
@@ -54,10 +54,10 @@ class Sidechain {
     return axios.get(url);
   }
 
-  getTransaction = (scTxHash) => {
-    let url = this._nodeUrl + '/transaction';
+  getPayment = (paymentHash) => {
+    let url = this._nodeUrl + '/payment';
     return axios.get(url, {
-      scTxHash: scTxHash
+      paymentHash: paymentHash
     });
   }
 

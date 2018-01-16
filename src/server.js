@@ -13,17 +13,17 @@ class Server {
     this._nodeUrl = serverConfig.nodeUrl;
   }
 
-  validateRawTransaction = (rawTx) => {
-    if (!rawTx.hasOwnProperty('from') ||
-        !rawTx.hasOwnProperty('to') ||
-        !rawTx.hasOwnProperty('value') ||
-        !rawTx.hasOwnProperty('localSequenceNumber') ||
-        !rawTx.hasOwnProperty('stageHeight') ||
-        !rawTx.hasOwnProperty('data')) {
+  validateRawPayment = (rawPayment) => {
+    if (!rawPayment.hasOwnProperty('from') ||
+        !rawPayment.hasOwnProperty('to') ||
+        !rawPayment.hasOwnProperty('value') ||
+        !rawPayment.hasOwnProperty('localSequenceNumber') ||
+        !rawPayment.hasOwnProperty('stageHeight') ||
+        !rawPayment.hasOwnProperty('data')) {
       return false;
     }
 
-    let data = rawTx.data;
+    let data = rawPayment.data;
 
     if (!data.hasOwnProperty('pkUser') ||
         !data.hasOwnProperty('pkStakeholder')) {
@@ -33,16 +33,16 @@ class Server {
     return true;
   }
 
-  signTransaction = (rawTx) => {
-    assert(this.validateRawTransaction(rawTx), 'Wrong rawTx format.');
+  signRawPayment = (rawPayment) => {
+    assert(this.validateRawPayment(rawPayment), 'Wrong rawPayment format.');
 
-    let stageHash = EthUtils.sha3(rawTx.stageHeight.toString()).toString('hex');
+    let stageHash = EthUtils.sha3(rawPayment.stageHeight.toString()).toString('hex');
 
-    let txHashAndCiphers = this._computeTxHashAndCiphers(rawTx);
-    let txHash = txHashAndCiphers.txHash;
-    let ciphers = txHashAndCiphers.ciphers;
+    let paymentHashAndCiphers = this._computePaymentHashAndCiphers(rawPayment);
+    let paymentHash = paymentHashAndCiphers.paymentHash;
+    let ciphers = paymentHashAndCiphers.ciphers;
 
-    let message = stageHash + txHash;
+    let message = stageHash + paymentHash;
     console.log(message);
     let msgHash = EthUtils.sha3(message);
     let prefix = new Buffer('\x19Ethereum Signed Message:\n');
@@ -58,9 +58,9 @@ class Server {
     assert(address == this.ifc.crypto.getSignerAddress(), 'Wrong signature.');
 
     return {
-      stageHeight: rawTx.stageHeight,
+      stageHeight: rawPayment.stageHeight,
       stageHash: stageHash.toString('hex'),
-      txHash: txHash.toString('hex'),
+      paymentHash: paymentHash.toString('hex'),
       cipherUser: ciphers.cipherUser,
       cipherCP: ciphers.cipherCP,
       v: signature.v,
@@ -69,19 +69,19 @@ class Server {
     };
   }
 
-  sendTransactions = async (txs) => {
+  sendPayments = async (payments) => {
     try {
-      let url = this._nodeUrl + '/send/transactions';
-      let res = await axios.post(url, { txs: txs });
+      let url = this._nodeUrl + '/send/payments';
+      let res = await axios.post(url, { payments: payments });
       return res.data;
     } catch (e) {
       console.log(e);
     }
   }
 
-  commitTransactions = async () => {
+  commitPayments = async () => {
     try {
-      let url = this._nodeUrl + '/commit/transactions';
+      let url = this._nodeUrl + '/commit/payments';
       let res = await axios.post(url);
       return res.data;
     } catch (e) {
@@ -100,24 +100,25 @@ class Server {
     }
   }
 
-  exonerate = async (stageHeight, txHash) => {
+  exonerate = async (stageHeight, paymentHash) => {
     try {
       let url = this._nodeUrl + '/exonerate';
-      let res = await axios.post(url, { stage_height: stageHeight, tx_hash: txHash });
+      let res = await axios.post(url, { stage_height: stageHeight, payment_hash: paymentHash });
       return res.data;
     } catch (e) {
       console.log(e);
     }
   }
 
-  _computeTxHashAndCiphers = (rawTx) => {
+  _computePaymentHashAndCiphers = (rawPayment) => {
     let crypto = this.ifc.crypto;
-    let serializedRawTx = Buffer.from(JSON.stringify(rawTx)).toString('hex');
-    let cipherUser = crypto.encrypt(serializedRawTx, rawTx.data.pkUser);
-    let cipherCP = crypto.encrypt(serializedRawTx, rawTx.data.pkStakeholder);
-    let txHash = EthUtils.sha3(cipherUser + cipherCP).toString('hex');
+    let serializedRawPayment = Buffer.from(JSON.stringify(rawPayment)).toString('hex');
+    let cipherUser = crypto.encrypt(serializedRawPayment, rawPayment.data.pkUser);
+    let cipherCP = crypto.encrypt(serializedRawPayment, rawPayment.data.pkStakeholder);
+    let paymentHash = EthUtils.sha3(cipherUser + cipherCP).toString('hex');
+
     return {
-      txHash: txHash,
+      paymentHash: paymentHash,
       ciphers: {
         cipherUser: cipherUser,
         cipherCP: cipherCP,
