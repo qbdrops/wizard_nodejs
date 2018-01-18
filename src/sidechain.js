@@ -66,7 +66,6 @@ class Sidechain {
     try {
       let res = await this._getContractAddress();
       contractAddress = res.data.address;
-      console.log(contractAddress);
     } catch (e) {
       console.error(e);
     }
