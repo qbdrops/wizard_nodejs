@@ -35,7 +35,7 @@ class Sidechain {
       return this.stageCache[stageHash];
     }
 
-    let stageContractAddress = await this._ifcContract.contract.getBlockAddress(stageHash);
+    let stageContractAddress = await this._ifcContract.getStageAddress(stageHash);
     assert(stageContractAddress != 0, 'This stage contract does not exist.');
 
     let stageContract = this._web3.eth.contract(stageJSON.abi).at(stageContractAddress);

@@ -13,28 +13,8 @@ class Server {
     this._nodeUrl = serverConfig.nodeUrl;
   }
 
-  validateRawPayment = (rawPayment) => {
-    if (!rawPayment.hasOwnProperty('from') ||
-        !rawPayment.hasOwnProperty('to') ||
-        !rawPayment.hasOwnProperty('value') ||
-        !rawPayment.hasOwnProperty('localSequenceNumber') ||
-        !rawPayment.hasOwnProperty('stageHeight') ||
-        !rawPayment.hasOwnProperty('data')) {
-      return false;
-    }
-
-    let data = rawPayment.data;
-
-    if (!data.hasOwnProperty('pkUser') ||
-        !data.hasOwnProperty('pkStakeholder')) {
-      return false;
-    }
-
-    return true;
-  }
-
   signRawPayment = (rawPayment) => {
-    assert(this.validateRawPayment(rawPayment), 'Wrong rawPayment format.');
+    assert(this._validateRawPayment(rawPayment), 'Wrong rawPayment format.');
 
     let stageHash = EthUtils.sha3(rawPayment.stageHeight.toString()).toString('hex');
 
@@ -124,6 +104,26 @@ class Server {
         cipherCP: cipherCP,
       }
     };
+  }
+
+  _validateRawPayment = (rawPayment) => {
+    if (!rawPayment.hasOwnProperty('from') ||
+        !rawPayment.hasOwnProperty('to') ||
+        !rawPayment.hasOwnProperty('value') ||
+        !rawPayment.hasOwnProperty('localSequenceNumber') ||
+        !rawPayment.hasOwnProperty('stageHeight') ||
+        !rawPayment.hasOwnProperty('data')) {
+      return false;
+    }
+
+    let data = rawPayment.data;
+
+    if (!data.hasOwnProperty('pkUser') ||
+        !data.hasOwnProperty('pkStakeholder')) {
+      return false;
+    }
+
+    return true;
   }
 }
 
