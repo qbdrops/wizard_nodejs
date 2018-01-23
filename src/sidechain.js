@@ -16,49 +16,8 @@ class Sidechain {
     this.stageCache = [];
   }
 
-  pendingStages = async () => {
-    let url = this._nodeUrl + '/pending/stages';
-    return axios.get(url);
-  }
-
-  pendingPayments = () => {
-    let url = this._nodeUrl + '/pending/payments';
-    return axios.get(url);
-  }
-
   getIFCContract = async () => {
     return this._ifcContract;
-  }
-
-  getStage = async (stageHash) => {
-    if(this.stageCache[stageHash]) {
-      return this.stageCache[stageHash];
-    }
-
-    let stageContractAddress = await this._ifcContract.getStageAddress(stageHash);
-    assert(stageContractAddress != 0, 'This stage contract does not exist.');
-
-    let stageContract = this._web3.eth.contract(stageJSON.abi).at(stageContractAddress);
-    this.stageCache[stageHash] = stageContract;
-
-    return stageContract;
-  }
-
-  getStageRootHash = async (stageHash) => {
-    let stage = this.getStage(stageHash);
-    return stage.rootHash();
-  }
-
-  getLatestStageHeight = () => {
-    let url = this._nodeUrl + '/latest/stage/height';
-    return axios.get(url);
-  }
-
-  getPayment = (paymentHash) => {
-    let url = this._nodeUrl + '/payment';
-    return axios.get(url, {
-      paymentHash: paymentHash
-    });
   }
 
   _fetchContract = async () => {
@@ -69,18 +28,59 @@ class Sidechain {
     } catch (e) {
       console.error(e);
     }
-
+    
     assert(contractAddress, 'Can not fetch contract address.');
     this.contractAddress = contractAddress;
-
+    
     this._web3 = new Web3(new Web3.providers.HttpProvider(this._web3Url));
     this._ifcContract = this._web3.eth.contract(ifcJSON.abi).at(contractAddress);
   }
-
+  
   _getContractAddress = async () => {
     let url = this._nodeUrl + '/contract/address/ifc';
     return axios.get(url);
   }
+
+  // pendingStages = async () => {
+  //   let url = this._nodeUrl + '/pending/stages';
+  //   return axios.get(url);
+  // }
+
+  // pendingPayments = () => {
+  //   let url = this._nodeUrl + '/pending/payments';
+  //   return axios.get(url);
+  // }
+
+  // getStage = async (stageHash) => {
+  //   if(this.stageCache[stageHash]) {
+  //     return this.stageCache[stageHash];
+  //   }
+
+  //   let stageContractAddress = await this._ifcContract.getStageAddress(stageHash);
+  //   assert(stageContractAddress != 0, 'This stage contract does not exist.');
+
+  //   let stageContract = this._web3.eth.contract(stageJSON.abi).at(stageContractAddress);
+  //   this.stageCache[stageHash] = stageContract;
+
+  //   return stageContract;
+  // }
+
+  // getStageRootHash = async (stageHash) => {
+  //   let stage = this.getStage(stageHash);
+  //   return stage.rootHash();
+  // }
+
+  // getLatestStageHeight = () => {
+  //   let url = this._nodeUrl + '/latest/stage/height';
+  //   return axios.get(url);
+  // }
+
+  // getPayment = (paymentHash) => {
+  //   let url = this._nodeUrl + '/payment';
+  //   return axios.get(url, {
+  //     paymentHash: paymentHash
+  //   });
+  // }
 }
 
 export default Sidechain;
