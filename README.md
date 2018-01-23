@@ -3,32 +3,22 @@
 IFCBuilder
 
 IFC
-- client // Web3Url, NodeUrl, Storage
-  - makeRawPayment
-  - audit
-  - takeObjection
-  - putPayment
-  - finalize
 - server // Web3Url
   - signRawPayment
   - exonerate
   - sendPayments
   - commitPayments
   - finalize
+  - payPenalty
 - crypto
-  - generateKeyPair
-  - getKeyPairs
+  - getNewKeyPair
+  - keyInfo
   - encrypt
   - decrypt
   - sign
   - verify
 - sidechain // Web3Url, NodeUrl
-  - pendingStages
-  - pendingPayments
   - getIFCContract
-  - getStage
-  - getPayment
-  - getSlice
 - event // Web3Url
   - watchAddStage
   - watchObjection
@@ -36,15 +26,20 @@ IFC
   - watchFinalize
 
 ## Example
+### 1. Use `IFCBuilder` to create an ifc object
 ```javascript
-// Use IFCBuilder to create an ifc object
 ifc = new IFCBuilder().setNodeUrl("http://0.0.0.0:3000").setWeb3Url("http://0.0.0.0:8545").build()
+```
 
-// Crypto
+### 2. Use `crypto` to generate key pair
+```javascript
 ifc.crypto.getOrNewKeyPair()
 ifc.crypto.keyInfo()
-ifc.crypto.importSignerKey('2af10f5713dd24bcdbf117024eb1506ff52b7084a392a30169790713add35ede')
+ifc.crypto.importSignerKey('YOUR_PRIVATE_KEY')
+```
 
+### 3. Fake a `rawPayment` with specific format
+```javascript
 rawPayment = {
   from: '0x49aabbbe9141fe7a80804bdf01473e250a3414cb',
   to: '0x5b9688b5719f608f1cb20fdc59626e717fbeaa9a',
@@ -57,19 +52,27 @@ rawPayment = {
     pkStakeholder: '-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAiQgP8iTDok0b1JSIPmbE\nzCKSphTfHm57Mu3LIgz9PD3vfcVW43sqAMOkelRijqmUpNLW0OBYzNIgH7sIIrhG\n89zXxXG/s4ewrbcbJn8XhotFoJQFLzBFovgYv34v3ZYmlCZsApWAtXkxWveq54FJ\nsQFrUWA+J/FNkp4uqu2Ekenn8OnuYYn25LdZPiUugOPMrALk4hS6nDSBmfVSPPka\nDilawdZwjkQGH9uu8pOFYG+oT1q9MYahrkmRzY05Q4zHOhB8HPzsbz0HpuwanXga\n/HqEmvBn0EJs+SrkZZmyZ6bjz1Izx8Io67HEje9JUeV6qDLE/ZQ/PXoRLnqg3Yqd\nIwIDAQAB\n-----END PUBLIC KEY-----'
   }
 }
+```
 
+### 4. Make a valid `payment`
+```javascript
 payment = ifc.server.signRawPayment(rawPayment)
+```
+
+### 5. Send `payment`s to Infinitechain Node
+```javascript
 ifc.server.sendPayments([payment])
 ```
 
-尚未加
-JSON description (標準，agent公告後，用戶follow)
-payment format (資料結構定義)
-包含salt 在訂單中
+### 6. Commit `payment`s to Blockchain
+```javascript
+ifc.server.commitPayments()
+```
 
-名詞: rootHash, IndexedMerkelTree
-
-合約、payment version
+### 7. Finalize `stage`
+```javascript
+ifc.server.finalize(STAGE_HEIGHT)
+```
 
 ### How to Develop
 - `npm install`
