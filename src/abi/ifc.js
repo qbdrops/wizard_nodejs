@@ -62,7 +62,7 @@ module.exports = {
           'type': 'bytes32'
         },
         {
-          'name': 'txs',
+          'name': 'paymentHashes',
           'type': 'bytes32[]'
         }
       ],

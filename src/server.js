@@ -90,6 +90,22 @@ class Server {
     }
   }
 
+  payPenalty = async (stageHeight, paymentHashes) => {
+    try {
+      let url = this._nodeUrl + '/payPenalty';
+      let stageHash = '0x' + EthUtils.sha3(stageHeight.toString()).toString('hex');
+
+      paymentHashes = paymentHashes.map((hash) => {
+        return '0x' + hash;
+      });
+
+      let res = await axios.post(url, { stage_hash: stageHash, payment_hashes: paymentHashes });
+      return res.data;
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
   _computePaymentHashAndCiphers = (rawPayment) => {
     let crypto = this.ifc.crypto;
     let serializedRawPayment = Buffer.from(JSON.stringify(rawPayment)).toString('hex');
