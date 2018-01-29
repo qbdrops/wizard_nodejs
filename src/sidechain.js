@@ -1,6 +1,7 @@
 import Web3 from 'web3';
+import EthUtils from 'ethereumjs-util';
+import EthereumTx from 'ethereumjs-tx';
 import ifcJSON from '@/abi/ifc.js';
-import stageJSON from '@/abi/stage.js';
 import assert from 'assert';
 import axios from 'axios';
 
@@ -14,10 +15,44 @@ class Sidechain {
     this._fetchContract();
     this._ifc = ifc;
     this.stageCache = [];
+
+    let keyInfo = ifc.crypto.keyInfo();
+    this._key = keyInfo.eccPrivateKey;
+    this._address = keyInfo.address;
   }
 
-  getIFCContract = async () => {
+  getIFCContract = () => {
     return this._ifcContract;
+  }
+
+  finalize = async (stageHeight) => {
+    let stageHash = '0x' + EthUtils.sha3(stageHeight.toString()).toString('hex');
+    let txMethodData = this._ifcContract.finalize.getData(
+      stageHash,
+      { from: this._address }
+    );
+    let serializedTx = this._signRawTransaction(txMethodData);
+    let txHash = await this._web3.eth.sendRawTransaction(serializedTx);
+    return txHash;
+  }
+
+  _signRawTransaction = (txMethodData) => {
+    let newNonce = this._web3.toHex(this._web3.eth.getTransactionCount(this._address));
+
+    let txParams = {
+      nonce: newNonce,
+      gas: 4700000,
+      from: this._address,
+      to: this._ifcContract.address,
+      data: txMethodData
+    };
+
+    let tx = new EthereumTx(txParams);
+    let key = this._key.substring(2);
+    tx.sign(Buffer.from(key, 'hex'));
+    let serializedTx = '0x' + tx.serialize().toString('hex');
+
+    return serializedTx;
   }
 
   _fetchContract = async () => {
@@ -35,7 +70,7 @@ class Sidechain {
     this._web3 = new Web3(new Web3.providers.HttpProvider(this._web3Url));
     this._ifcContract = this._web3.eth.contract(ifcJSON.abi).at(contractAddress);
   }
-  
+
   _getContractAddress = async () => {
     let url = this._nodeUrl + '/contract/address/ifc';
     return axios.get(url);
