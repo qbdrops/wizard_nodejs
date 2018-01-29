@@ -22,6 +22,16 @@ class IFCBuilder {
     return this;
   }
 
+  setSignerKeypair (key) {
+    this._signerKey = key;
+    return this;
+  }
+
+  setCipherKeypair (key) {
+    this._cipherKey = key;
+    return this;
+  }
+
   build = () => {
     let serverConfig = {
       web3Url: this._web3Url,
@@ -45,15 +55,27 @@ class IFCBuilder {
 
     let ifc = new IFC();
 
-    let server = new Server(serverConfig, ifc);
     let crypto = new Crypto(cryptoConfig, ifc);
-    let event = new Event(eventConfig, ifc);
-    let sidechain = new Sidechain(sidechainConfig, ifc);
-
-    ifc.setServer(server);
     ifc.setCrypto(crypto);
+
+    // Generate keypair if key is not configured
+    if (this._signerKey != undefined && this._cipherKey != undefined) {
+      crypto.importSignerKey(this._signerKey);
+      crypto.importCipherKey(this._cipherKey);
+    } else {
+      crypto.getOrNewKeyPair();
+    }
+
+    let event = new Event(eventConfig, ifc);
     ifc.setEvent(event);
+
+    // Create server object after crypto and sidechain in order to use them in server
+    let sidechain = new Sidechain(sidechainConfig, ifc);
     ifc.setSidechain(sidechain);
+
+    // Create server object after crypto and sidechain in order to use them in server
+    let server = new Server(serverConfig, ifc);
+    ifc.setServer(server);
 
     return ifc;
   }
