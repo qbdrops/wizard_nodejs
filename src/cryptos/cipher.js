@@ -18,7 +18,7 @@ class Cipher {
   }
 
   importPrivateKey = (privateKey) => {
-    this.key = privateKey;
+    this.key = new NodeRSA(privateKey, { encryptionScheme: { scheme:'pkcs1', padding: constants.RSA_NO_PADDING } });
   }
 
   encrypt = (message, publicKey = null) => {

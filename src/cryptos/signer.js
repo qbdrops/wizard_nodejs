@@ -1,5 +1,6 @@
 import EthUtils from 'ethereumjs-util';
 import keythereum from 'keythereum';
+import assert from 'assert';
 
 class Signer {
   constructor () {
@@ -32,10 +33,12 @@ class Signer {
   }
 
   getPrivateKey () {
+    assert(this.key != null, 'ECC private key does not exist. Please generate or import your keypair.');
     return '0x' + this.key.toString('hex');
   }
 
   getPublicKey () {
+    assert(this.key != null, 'ECC private key does not exist. Please generate or import your keypair.');
     return '0x' + EthUtils.privateToPublic(this.key).toString('hex');
   }
 

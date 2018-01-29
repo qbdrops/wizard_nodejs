@@ -51,6 +51,7 @@ class Crypto {
     let address = this._signer.getAddress();
     let rsaPrivateKey = this._cipher.getPrivateKey();
     let rsaPublicKey = this._cipher.getPublicKey();
+
     return {
       eccPrivateKey: eccPrivateKey,
       eccPublicKey: eccPublicKey,
