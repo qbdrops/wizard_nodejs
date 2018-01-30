@@ -33,7 +33,7 @@ module.exports = {
           'type': 'bytes32'
         },
         {
-          'name': '_txHash',
+          'name': '_paymentHash',
           'type': 'bytes32'
         },
         {
@@ -230,7 +230,7 @@ module.exports = {
         },
         {
           'indexed': false,
-          'name': '_txHash',
+          'name': '_paymentHash',
           'type': 'bytes32'
         }
       ],
@@ -247,7 +247,7 @@ module.exports = {
         },
         {
           'indexed': false,
-          'name': '_txHash',
+          'name': '_paymentHash',
           'type': 'bytes32'
         }
       ],
