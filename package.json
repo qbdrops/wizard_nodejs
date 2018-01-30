@@ -1,6 +1,6 @@
 {
   "name": "infinitechain_server",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Infinitechain Server SDK",
   "main": "bundle.js",
   "scripts": {
