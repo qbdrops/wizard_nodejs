@@ -60,13 +60,12 @@ class Server {
   }
 
   commitPayments = async () => {
-    try {
-      let url = this._nodeUrl + '/commit/payments';
-      let res = await axios.post(url);
-      return res.data;
-    } catch (e) {
-      console.log(e);
-    }
+    let url = this._nodeUrl + '/roothash';
+    let res = await axios.get(url);
+    let rootHash = res.data.rootHash;
+    let stageHeight = res.data.stageHeight;
+
+    return await this.ifc.sidechain.addNewStage(rootHash, stageHeight);
   }
 
   finalize = async (stageHeight) => {
@@ -74,29 +73,23 @@ class Server {
   }
 
   exonerate = async (stageHeight, paymentHash) => {
-    try {
-      let url = this._nodeUrl + '/exonerate';
-      let res = await axios.post(url, { stage_height: stageHeight, payment_hash: paymentHash });
-      return res.data;
-    } catch (e) {
-      console.log(e);
-    }
+    let url = this._nodeUrl + '/slice';
+    let res = await axios.get(url, {
+      params: {
+        stage_height: stageHeight, payment_hash: paymentHash
+      }
+    });
+
+    let slice = res.data.slice;
+    slice = slice.map(h => h.treeNodeHash);
+    let collidingPaymentHashes = res.data.paymentHashArray;
+    let treeNodeIndex = res.data.treeNodeIndex;
+
+    return await this.ifc.sidechain.exonerate(stageHeight, paymentHash, treeNodeIndex, slice, collidingPaymentHashes);
   }
 
   payPenalty = async (stageHeight, paymentHashes) => {
-    try {
-      let url = this._nodeUrl + '/payPenalty';
-      let stageHash = '0x' + EthUtils.sha3(stageHeight.toString()).toString('hex');
-
-      paymentHashes = paymentHashes.map((hash) => {
-        return '0x' + hash;
-      });
-
-      let res = await axios.post(url, { stage_hash: stageHash, payment_hashes: paymentHashes });
-      return res.data;
-    } catch (e) {
-      console.log(e);
-    }
+    return await this.ifc.sidechain.payPenalty(stageHeight, paymentHashes);
   }
 
   _computePaymentHashAndCiphers = (rawPayment) => {

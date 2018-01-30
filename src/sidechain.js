@@ -25,18 +25,76 @@ class Sidechain {
     return this._ifcContract;
   }
 
-  finalize = async (stageHeight) => {
-    let stageHash = '0x' + EthUtils.sha3(stageHeight.toString()).toString('hex');
-    let txMethodData = this._ifcContract.finalize.getData(
-      stageHash,
-      { from: this._address }
-    );
-    let serializedTx = this._signRawTransaction(txMethodData);
-    let txHash = await this._web3.eth.sendRawTransaction(serializedTx);
-    return txHash;
+  addNewStage = (rootHash, stageHeight) => {
+    try {
+      let stageHash = '0x' + this._sha3(stageHeight.toString());
+      let txMethodData = this._ifcContract.addNewStage.getData(
+        stageHash,
+        rootHash,
+        { from: this._address }
+      );
+
+      let txHash = this._signAndSendRawTransaction(txMethodData);
+      return txHash;
+    } catch (e) {
+      console.error(e);
+    }
   }
 
-  _signRawTransaction = (txMethodData) => {
+  finalize = async (stageHeight) => {
+    try {
+      let stageHash = '0x' + this._sha3(stageHeight.toString());
+      let txMethodData = this._ifcContract.finalize.getData(
+        stageHash,
+        { from: this._address }
+      );
+      let txHash = this._signAndSendRawTransaction(txMethodData);
+      return txHash;
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  payPenalty = async (stageHeight, paymentHashes) => {
+    try {
+      let stageHash = '0x' + this._sha3(stageHeight.toString());
+      paymentHashes = paymentHashes.map(paymentHash => '0x' + paymentHash);
+      let txMethodData = this._ifcContract.payPenalty.getData(
+        stageHash,
+        paymentHashes,
+        '', // Work around! To prevent solidity invalid argument error.
+        { from: this._address }
+      );
+      let txHash = this._signAndSendRawTransaction(txMethodData);
+      return txHash;
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  exonerate = async (stageHeight, paymentHash, treeNodeIndex, slice, collidingPaymentHashes) => {
+    try {
+      let stageHash = '0x' + this._sha3(stageHeight.toString());
+      paymentHash = '0x' + paymentHash;
+      slice = slice.map(h => '0x' + h);
+      collidingPaymentHashes = collidingPaymentHashes.map(h => '0x' + h);
+      let txMethodData = this._ifcContract.exonerate.getData(
+        stageHash,
+        paymentHash,
+        treeNodeIndex,
+        slice,
+        collidingPaymentHashes,
+        { from: this._address }
+      );
+
+      let txHash = this._signAndSendRawTransaction(txMethodData);
+      return txHash;
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  _signAndSendRawTransaction = (txMethodData) => {
     let newNonce = this._web3.toHex(this._web3.eth.getTransactionCount(this._address));
 
     let txParams = {
@@ -51,8 +109,8 @@ class Sidechain {
     let key = this._key.substring(2);
     tx.sign(Buffer.from(key, 'hex'));
     let serializedTx = '0x' + tx.serialize().toString('hex');
-
-    return serializedTx;
+    let txHash = this._web3.eth.sendRawTransaction(serializedTx);
+    return txHash;
   }
 
   _fetchContract = async () => {
@@ -63,10 +121,10 @@ class Sidechain {
     } catch (e) {
       console.error(e);
     }
-    
+
     assert(contractAddress, 'Can not fetch contract address.');
     this.contractAddress = contractAddress;
-    
+
     this._web3 = new Web3(new Web3.providers.HttpProvider(this._web3Url));
     this._ifcContract = this._web3.eth.contract(ifcJSON.abi).at(contractAddress);
   }
@@ -74,6 +132,10 @@ class Sidechain {
   _getContractAddress = async () => {
     let url = this._nodeUrl + '/contract/address/ifc';
     return axios.get(url);
+  }
+
+  _sha3 = (content) => {
+    return EthUtils.sha3(content).toString('hex');
   }
 
   // pendingStages = async () => {
