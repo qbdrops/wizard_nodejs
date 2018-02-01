@@ -1,9 +1,13 @@
-# IFC
+# Infinitechain Server
+## Install
+```
+npm install infinitechain_server
+```
 ## Structure
 IFCBuilder
 
 IFC
-- server // Web3Url
+- server
   - signRawPayment
   - sendPayments
   - commitPayments
@@ -17,7 +21,7 @@ IFC
   - decrypt
   - sign
   - verify
-- event // Web3Url
+- event
   - watchAddNewStage
   - watchObjection
   - watchExonerate
@@ -26,6 +30,7 @@ IFC
 ## Example
 ### 1. Use `IFCBuilder` to create an ifc object
 ```javascript
+var IFCBuilder = require('infinitechain_server')
 ifc = new IFCBuilder().setNodeUrl("http://0.0.0.0:3000").setWeb3Url("http://0.0.0.0:8545").build()
 ```
 
@@ -70,8 +75,3 @@ After processing these objection's payment, server can call `finalize()` to comp
 ```javascript
 ifc.server.finalize(stageHeight)
 ```
-
-### How to Develop
-- `npm install`
-- `npm run build`
-- `npm run console`: node REPL
