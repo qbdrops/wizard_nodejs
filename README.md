@@ -39,46 +39,36 @@ ifc.crypto.keyInfo()
 ifc.crypto.importSignerKey('YOUR_PRIVATE_KEY')
 ```
 
-### 3. Fake a `rawPayment` with specific format
-```javascript
-rawPayment = {
-  from: '0x49aabbbe9141fe7a80804bdf01473e250a3414cb',
-  to: '0x5b9688b5719f608f1cb20fdc59626e717fbeaa9a',
-  value: 100,
-  localSequenceNumber: 99,
-  stageHeight: 3,
-  data: {
-    foo: 'bar',
-    pkClient: '-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA5SxAR4lIyHg3vF/DbWKq\nZfedueCC6TpSMmD3LMZ2vhvI8cO1ydmDRTngJlgiKCcQFGGRcDqI5vxBfE4vdCy/\nDFw1zTiT9pPLUWGZNT4YxlcdFUJ26b4YqRHUk8Tfg4YNSUTaNKaj2VKj3NyLrchN\neunMWeLj+QlfdjV5zUkOy9pbMj0co1gDAK85jnO8NJupycWyA/ezfpaoTfJj2Ijd\n2b0+nCWCdWw8oWBJH9uXhCetbTI2QjYYOXj77aICrr2OUH4OkiZMoiIXAIV0D+P9\nysa6hgFzv5xAlO39mOnnu4wRoYJIIaHZyvNMVkdt4ZavZPuTuAQIPODy8/n19QWq\nRQIDAQAB\n-----END PUBLIC KEY-----',
-    pkStakeholder: '-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAiQgP8iTDok0b1JSIPmbE\nzCKSphTfHm57Mu3LIgz9PD3vfcVW43sqAMOkelRijqmUpNLW0OBYzNIgH7sIIrhG\n89zXxXG/s4ewrbcbJn8XhotFoJQFLzBFovgYv34v3ZYmlCZsApWAtXkxWveq54FJ\nsQFrUWA+J/FNkp4uqu2Ekenn8OnuYYn25LdZPiUugOPMrALk4hS6nDSBmfVSPPka\nDilawdZwjkQGH9uu8pOFYG+oT1q9MYahrkmRzY05Q4zHOhB8HPzsbz0HpuwanXga\n/HqEmvBn0EJs+SrkZZmyZ6bjz1Izx8Io67HEje9JUeV6qDLE/ZQ/PXoRLnqg3Yqd\nIwIDAQAB\n-----END PUBLIC KEY-----'
-  }
-}
-```
-
-### 4. Make a valid `payment`
+### 3. Make a valid `payment`
+After server get the client's rawPayment, server should call `signRawPayment()` to produce the payment. Then server will send back a payment to client and store it in server's database. 
 ```javascript
 payment = ifc.server.signRawPayment(rawPayment)
 ```
 
-### 5. Send `payments` to Infinitechain Node
+### 4. Send `payments` to Infinitechain Node
+When server accumulates some transactions and wants to put on blockchain, he can call `sendPayments()` to send them to infinitechain node in order to  prepare for commit payments. 
 ```javascript
 ifc.server.sendPayments([payment1, payment2, payment3, ...])
 ```
 
-### 6. Commit `payment`s to Blockchain
+### 5. Commit `payment`s to Blockchain
+After sending payments, server can call `commitPayments()` to put these payments on blockchain.
 ```javascript
 ifc.server.commitPayments(objectionTime, finalizeTime, data)
 // data is a string variable that you can add any message you want like bitcoin's op_return.
 ```
-### 7. Exonerate `payment`
+### 6. Exonerate `payment`
+When server receives the objections from clients, he can exonerate to each objection payments.
 ```javascript
 ifc.server.exonerate(stageHeight, paymentHash)
 ```
-### 8. Pay Penalty `payments`
+### 7. Pay Penalty `payments`
+If server exonerates fail to some client's payment, he should pay penalty to these payments. 
 ```javascript
 ifc.server.payPenalty(stageHeight, [paymentHash1, paymentHash2, paymentHash3, ...])
 ```
-### 9. Finalize `stage`
+### 8. Finalize `stage`
+After processing these objection's payment, server can call `finalize()` to complete this stage. 
 ```javascript
 ifc.server.finalize(stageHeight)
 ```
