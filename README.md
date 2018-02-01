@@ -60,7 +60,7 @@ rawPayment = {
 payment = ifc.server.signRawPayment(rawPayment)
 ```
 
-### 5. Send `payment`s to Infinitechain Node
+### 5. Send `payments` to Infinitechain Node
 ```javascript
 ifc.server.sendPayments([payment1, payment2, payment3, ...])
 ```
