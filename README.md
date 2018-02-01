@@ -5,11 +5,11 @@ IFCBuilder
 IFC
 - server // Web3Url
   - signRawPayment
-  - exonerate
   - sendPayments
   - commitPayments
-  - finalize
+  - exonerate
   - payPenalty
+  - finalize
 - crypto
   - getNewKeyPair
   - keyInfo
@@ -19,8 +19,9 @@ IFC
   - verify
 - sidechain // Web3Url, NodeUrl
   - getIFCContract
+  - addNewStage
 - event // Web3Url
-  - watchAddStage
+  - watchAddNewStage
   - watchObjection
   - watchExonerate
   - watchFinalize
@@ -31,7 +32,7 @@ IFC
 ifc = new IFCBuilder().setNodeUrl("http://0.0.0.0:3000").setWeb3Url("http://0.0.0.0:8545").build()
 ```
 
-### 2. Use `crypto` to generate key pair
+### 2. Use `crypto` to generate key pair and you can also import your private key.
 ```javascript
 ifc.crypto.getOrNewKeyPair()
 ifc.crypto.keyInfo()
@@ -61,17 +62,25 @@ payment = ifc.server.signRawPayment(rawPayment)
 
 ### 5. Send `payment`s to Infinitechain Node
 ```javascript
-ifc.server.sendPayments([payment])
+ifc.server.sendPayments([payment1, payment2, payment3, ...])
 ```
 
 ### 6. Commit `payment`s to Blockchain
 ```javascript
-ifc.server.commitPayments()
+ifc.server.commitPayments(objectionTime, finalizeTime, data)
+// data is a string variable that you can add any message you want like bitcoin's op_return.
 ```
-
-### 7. Finalize `stage`
+### 7. Exonerate `payment`
 ```javascript
-ifc.server.finalize(STAGE_HEIGHT)
+ifc.server.exonerate(stageHeight, paymentHash)
+```
+### 8. Pay Penalty `payments`
+```javascript
+ifc.server.payPenalty(stageHeight, [paymentHash1, paymentHash2, paymentHash3, ...])
+```
+### 9. Finalize `stage`
+```javascript
+ifc.server.finalize(stageHeight)
 ```
 
 ### How to Develop
