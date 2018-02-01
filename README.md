@@ -85,7 +85,7 @@ ifc.server.finalize(stageHeight)
 
 ### How to Develop
 - `npm install`
-- `npm run build`: 轉譯 & 打包
+- `npm run build`
 - `npm run console`: node REPL
 
 ### 從本機安裝 ifc
