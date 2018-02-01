@@ -88,7 +88,7 @@ ifc.server.finalize(stageHeight)
 - `npm run build`
 - `npm run console`: node REPL
 
-### 從本機安裝 ifc
+### Install ifc in local
 ```
 (/ifc)           cd ../ifc_extension
 (/ifc_extension) npm install ../ifc
