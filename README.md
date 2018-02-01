@@ -46,7 +46,7 @@ payment = ifc.server.signRawPayment(rawPayment)
 ```
 
 ### 4. Send `payments` to Infinitechain Node
-When server accumulates some transactions and wants to put on blockchain, he can call `sendPayments()` to send them to infinitechain node in order to  prepare for commit payments. 
+When server accumulates some transactions and wants to put on blockchain, he can call `sendPayments()` to send them to Infinitechain node in order to  prepare for commit payments. 
 ```javascript
 ifc.server.sendPayments([payment1, payment2, payment3, ...])
 ```
