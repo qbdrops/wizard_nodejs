@@ -6,39 +6,39 @@ class Event {
   }
 
   watchAddNewStage (cb) {
-    this.ifc.sidechain.getIFCContract()
-      .then((IFCContract) => IFCContract.AddNewStage(this._opt).watch((err ,result) => {
-        if(err) {console.trace;}
-        cb(err,result);
-      }))
-      .catch(console.trace);
+    let IFCContract = this.ifc.sidechain.getIFCContract();
+
+    IFCContract.AddNewStage(this._opt).watch((err, result) => {
+      if (err) { console.trace; }
+      cb(err, result);
+    });
   }
 
   watchObjection (cb) {
-    this.ifc.sidechain.getIFCContract()
-      .then((IFCContract) => IFCContract.TakeObjection(this._opt).watch((err ,result) => {
-        if(err) {console.trace;}
-        cb(err,result);
-      }))
-      .catch(console.trace);
+    let IFCContract = this.ifc.sidechain.getIFCContract();
+
+    IFCContract.TakeObjection(this._opt).watch((err, result) => {
+      if (err) { console.trace; }
+      cb(err, result);
+    });
   }
 
   watchExonerate (cb) {
-    this.ifc.sidechain.getIFCContract()
-      .then((IFCContract) => IFCContract.Exonerate(this._opt).watch((err ,result) => {
-        if(err) {console.trace;}
-        cb(err,result);
-      }))
-      .catch(console.trace);
+    let IFCContract = this.ifc.sidechain.getIFCContract();
+
+    IFCContract.Exonerate(this._opt).watch((err, result) => {
+      if (err) { console.trace; }
+      cb(err, result);
+    });
   }
 
   watchFinalize (cb) {
-    this.ifc.sidechain.getIFCContract()
-      .then((IFCContract) => IFCContract.Finalize(this._opt).watch((err ,result) => {
-        if(err) {console.trace;}
-        cb(err,result);
-      }))
-      .catch(console.trace);
+    let IFCContract = this.ifc.sidechain.getIFCContract();
+
+    IFCContract.Finalize(this._opt).watch((err, result) => {
+      if (err) { console.trace; }
+      cb(err, result);
+    });
   }
 }
 
