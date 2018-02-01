@@ -4,6 +4,35 @@ module.exports = {
       'constant': false,
       'inputs': [
         {
+          'name': '_stageHash',
+          'type': 'bytes32'
+        },
+        {
+          'name': '_rootHash',
+          'type': 'bytes32'
+        },
+        {
+          'name': '_objectionTimePeriod',
+          'type': 'uint256'
+        },
+        {
+          'name': '_finalizedTimePeriod',
+          'type': 'uint256'
+        },
+        {
+          'name': '_data',
+          'type': 'string'
+        }
+      ],
+      'name': 'addNewStage',
+      'outputs': [],
+      'payable': false,
+      'type': 'function'
+    },
+    {
+      'constant': false,
+      'inputs': [
+        {
           'name': 'agentResponse',
           'type': 'bytes32[]'
         },
@@ -68,6 +97,19 @@ module.exports = {
       ],
       'name': 'payPenalty',
       'outputs': [],
+      'payable': false,
+      'type': 'function'
+    },
+    {
+      'constant': true,
+      'inputs': [],
+      'name': 'version',
+      'outputs': [
+        {
+          'name': '',
+          'type': 'string'
+        }
+      ],
       'payable': false,
       'type': 'function'
     },
@@ -165,23 +207,6 @@ module.exports = {
       'type': 'function'
     },
     {
-      'constant': false,
-      'inputs': [
-        {
-          'name': '_stageHash',
-          'type': 'bytes32'
-        },
-        {
-          'name': '_rootHash',
-          'type': 'bytes32'
-        }
-      ],
-      'name': 'addNewStage',
-      'outputs': [],
-      'payable': false,
-      'type': 'function'
-    },
-    {
       'constant': true,
       'inputs': [],
       'name': 'stageHeight',
@@ -195,7 +220,12 @@ module.exports = {
       'type': 'function'
     },
     {
-      'inputs': [],
+      'inputs': [
+        {
+          'name': '_compensation',
+          'type': 'uint256'
+        }
+      ],
       'payable': true,
       'type': 'constructor'
     },
@@ -215,6 +245,11 @@ module.exports = {
           'indexed': false,
           'name': '_stageAddress',
           'type': 'address'
+        },
+        {
+          'indexed': false,
+          'name': '_rootHash',
+          'type': 'bytes32'
         }
       ],
       'name': 'AddNewStage',

@@ -59,13 +59,13 @@ class Server {
     }
   }
 
-  commitPayments = async () => {
+  commitPayments = async (objectionTime, finalizeTime, data) => {
     let url = this._nodeUrl + '/roothash';
     let res = await axios.get(url);
     let rootHash = res.data.rootHash;
     let stageHeight = res.data.stageHeight;
 
-    return await this.ifc.sidechain.addNewStage(rootHash, stageHeight);
+    return await this.ifc.sidechain.addNewStage(rootHash, stageHeight, objectionTime, finalizeTime, data);
   }
 
   finalize = async (stageHeight) => {

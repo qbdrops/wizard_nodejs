@@ -14,9 +14,44 @@ module.exports = {
       'type': 'function'
     },
     {
+      'constant': true,
+      'inputs': [
+        {
+          'name': '',
+          'type': 'uint256'
+        }
+      ],
+      'name': 'objectionablePaymentHashes',
+      'outputs': [
+        {
+          'name': '',
+          'type': 'bytes32'
+        }
+      ],
+      'payable': false,
+      'type': 'function'
+    },
+    {
       'constant': false,
       'inputs': [],
       'name': 'setCompleted',
+      'outputs': [],
+      'payable': false,
+      'type': 'function'
+    },
+    {
+      'constant': false,
+      'inputs': [
+        {
+          'name': '_paymentHash',
+          'type': 'bytes32'
+        },
+        {
+          'name': '_customer',
+          'type': 'address'
+        }
+      ],
+      'name': 'addObjectionablePaymentHash',
       'outputs': [],
       'payable': false,
       'type': 'function'
@@ -50,11 +85,11 @@ module.exports = {
     {
       'constant': true,
       'inputs': [],
-      'name': 'getObjectionableTxHashes',
+      'name': 'data',
       'outputs': [
         {
           'name': '',
-          'type': 'bytes32[]'
+          'type': 'string'
         }
       ],
       'payable': false,
@@ -64,28 +99,11 @@ module.exports = {
       'constant': false,
       'inputs': [
         {
-          'name': '_txHash',
+          'name': '_paymentHash',
           'type': 'bytes32'
         }
       ],
       'name': 'resolveObjections',
-      'outputs': [],
-      'payable': false,
-      'type': 'function'
-    },
-    {
-      'constant': false,
-      'inputs': [
-        {
-          'name': '_txHash',
-          'type': 'bytes32'
-        },
-        {
-          'name': '_customer',
-          'type': 'address'
-        }
-      ],
-      'name': 'addObjectionableTxHash',
       'outputs': [],
       'payable': false,
       'type': 'function'
@@ -170,24 +188,6 @@ module.exports = {
     },
     {
       'constant': true,
-      'inputs': [
-        {
-          'name': '',
-          'type': 'uint256'
-        }
-      ],
-      'name': 'objectionableTxHashes',
-      'outputs': [
-        {
-          'name': '',
-          'type': 'bytes32'
-        }
-      ],
-      'payable': false,
-      'type': 'function'
-    },
-    {
-      'constant': true,
       'inputs': [],
       'name': 'objectionTime',
       'outputs': [
@@ -200,10 +200,23 @@ module.exports = {
       'type': 'function'
     },
     {
+      'constant': true,
+      'inputs': [],
+      'name': 'getObjectionablePaymentHashes',
+      'outputs': [
+        {
+          'name': '',
+          'type': 'bytes32[]'
+        }
+      ],
+      'payable': false,
+      'type': 'function'
+    },
+    {
       'constant': false,
       'inputs': [
         {
-          'name': '_txHash',
+          'name': '_paymentHash',
           'type': 'bytes32'
         }
       ],
@@ -246,6 +259,10 @@ module.exports = {
         {
           'name': '_finalizedTimePeriod',
           'type': 'uint256'
+        },
+        {
+          'name': '_data',
+          'type': 'string'
         }
       ],
       'payable': false,

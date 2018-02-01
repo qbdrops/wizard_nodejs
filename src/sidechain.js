@@ -25,12 +25,15 @@ class Sidechain {
     return this._ifcContract;
   }
 
-  addNewStage = (rootHash, stageHeight) => {
+  addNewStage = (rootHash, stageHeight, objectionTime, finalizeTime, data) => {
     try {
       let stageHash = '0x' + this._sha3(stageHeight.toString());
       let txMethodData = this._ifcContract.addNewStage.getData(
         stageHash,
         rootHash,
+        objectionTime,
+        finalizeTime,
+        data,
         { from: this._address }
       );
 
