@@ -5,7 +5,7 @@ module.exports = {
   output: {
     filename: 'bundle.js',
     library: '',
-    libraryTarget: 'commonjs'
+    libraryTarget: 'umd'
   },
   module: {
     loaders: [{

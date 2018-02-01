@@ -9,11 +9,11 @@ var ctx = repl.start({
 
 var bundleFile = path.resolve('./bundle.js');
 
-var bundle = require('./bundle.js');
-ctx.IFCBuilder = bundle.IFCBuilder;
+var IFCBuilder = require('./bundle.js');
+ctx.IFCBuilder = IFCBuilder;
 
 chokidar.watch('./bundle.js', {ignored: /[\/\\]\./}).on('change', function(event, path) {
   delete require.cache[bundleFile];
-  var bundle = require('./bundle.js');
-  ctx.IFCBuilder = bundle.IFCBuilder;
+  var IFCBuilder = require('./bundle.js');
+  ctx.IFCBuilder = IFCBuilder;
 });

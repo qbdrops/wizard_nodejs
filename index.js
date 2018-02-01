@@ -1,3 +1,2 @@
-import IFCBuilder from '@/ifc-builder';
-
-export { IFCBuilder };
+var IFCBuilder = require('@/ifc-builder').default;
+module.exports = IFCBuilder;
