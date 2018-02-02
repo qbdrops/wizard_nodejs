@@ -1,12 +1,12 @@
 {
-  "name": "infinitechain_server",
+  "name": "infinitechain_nodejs",
   "version": "0.0.4",
-  "description": "Infinitechain Server SDK",
+  "description": "Infinitechain SDK for nodejs",
   "repository": {
     "type": "git",
     "url": "https://github.com/TideiSunTaipei/infinitechain_server.git"
   },
-  "main": "bundle.js",
+  "main": "dist/infinitechain_nodejs.js",
   "scripts": {
     "test": "./node_modules/mocha/bin/mocha",
     "build": "webpack",
@@ -38,6 +38,7 @@
     "fs": "0.0.1-security",
     "js-sha3": "^0.6.1",
     "keythereum": "^1.0.2",
+    "level": "^2.1.2",
     "node-rsa": "^0.4.2",
     "web3": "^0.20.1"
   }
