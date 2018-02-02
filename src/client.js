@@ -12,7 +12,7 @@ class Client {
   }
 
   makeRawPayment = (value, data) => {
-    assert(data.pkUser, 'Parameter \'data\' does not include key \'pkUser\'');
+    assert(data.pkClient, 'Parameter \'data\' does not include key \'pkClient\'');
     assert(data.pkStakeholder, 'Parameter \'data\' does not include key \'pkStakeholder\'');
 
     let sidechain = this.ifc.sidechain;
@@ -98,16 +98,16 @@ class Client {
     let crypto = this.ifc.crypto;
 
     // 1. Verify ciphers
-    let cipherUser = payment.cipherUser;
-    let cipherCP = payment.cipherCP;
+    let cipherClient = payment.cipherClient;
+    let cipherStakeholder = payment.cipherStakeholder;
     try {
-      crypto.decrypt(cipherUser);
+      crypto.decrypt(cipherClient);
     } catch (e) {
       return false;
     }
 
     // 2. Verify paymentHash
-    if (!(payment.paymentHash == EthUtils.sha3(cipherUser + cipherCP).toString('hex'))) {
+    if (!(payment.paymentHash == EthUtils.sha3(cipherClient + cipherStakeholder).toString('hex'))) {
       return false;
     }
 
@@ -203,8 +203,8 @@ class Client {
       stageHeight: rawPayment.stageHeight,
       stageHash: stageHash.toString('hex'),
       paymentHash: paymentHash.toString('hex'),
-      cipherUser: ciphers.cipherUser,
-      cipherCP: ciphers.cipherCP
+      cipherClient: ciphers.cipherClient,
+      cipherStakeholder: ciphers.cipherStakeholder
     };
   }
 
@@ -220,7 +220,7 @@ class Client {
 
     let data = rawPayment.data;
 
-    if (!data.hasOwnProperty('pkUser') ||
+    if (!data.hasOwnProperty('pkClient') ||
         !data.hasOwnProperty('pkStakeholder')) {
       return false;
     }
@@ -231,15 +231,15 @@ class Client {
   _computePaymentHashAndCiphers = (rawPayment) => {
     let crypto = this.ifc.crypto;
     let serializedRawPayment = Buffer.from(JSON.stringify(rawPayment)).toString('hex');
-    let cipherUser = crypto.encrypt(serializedRawPayment, rawPayment.data.pkUser);
-    let cipherCP = crypto.encrypt(serializedRawPayment, rawPayment.data.pkStakeholder);
-    let paymentHash = EthUtils.sha3(cipherUser + cipherCP).toString('hex');
+    let cipherClient = crypto.encrypt(serializedRawPayment, rawPayment.data.pkClient);
+    let cipherStakeholder = crypto.encrypt(serializedRawPayment, rawPayment.data.pkStakeholder);
+    let paymentHash = EthUtils.sha3(cipherClient + cipherStakeholder).toString('hex');
 
     return {
       paymentHash: paymentHash,
       ciphers: {
-        cipherUser: cipherUser,
-        cipherCP: cipherCP,
+        cipherClient: cipherClient,
+        cipherStakeholder: cipherStakeholder,
       }
     };
   }

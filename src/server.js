@@ -41,8 +41,8 @@ class Server {
       stageHeight: rawPayment.stageHeight,
       stageHash: stageHash.toString('hex'),
       paymentHash: paymentHash.toString('hex'),
-      cipherUser: ciphers.cipherUser,
-      cipherCP: ciphers.cipherCP,
+      cipherClient: ciphers.cipherClient,
+      cipherStakeholder: ciphers.cipherStakeholder,
       v: signature.v,
       r: '0x' + signature.r.toString('hex'),
       s: '0x' + signature.s.toString('hex')
@@ -95,15 +95,15 @@ class Server {
   _computePaymentHashAndCiphers = (rawPayment) => {
     let crypto = this.ifc.crypto;
     let serializedRawPayment = Buffer.from(JSON.stringify(rawPayment)).toString('hex');
-    let cipherUser = crypto.encrypt(serializedRawPayment, rawPayment.data.pkUser);
-    let cipherCP = crypto.encrypt(serializedRawPayment, rawPayment.data.pkStakeholder);
-    let paymentHash = EthUtils.sha3(cipherUser + cipherCP).toString('hex');
+    let cipherClient = crypto.encrypt(serializedRawPayment, rawPayment.data.pkClient);
+    let cipherStakeholder = crypto.encrypt(serializedRawPayment, rawPayment.data.pkStakeholder);
+    let paymentHash = EthUtils.sha3(cipherClient + cipherStakeholder).toString('hex');
 
     return {
       paymentHash: paymentHash,
       ciphers: {
-        cipherUser: cipherUser,
-        cipherCP: cipherCP,
+        cipherClient: cipherClient,
+        cipherStakeholder: cipherStakeholder,
       }
     };
   }
@@ -120,7 +120,7 @@ class Server {
 
     let data = rawPayment.data;
 
-    if (!data.hasOwnProperty('pkUser') ||
+    if (!data.hasOwnProperty('pkClient') ||
         !data.hasOwnProperty('pkStakeholder')) {
       return false;
     }
