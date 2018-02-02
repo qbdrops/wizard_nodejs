@@ -1,4 +1,5 @@
 import IFC from '@/ifc';
+import Client from '@/client';
 import Server from '@/server';
 import Event from '@/event';
 
@@ -14,6 +15,11 @@ class IFCBuilder {
 
   setWeb3Url (url) {
     this._web3Url = url;
+    return this;
+  }
+
+  setClientAddress (address) {
+    this._clientAddress = address;
     return this;
   }
 
@@ -33,6 +39,15 @@ class IFCBuilder {
   }
 
   build = () => {
+
+    let clientConfig = {
+      web3Url: this._web3Url,
+      nodeUrl: this._nodeUrl,
+      storageType: this._storageType,
+      clientAddress: this._clientAddress,
+      serverAddress: this._serverAddress
+    };
+
     let serverConfig = {
       web3Url: this._web3Url,
       nodeUrl: this._nodeUrl
@@ -72,6 +87,9 @@ class IFCBuilder {
     // Create server object after crypto and sidechain in order to use them in server
     let sidechain = new Sidechain(sidechainConfig, ifc);
     ifc.setSidechain(sidechain);
+
+    let client = new Client(clientConfig, ifc);
+    ifc.setClient(client);
 
     // Create server object after crypto and sidechain in order to use them in server
     let server = new Server(serverConfig, ifc);

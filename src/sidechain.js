@@ -2,6 +2,7 @@ import Web3 from 'web3';
 import EthUtils from 'ethereumjs-util';
 import EthereumTx from 'ethereumjs-tx';
 import ifcJSON from '@/abi/ifc.js';
+import stageJSON from '@/abi/stage.js';
 import assert from 'assert';
 import axios from 'axios';
 
@@ -42,6 +43,41 @@ class Sidechain {
     } catch (e) {
       console.error(e);
     }
+  }
+
+  getStage = async (stageHash) => {
+    if(this.stageCache[stageHash]) {
+      return this.stageCache[stageHash];
+    }
+
+    let stageContractAddress = await this._ifcContract.getStageAddress(stageHash);
+    assert(stageContractAddress != 0, 'This stage contract does not exist.');
+
+    let stageContract = this._web3.eth.contract(stageJSON.abi).at(stageContractAddress);
+    this.stageCache[stageHash] = stageContract;
+
+    return stageContract;
+  }
+
+  getStageRootHash = async (stageHash) => {
+    let stage = await this.getStage(stageHash);
+    return stage.rootHash();
+  }
+
+  getLatestStageHeight = () => {
+    assert(this._ifcContract, 'Can not find contract.');
+
+    return this._ifcContract.stageHeight();
+  }
+
+  getSlice = async (stageHeight, paymentHash) => {
+    let url = this._nodeUrl + '/slice';
+    return axios.get(url, {
+      params: {
+        stage_height: stageHeight,
+        payment_hash: paymentHash
+      }
+    });
   }
 
   finalize = async (stageHeight) => {
