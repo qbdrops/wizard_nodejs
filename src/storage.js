@@ -1,8 +1,7 @@
-import level from 'level';
-
 class Storage {
-  constructor () {
-    this.db = level('./db');
+  constructor (db) {
+    // Use level db
+    this.db = db;
   }
 
   get = async (key) => {

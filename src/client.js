@@ -8,7 +8,7 @@ class Client {
     this.clientConfig = clientConfig;
     this.ifc = ifc;
     this._rawPaymentStoragePrefix = 'raw:';
-    this._storage = new Storage();
+    this._storage = new Storage(clientConfig.db);
   }
 
   makeRawPayment = (value, data) => {
