@@ -43,7 +43,6 @@ class IFCBuilder {
     let clientConfig = {
       web3Url: this._web3Url,
       nodeUrl: this._nodeUrl,
-      storageType: this._storageType,
       clientAddress: this._clientAddress,
       serverAddress: this._serverAddress
     };

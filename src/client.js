@@ -1,31 +1,14 @@
 import EthUtils from 'ethereumjs-util';
 import EthereumTx from 'ethereumjs-tx';
-import LocalStorage from '@/storages/local';
-import ChromeExtensionStorage from '@/storages/chrome-extension';
-import ReactNativeStorage from '@/storages/react-native';
+import Storage from '@/storage';
 import assert from 'assert';
 
 class Client {
   constructor (clientConfig, ifc) {
-    assert((['local', 'chrome-extension', 'react-native'].includes(clientConfig.storageType)), 'Storage type is not one of \'chrome-extension\', \'local\', \'react-native\'');
-
-    switch(clientConfig.storageType) {
-    case 'local':
-      this._storage = new LocalStorage();
-      break;
-    case 'chrome-extension':
-      this._storage = new ChromeExtensionStorage();
-      break;
-    case 'react-native':
-      this._storage = new ReactNativeStorage();
-      break;
-    default:
-      this._storage = {};
-    }
-
     this.clientConfig = clientConfig;
     this.ifc = ifc;
     this._rawPaymentStoragePrefix = 'raw:';
+    this._storage = new Storage();
   }
 
   makeRawPayment = (value, data) => {
@@ -156,23 +139,23 @@ class Client {
     }
   }
 
-  getAllPayments = async () => {
-    try {
-      let results = await this._storage.getAll();
-      return results.map((result) => {
-        try {
-          return JSON.parse(result);
-        } catch (e) {
-          console.log(e);
-          return false;
-        }
-      }).filter((result) => {
-        return !!result;
-      });
-    } catch (e) {
-      console.log(e);
-    }
-  }
+  // getAllPayments = async () => {
+  //   try {
+  //     let results = await this._storage.getAll();
+  //     return results.map((result) => {
+  //       try {
+  //         return JSON.parse(result);
+  //       } catch (e) {
+  //         console.log(e);
+  //         return false;
+  //       }
+  //     }).filter((result) => {
+  //       return !!result;
+  //     });
+  //   } catch (e) {
+  //     console.log(e);
+  //   }
+  // }
 
   saveRawPayment = async (rawPayment) => {
     let key = this._rawPaymentStoragePrefix + this._makeUnsignedPayment(rawPayment).paymentHash;
