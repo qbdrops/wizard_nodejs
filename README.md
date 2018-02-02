@@ -1,4 +1,4 @@
-# Infinitechain Server
+# Infinitechain Nodejs
 ## Install
 ```
 npm install infinitechain_server

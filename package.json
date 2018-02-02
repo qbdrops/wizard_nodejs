@@ -1,7 +1,7 @@
 {
-  "name": "infinitechain_server",
+  "name": "infinitechain_nodejs",
   "version": "0.0.4",
-  "description": "Infinitechain Server SDK",
+  "description": "Infinitechain SDK for nodejs",
   "repository": {
     "type": "git",
     "url": "https://github.com/TideiSunTaipei/infinitechain_server.git"
