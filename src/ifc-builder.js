@@ -40,6 +40,7 @@ class IFCBuilder {
 
   setDB (db) {
     this._db = db;
+    return this;
   }
 
   build = () => {
