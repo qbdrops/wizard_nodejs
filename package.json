@@ -1,6 +1,6 @@
 {
   "name": "infinitechain_nodejs",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Infinitechain SDK for nodejs",
   "repository": {
     "type": "git",
