@@ -6,7 +6,7 @@
     "type": "git",
     "url": "https://github.com/TideiSunTaipei/infinitechain_server.git"
   },
-  "main": "dist/infinitechain_sdk.js",
+  "main": "dist/infinitechain_nodejs.js",
   "scripts": {
     "test": "./node_modules/mocha/bin/mocha",
     "build": "webpack",
