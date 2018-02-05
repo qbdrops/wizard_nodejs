@@ -4,7 +4,7 @@ This project is a package for the centralized service which can import it to uti
 
 ## Install
 ```
-npm install infinitechain_server
+npm install infinitechain_nodejs
 ```
 ## Structure
 IFCBuilder
