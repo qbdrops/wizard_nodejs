@@ -33,7 +33,7 @@ IFC
 ## Example
 ### 1. Use `IFCBuilder` to create an ifc object
 ```javascript
-var IFCBuilder = require('infinitechain_server')
+var IFCBuilder = require('infinitechain_nodejs')
 ifc = new IFCBuilder().setNodeUrl("http://0.0.0.0:3000").setWeb3Url("http://0.0.0.0:8545").build()
 ```
 
