@@ -7,6 +7,9 @@ import Crypto from '@/crypto';
 
 import Sidechain from '@/sidechain';
 
+import Memory from '@/storages/memory';
+import Level from '@/storages/level';
+
 class IFCBuilder {
   setNodeUrl (url) {
     this._nodeUrl = url;
@@ -28,18 +31,25 @@ class IFCBuilder {
     return this;
   }
 
-  setSignerKeypair (key) {
+  setSignerKey (key) {
     this._signerKey = key;
     return this;
   }
 
-  setCipherKeypair (key) {
+  setCipherKey (key) {
     this._cipherKey = key;
     return this;
   }
 
-  setDB (db) {
-    this._db = db;
+  setStorage (storage) {
+    if (storage == 'memory') {
+      this.storage = new Memory();
+    } else if (storage == 'level') {
+      this.storage = new Level();
+    } else {
+      throw new Error('Not supported storage type.');
+    }
+
     return this;
   }
 
@@ -49,7 +59,7 @@ class IFCBuilder {
       nodeUrl: this._nodeUrl,
       clientAddress: this._clientAddress,
       serverAddress: this._serverAddress,
-      db: this._db
+      storage: this.storage
     };
 
     let serverConfig = {

@@ -1,17 +1,17 @@
 import EthUtils from 'ethereumjs-util';
 import EthereumTx from 'ethereumjs-tx';
-import Storage from '@/storage';
 import assert from 'assert';
 
 class Client {
   constructor (clientConfig, ifc) {
-    this.clientConfig = clientConfig;
+    this.clientAddress = clientConfig.clientAddress;
+    this.serverAddress = clientConfig.serverAddress;
     this.ifc = ifc;
-    this._rawPaymentStoragePrefix = 'raw:';
-    this._storage = new Storage(clientConfig.db);
+    this._storage = clientConfig.storage;
+    this._nodeUrl = clientConfig.nodeUrl;
   }
 
-  makeRawPayment = (value, data) => {
+  makeRawPayment = (value, lsn, data) => {
     assert(data.pkClient, 'Parameter \'data\' does not include key \'pkClient\'');
     assert(data.pkStakeholder, 'Parameter \'data\' does not include key \'pkStakeholder\'');
 
@@ -20,10 +20,10 @@ class Client {
     let newStageHeight = parseInt(latestStageHeight) + 1;
 
     return {
-      from: this.clientConfig.clientAddress,
-      to: this.clientConfig.serverAddress,
+      from: this.clientAddress,
+      to: this.serverAddress,
       value: value,
-      localSequenceNumber: 0,
+      localSequenceNumber: lsn,
       stageHeight: newStageHeight,
       data: data
     };
@@ -122,9 +122,7 @@ class Client {
 
   getRawPayment = async (paymentHash) => {
     try {
-      let key = this._rawPaymentStoragePrefix + paymentHash;
-      let result = await this._storage.get(key);
-      return JSON.parse(result);
+      return await this._storage.getRawPayment(paymentHash);
     } catch (e) {
       console.log(e);
     }
@@ -132,39 +130,24 @@ class Client {
 
   getPayment = async (paymentHash) => {
     try {
-      let result = await this._storage.get(paymentHash);
-      return JSON.parse(result);
+      return await this._storage.getPayment(paymentHash);
     } catch (e) {
       console.log(e);
     }
   }
 
-  // getAllPayments = async () => {
-  //   try {
-  //     let results = await this._storage.getAll();
-  //     return results.map((result) => {
-  //       try {
-  //         return JSON.parse(result);
-  //       } catch (e) {
-  //         console.log(e);
-  //         return false;
-  //       }
-  //     }).filter((result) => {
-  //       return !!result;
-  //     });
-  //   } catch (e) {
-  //     console.log(e);
-  //   }
-  // }
-
-  saveRawPayment = async (rawPayment) => {
-    let key = this._rawPaymentStoragePrefix + this._makeUnsignedPayment(rawPayment).paymentHash;
-    await this._storage.set(key, JSON.stringify(rawPayment));
+  getAllPaymentHashes = async (stageHash) => {
+    return await this._storage.getPaymentsByStageHash(stageHash);
   }
 
-  savePayment = async (payment) => {
+  saveRawPayment = (rawPayment) => {
+    let key = this._makeUnsignedPayment(rawPayment).paymentHash;
+    this._storage.setRawPayment(key, rawPayment);
+  }
+
+  savePayment = (payment) => {
     assert(payment.hasOwnProperty('paymentHash'), 'Payment should have key \'paymentHash\'');
-    await this._storage.set(payment.paymentHash, JSON.stringify(payment));
+    this._storage.setPayment(payment.paymentHash, payment);
   }
 
   export = () => {
