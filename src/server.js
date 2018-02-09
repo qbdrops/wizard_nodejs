@@ -52,7 +52,7 @@ class Server {
     }
   }
 
-  commitPayments = async (objectionTime, finalizeTime, data) => {
+  commitPayments = async (objectionTime, finalizeTime, data = '') => {
     let url = this._nodeUrl + '/roothash';
     let res = await axios.get(url);
     let rootHash = res.data.rootHash;
