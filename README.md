@@ -1,6 +1,6 @@
 # Infinitechain Nodejs
 
-This project is a package for the centralized service which can import it to utilize the infinitechain server function.
+This project is a package for the centralized service which can import it to utilize the infinitechain client and server function.
 
 ## Install
 ```
