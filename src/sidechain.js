@@ -26,25 +26,6 @@ class Sidechain {
     return this._ifcContract;
   }
 
-  addNewStage = (rootHash, stageHeight, objectionTime, finalizeTime, data) => {
-    try {
-      let stageHash = '0x' + this._sha3(stageHeight.toString());
-      let txMethodData = this._ifcContract.addNewStage.getData(
-        stageHash,
-        rootHash,
-        objectionTime,
-        finalizeTime,
-        data,
-        { from: this._address }
-      );
-
-      let txHash = this._signAndSendRawTransaction(txMethodData);
-      return txHash;
-    } catch (e) {
-      console.error(e);
-    }
-  }
-
   getStage = async (stageHash) => {
     if(this.stageCache[stageHash]) {
       return this.stageCache[stageHash];
@@ -66,7 +47,6 @@ class Sidechain {
 
   getLatestStageHeight = () => {
     assert(this._ifcContract, 'Can not find contract.');
-
     return this._ifcContract.stageHeight();
   }
 
@@ -80,21 +60,40 @@ class Sidechain {
     });
   }
 
-  finalize = async (stageHeight) => {
+  addNewStage = (rootHash, stageHeight, objectionTime, finalizeTime, data) => {
+    try {
+      let stageHash = '0x' + this._sha3(stageHeight.toString());
+      let txMethodData = this._ifcContract.addNewStage.getData(
+        stageHash,
+        rootHash,
+        objectionTime,
+        finalizeTime,
+        data,
+        { from: this._address }
+      );
+      let serializedTx = this._signRawTransaction(txMethodData);
+      return serializedTx;
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  finalize = (stageHeight) => {
     try {
       let stageHash = '0x' + this._sha3(stageHeight.toString());
       let txMethodData = this._ifcContract.finalize.getData(
         stageHash,
         { from: this._address }
       );
-      let txHash = this._signAndSendRawTransaction(txMethodData);
+      let serializedTx = this._signRawTransaction(txMethodData);
+      let txHash = this._sendRawTransaction(serializedTx);
       return txHash;
     } catch (e) {
       console.error(e);
     }
   }
 
-  payPenalty = async (stageHeight, paymentHashes) => {
+  payPenalty = (stageHeight, paymentHashes) => {
     try {
       let stageHash = '0x' + this._sha3(stageHeight.toString());
       paymentHashes = paymentHashes.map(paymentHash => '0x' + paymentHash);
@@ -104,14 +103,15 @@ class Sidechain {
         '', // Work around! To prevent solidity invalid argument error.
         { from: this._address }
       );
-      let txHash = this._signAndSendRawTransaction(txMethodData);
+      let serializedTx = this._signRawTransaction(txMethodData);
+      let txHash = this._sendRawTransaction(serializedTx);
       return txHash;
     } catch (e) {
       console.error(e);
     }
   }
 
-  exonerate = async (stageHeight, paymentHash, treeNodeIndex, slice, collidingPaymentHashes) => {
+  exonerate = (stageHeight, paymentHash, treeNodeIndex, slice, collidingPaymentHashes) => {
     try {
       let stageHash = '0x' + this._sha3(stageHeight.toString());
       paymentHash = '0x' + paymentHash;
@@ -126,14 +126,15 @@ class Sidechain {
         { from: this._address }
       );
 
-      let txHash = this._signAndSendRawTransaction(txMethodData);
+      let serializedTx = this._signRawTransaction(txMethodData);
+      let txHash = this._sendRawTransaction(serializedTx);
       return txHash;
     } catch (e) {
       console.error(e);
     }
   }
 
-  _signAndSendRawTransaction = (txMethodData) => {
+  _signRawTransaction = (txMethodData) => {
     let newNonce = this._web3.toHex(this._web3.eth.getTransactionCount(this._address));
 
     let txParams = {
@@ -148,6 +149,10 @@ class Sidechain {
     let key = this._key.substring(2);
     tx.sign(Buffer.from(key, 'hex'));
     let serializedTx = '0x' + tx.serialize().toString('hex');
+    return serializedTx;
+  }
+
+  _sendRawTransaction = (serializedTx) => {
     let txHash = this._web3.eth.sendRawTransaction(serializedTx);
     return txHash;
   }

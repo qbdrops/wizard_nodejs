@@ -17,23 +17,16 @@ class Server {
     assert(this._validateRawPayment(rawPayment), 'Wrong rawPayment format.');
 
     let stageHash = EthUtils.sha3(rawPayment.stageHeight.toString()).toString('hex');
-
     let paymentHashAndCiphers = this._computePaymentHashAndCiphers(rawPayment);
     let paymentHash = paymentHashAndCiphers.paymentHash;
     let ciphers = paymentHashAndCiphers.ciphers;
-
     let message = stageHash + paymentHash;
-    console.log(message);
     let msgHash = EthUtils.sha3(message);
     let prefix = new Buffer('\x19Ethereum Signed Message:\n');
     let ethMsgHash = EthUtils.sha3(Buffer.concat([prefix, new Buffer(String(msgHash.length)), msgHash]));
-
-    console.log(ethMsgHash.toString('hex'));
     let signature = this.ifc.crypto.sign(ethMsgHash);
-
     let publicKey = EthUtils.ecrecover(ethMsgHash, signature.v, signature.r, signature.s);
     let address = '0x' + EthUtils.pubToAddress(publicKey).toString('hex');
-    console.log(address);
 
     assert(address == this.ifc.crypto.getSignerAddress(), 'Wrong signature.');
 
@@ -65,7 +58,12 @@ class Server {
     let rootHash = res.data.rootHash;
     let stageHeight = res.data.stageHeight;
 
-    return await this.ifc.sidechain.addNewStage(rootHash, stageHeight, objectionTime, finalizeTime, data);
+    let serializedTx = this.ifc.sidechain.addNewStage(rootHash, stageHeight, objectionTime, finalizeTime, data);
+    console.log('Serialized: ' + serializedTx);
+
+    let commitUrl = this._nodeUrl + '/commit/payments';
+    let commitRes = await axios.post(commitUrl, { serializedTx: serializedTx });
+    return commitRes.data.txHash;
   }
 
   finalize = async (stageHeight) => {
