@@ -1,5 +1,4 @@
 import EthUtils from 'ethereumjs-util';
-import EthereumTx from 'ethereumjs-tx';
 import assert from 'assert';
 
 class Client {
@@ -59,39 +58,7 @@ class Client {
   }
 
   takeObjection = async (payment) => {
-    let _web3 = this.ifc.sidechain._web3;
-    let stageHash = '0x' + payment.stageHash;
-    let paymentHash = '0x' + payment.paymentHash;
-    let ifcObj = this.ifc.sidechain.getIFCContract();
-    let keyInfo = this.ifc.crypto.keyInfo();
-    let eccPrivateKey = keyInfo.eccPrivateKey;
-    let eccAddress = keyInfo.address;
-
-    let txMethodData = ifcObj.takeObjection.getData(
-      [stageHash, paymentHash],
-      payment.v,
-      payment.r,
-      payment.s,
-      { from: eccAddress }
-    );
-
-    let newNonce = _web3.toHex(_web3.eth.getTransactionCount(eccAddress));
-
-    let txParams = {
-      nonce: newNonce,
-      gas: 4700000,
-      from: eccAddress,
-      to: ifcObj.address,
-      data: txMethodData
-    };
-
-    let tx = new EthereumTx(txParams);
-    eccPrivateKey = eccPrivateKey.substring(2);
-    tx.sign(Buffer.from(eccPrivateKey, 'hex'));
-    let serializedTx = '0x' + tx.serialize().toString('hex');
-    let txHash = await _web3.eth.sendRawTransaction(serializedTx);
-
-    return txHash;
+    return this.ifc.sidechain.takeObjection(payment);
   }
 
   verifyPayment = async (payment) => {
