@@ -40,16 +40,6 @@ class Sidechain {
     return stageContract;
   }
 
-  getStageRootHash = async (stageHash) => {
-    let stage = await this.getStage(stageHash);
-    return stage.rootHash();
-  }
-
-  getLatestStageHeight = () => {
-    assert(this._ifcContract, 'Can not find contract.');
-    return this._ifcContract.stageHeight();
-  }
-
   getSlice = async (stageHeight, paymentHash) => {
     let url = this._nodeUrl + '/slice';
     return axios.get(url, {
@@ -73,6 +63,25 @@ class Sidechain {
       );
       let serializedTx = this._signRawTransaction(txMethodData);
       return serializedTx;
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  takeObjection = (payment) => {
+    try {
+      let stageHash = '0x' + payment.stageHash;
+      let paymentHash = '0x' + payment.paymentHash;
+      let txMethodData = this._ifcContract.takeObjection.getData(
+        [stageHash, paymentHash],
+        payment.v,
+        payment.r,
+        payment.s,
+        { from: this._address }
+      );
+      let serializedTx = this._signRawTransaction(txMethodData);
+      let txHash = this._sendRawTransaction(serializedTx);
+      return txHash;
     } catch (e) {
       console.error(e);
     }
@@ -134,6 +143,48 @@ class Sidechain {
     }
   }
 
+  // Sidechain status getter
+
+  getLatestStageHeight = () => {
+    assert(this._ifcContract, 'Can not find contract.');
+    return this._ifcContract.stageHeight();
+  }
+
+  getStageRootHash = async (stageHash) => {
+    let stage = await this.getStage(stageHash);
+    return stage.rootHash();
+  }
+
+  getObjectionablePaymentHashes = async (stageHash) => {
+    let stage = await this.getStage(stageHash);
+    return stage.getObjectionablePaymentHashes();
+  }
+
+  getObjection = async (stageHash, paymentHash) => {
+    let stage = await this.getStage(stageHash);
+    let objection = stage.objections(paymentHash);
+    return {
+      clientAddress: objection[0],
+      objectionSuccess: objection[1],
+      getCompensation: objection[2]
+    };
+  }
+
+  isStageFinalized = async (stageHash) => {
+    let stage = await this.getStage(stageHash);
+    return stage.completed();
+  }
+
+  // pendingStages = async () => {
+  //   let url = this._nodeUrl + '/pending/stages';
+  //   return axios.get(url);
+  // }
+
+  // pendingPayments = () => {
+  //   let url = this._nodeUrl + '/pending/payments';
+  //   return axios.get(url);
+  // }
+
   _signRawTransaction = (txMethodData) => {
     let newNonce = this._web3.toHex(this._web3.eth.getTransactionCount(this._address));
 
@@ -182,46 +233,6 @@ class Sidechain {
     return EthUtils.sha3(content).toString('hex');
   }
 
-  // pendingStages = async () => {
-  //   let url = this._nodeUrl + '/pending/stages';
-  //   return axios.get(url);
-  // }
-
-  // pendingPayments = () => {
-  //   let url = this._nodeUrl + '/pending/payments';
-  //   return axios.get(url);
-  // }
-
-  // getStage = async (stageHash) => {
-  //   if(this.stageCache[stageHash]) {
-  //     return this.stageCache[stageHash];
-  //   }
-
-  //   let stageContractAddress = await this._ifcContract.getStageAddress(stageHash);
-  //   assert(stageContractAddress != 0, 'This stage contract does not exist.');
-
-  //   let stageContract = this._web3.eth.contract(stageJSON.abi).at(stageContractAddress);
-  //   this.stageCache[stageHash] = stageContract;
-
-  //   return stageContract;
-  // }
-
-  // getStageRootHash = async (stageHash) => {
-  //   let stage = this.getStage(stageHash);
-  //   return stage.rootHash();
-  // }
-
-  // getLatestStageHeight = () => {
-  //   let url = this._nodeUrl + '/latest/stage/height';
-  //   return axios.get(url);
-  // }
-
-  // getPayment = (paymentHash) => {
-  //   let url = this._nodeUrl + '/payment';
-  //   return axios.get(url, {
-  //     paymentHash: paymentHash
-  //   });
-  // }
 }
 
 export default Sidechain;
