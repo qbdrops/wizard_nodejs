@@ -67,7 +67,7 @@ class Server {
   }
 
   finalize = async (stageHeight) => {
-    return await this.ifc.sidechain.finalize(stageHeight);
+    return this.ifc.sidechain.finalize(stageHeight);
   }
 
   exonerate = async (stageHeight, paymentHash) => {
@@ -83,11 +83,11 @@ class Server {
     let collidingPaymentHashes = res.data.paymentHashArray;
     let treeNodeIndex = res.data.treeNodeIndex;
 
-    return await this.ifc.sidechain.exonerate(stageHeight, paymentHash, treeNodeIndex, slice, collidingPaymentHashes);
+    return this.ifc.sidechain.exonerate(stageHeight, paymentHash, treeNodeIndex, slice, collidingPaymentHashes);
   }
 
   payPenalty = async (stageHeight, paymentHashes) => {
-    return await this.ifc.sidechain.payPenalty(stageHeight, paymentHashes);
+    return this.ifc.sidechain.payPenalty(stageHeight, paymentHashes);
   }
 
   _computePaymentHashAndCiphers = (rawPayment) => {
