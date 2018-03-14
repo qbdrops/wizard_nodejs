@@ -104,7 +104,7 @@ class Client {
   }
 
   getAllPaymentHashes = async (stageHash) => {
-    return await this._storage.getPaymentsByStageHash(stageHash);
+    return await this._storage.getPaymentHashesByStageHash(stageHash);
   }
 
   saveRawPayment = (rawPayment) => {

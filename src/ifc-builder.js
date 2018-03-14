@@ -41,11 +41,11 @@ class IFCBuilder {
     return this;
   }
 
-  setStorage (storage) {
+  setStorage (storage, db = null) {
     if (storage == 'memory') {
       this.storage = new Memory();
     } else if (storage == 'level') {
-      this.storage = new Level();
+      this.storage = new Level(db);
     } else {
       throw new Error('Not supported storage type.');
     }

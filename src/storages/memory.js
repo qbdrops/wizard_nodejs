@@ -4,7 +4,7 @@ class Memory {
     this.rawPayments = {};
   }
 
-  getPaymentsByStageHash = async (stageHash) => {
+  getPaymentHashesByStageHash = async (stageHash) => {
     return Object.keys(this.payments).map(key => {
       return this.payments[key];
     }).filter(payment => {

@@ -3,8 +3,17 @@ class Level {
     // Use level db
     this.db = db;
   }
-  
-  getPaymentsByStageHash = async (stageHash) => {
+
+  getPaymentHashesByStageHash = async (stageHash) => {
+    let result;
+    try {
+      result = await this.db.get(stageHash);
+    } catch (e) {
+      result = JSON.stringify([]);
+    } finally {
+      result = JSON.parse(result);
+    }
+    return result;
   }
 
   getRawPayment = async (key) => {
@@ -22,9 +31,26 @@ class Level {
   }
 
   setPayment = async (key, value) => {
-    this.db.put(key, JSON.stringify(value));
+    try {
+      this.db.put(key, JSON.stringify(value));
+      this._appendPaymentHash(value.stageHash, value.paymentHash);
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  _appendPaymentHash = async (stageHash, paymentHash) => {
+    let paymentHashes;
+    try {
+      paymentHashes = await this.db.get(stageHash);
+    } catch (e) {
+      paymentHashes = JSON.stringify([paymentHash]);
+    } finally {
+      paymentHashes = JSON.parse(paymentHashes);
+      paymentHashes.push(paymentHash);
+      this.db.put(stageHash, JSON.stringify(paymentHashes));
+    }
   }
 }
-    
+
 export default Level;
-  
