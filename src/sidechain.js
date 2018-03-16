@@ -1,18 +1,21 @@
 import Web3 from 'web3';
 import EthUtils from 'ethereumjs-util';
 import EthereumTx from 'ethereumjs-tx';
-import ifcJSON from '@/abi/ifc.js';
-import stageJSON from '@/abi/stage.js';
+import ifcJSON from '@/abi/IFC.json';
+import ifcFlexibleJSON from '@/abi/IFCFlexible.json';
+import stageJSON from '@/abi/Stage.json';
 import assert from 'assert';
 import axios from 'axios';
 
 class Sidechain {
   constructor (opt, ifc) {
-    assert(opt.web3Url != undefined, 'Opt shouldd include web3Url.');
-    assert(opt.nodeUrl != undefined, 'Opt shouldd include nodeUrl.');
+    assert(opt.web3Url != undefined, 'Opt should include web3Url.');
+    assert(opt.nodeUrl != undefined, 'Opt should include nodeUrl.');
+    assert(opt.contractType != undefined, 'Opt should include contractType.');
 
     this._web3Url = opt.web3Url;
     this._nodeUrl = opt.nodeUrl;
+    this._contractType = opt.contractType;
     this._fetchContract();
     this._ifc = ifc;
     this.stageCache = [];
@@ -221,7 +224,12 @@ class Sidechain {
     this.contractAddress = contractAddress;
 
     this._web3 = new Web3(new Web3.providers.HttpProvider(this._web3Url));
-    this._ifcContract = this._web3.eth.contract(ifcJSON.abi).at(contractAddress);
+
+    let abi = ifcJSON.abi;
+    if (this._contractType == 'flexible') {
+      abi = ifcFlexibleJSON.abi;
+    }
+    this._ifcContract = this._web3.eth.contract(abi).at(contractAddress);
   }
 
   _getContractAddress = async () => {
