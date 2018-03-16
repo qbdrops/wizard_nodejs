@@ -10,13 +10,12 @@ class Client {
     this._nodeUrl = clientConfig.nodeUrl;
   }
 
-  makeRawPayment = (value, lsn, data) => {
+  makeRawPayment = (value, lsn, data, stageHeight = null) => {
     assert(data.pkClient, 'Parameter \'data\' does not include key \'pkClient\'');
     assert(data.pkStakeholder, 'Parameter \'data\' does not include key \'pkStakeholder\'');
 
     let sidechain = this.ifc.sidechain;
-    let latestStageHeight = sidechain.getLatestStageHeight();
-    let newStageHeight = parseInt(latestStageHeight) + 1;
+    let newStageHeight = stageHeight ? stageHeight : (parseInt(sidechain.getLatestStageHeight()) + 1);
 
     return {
       from: this.clientAddress,
