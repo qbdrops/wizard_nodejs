@@ -1,5 +1,4 @@
 var path = require('path');
-
 module.exports = {
   entry: './index.js',
   output: {
@@ -15,6 +14,10 @@ module.exports = {
         presets: ['es2015', 'es2016', 'es2017'],
         plugins: ['babel-plugin-transform-runtime', 'babel-plugin-transform-class-properties']
       }
+    },
+    {
+      test: /\.json$/,
+      loader: 'json-loader'
     }]
   },
   resolve: {
