@@ -54,13 +54,6 @@ class IFCBuilder {
     return this;
   }
 
-  setContractType (type) {
-    let types = ['general', 'flexible'];
-    assert(types.includes(type), 'Not supported contract type.');
-    this._contractType = type;
-    return this;
-  }
-
   build = () => {
     let clientConfig = {
       web3Url: this._web3Url,
@@ -82,8 +75,7 @@ class IFCBuilder {
 
     let sidechainConfig = {
       web3Url: this._web3Url,
-      nodeUrl: this._nodeUrl,
-      contractType: this._contractType
+      nodeUrl: this._nodeUrl
     };
 
     let cryptoConfig = {
