@@ -22,7 +22,7 @@ class Level {
   }
 
   setRawPayment = async (key, value) => {
-    this.db.put('raw:' + key, JSON.stringify(value));
+    await this.db.put('raw:' + key, JSON.stringify(value));
   }
 
   getPayment = async (key) => {
@@ -32,7 +32,7 @@ class Level {
 
   setPayment = async (key, value) => {
     try {
-      this.db.put(key, JSON.stringify(value));
+      await this.db.put(key, JSON.stringify(value));
       this._appendPaymentHash(value.stageHash, value.paymentHash);
     } catch (e) {
       console.log(e);
@@ -44,11 +44,11 @@ class Level {
     try {
       paymentHashes = await this.db.get(stageHash);
     } catch (e) {
-      paymentHashes = JSON.stringify([paymentHash]);
+      paymentHashes = JSON.stringify([]);
     } finally {
       paymentHashes = JSON.parse(paymentHashes);
       paymentHashes.push(paymentHash);
-      this.db.put(stageHash, JSON.stringify(paymentHashes));
+      await this.db.put(stageHash, JSON.stringify(paymentHashes));
     }
   }
 }

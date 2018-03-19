@@ -55,15 +55,20 @@ class Server {
   commitPayments = async (objectionTime, finalizeTime, data = '') => {
     let url = this._nodeUrl + '/roothash';
     let res = await axios.get(url);
-    let rootHash = res.data.rootHash;
-    let stageHeight = res.data.stageHeight;
 
-    let serializedTx = this.ifc.sidechain.addNewStage(rootHash, stageHeight, objectionTime, finalizeTime, data);
-    console.log('Serialized: ' + serializedTx);
+    if (res.data.ok) {
+      let rootHash = res.data.rootHash;
+      let stageHeight = res.data.stageHeight;
 
-    let commitUrl = this._nodeUrl + '/commit/payments';
-    let commitRes = await axios.post(commitUrl, { serializedTx: serializedTx });
-    return commitRes.data.txHash;
+      let serializedTx = this.ifc.sidechain.addNewStage(rootHash, stageHeight, objectionTime, finalizeTime, data);
+      console.log('Serialized: ' + serializedTx);
+
+      let commitUrl = this._nodeUrl + '/commit/payments';
+      let commitRes = await axios.post(commitUrl, { serializedTx: serializedTx });
+      return commitRes.data.txHash;
+    } else {
+      throw new Error(res.data.message);
+    }
   }
 
   finalize = async (stageHeight) => {

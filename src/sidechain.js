@@ -146,7 +146,7 @@ class Sidechain {
 
   getLatestStageHeight = () => {
     assert(this._ifcContract, 'Can not find contract.');
-    return this._ifcContract.stageHeight();
+    return parseInt(this._ifcContract.stageHeight());
   }
 
   getStageRootHash = async (stageHash) => {
