@@ -49,7 +49,7 @@ class Sidechain {
     });
   }
 
-  addNewStage = (rootHash, stageHeight, objectionTime, finalizeTime, data) => {
+  addNewStage = (rootHash, stageHeight, objectionTime, finalizeTime, data, nonce = null) => {
     try {
       let stageHash = '0x' + this._sha3(stageHeight.toString());
       let txMethodData = this._ifcContract.addNewStage.getData(
@@ -60,7 +60,7 @@ class Sidechain {
         data,
         { from: this._address }
       );
-      let serializedTx = this._signRawTransaction(txMethodData);
+      let serializedTx = this._signRawTransaction(txMethodData, nonce);
       return serializedTx;
     } catch (e) {
       console.error(e);
@@ -184,11 +184,13 @@ class Sidechain {
   //   return axios.get(url);
   // }
 
-  _signRawTransaction = (txMethodData) => {
-    let newNonce = this._web3.toHex(this._web3.eth.getTransactionCount(this._address));
+  _signRawTransaction = (txMethodData, nonce = null) => {
+    if (nonce === null) {
+      nonce = this._web3.toHex(this._web3.eth.getTransactionCount(this._address));
+    }
 
     let txParams = {
-      nonce: newNonce,
+      nonce: nonce,
       gas: 4700000,
       from: this._address,
       to: this._ifcContract.address,

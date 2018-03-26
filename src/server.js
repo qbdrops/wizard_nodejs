@@ -62,7 +62,7 @@ class Server {
     }
   }
 
-  commitPayments = async (objectionTime, finalizeTime, data = '', targetRootHash = '') => {
+  commitPayments = async (objectionTime, finalizeTime, data = '', targetRootHash = '', nonce = null) => {
     let url = this._nodeUrl + '/roothash';
     let res = await axios.get(url, {
       params: {
@@ -74,7 +74,7 @@ class Server {
       let rootHash = res.data.rootHash;
       let stageHeight = res.data.stageHeight;
 
-      let serializedTx = this.ifc.sidechain.addNewStage(rootHash, stageHeight, objectionTime, finalizeTime, data);
+      let serializedTx = this.ifc.sidechain.addNewStage(rootHash, stageHeight, objectionTime, finalizeTime, data, nonce);
       console.log('Serialized: ' + serializedTx);
 
       let commitUrl = this._nodeUrl + '/commit/payments';
