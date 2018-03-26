@@ -42,7 +42,7 @@ class Server {
     };
   }
 
-  pendingRoothashes = async () => {
+  pendingRootHashes = async () => {
     try {
       let url = this._nodeUrl + '/pending/roothashes';
       let res = await axios.get(url);
