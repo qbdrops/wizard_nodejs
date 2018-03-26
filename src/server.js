@@ -42,6 +42,16 @@ class Server {
     };
   }
 
+  pendingRoothashes = async () => {
+    try {
+      let url = this._nodeUrl + '/pending/roothashes';
+      let res = await axios.get(url);
+      return res.data;
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
   sendPayments = async (payments) => {
     try {
       let url = this._nodeUrl + '/send/payments';
@@ -52,9 +62,13 @@ class Server {
     }
   }
 
-  commitPayments = async (objectionTime, finalizeTime, data = '') => {
+  commitPayments = async (objectionTime, finalizeTime, data = '', targetRootHash = '') => {
     let url = this._nodeUrl + '/roothash';
-    let res = await axios.get(url);
+    let res = await axios.get(url, {
+      params: {
+        rootHash: targetRootHash
+      }
+    });
 
     if (res.data.ok) {
       let rootHash = res.data.rootHash;
@@ -64,7 +78,7 @@ class Server {
       console.log('Serialized: ' + serializedTx);
 
       let commitUrl = this._nodeUrl + '/commit/payments';
-      let commitRes = await axios.post(commitUrl, { serializedTx: serializedTx });
+      let commitRes = await axios.post(commitUrl, { serializedTx: serializedTx, rootHash: rootHash });
       return commitRes.data.txHash;
     } else {
       throw new Error(res.data.message);
