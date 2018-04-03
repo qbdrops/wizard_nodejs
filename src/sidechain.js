@@ -144,9 +144,11 @@ class Sidechain {
 
   // Sidechain status getter
 
-  getLatestStageHeight = () => {
-    assert(this._ifcContract, 'Can not find contract.');
-    return parseInt(this._ifcContract.stageHeight());
+  getViableStageHeight = async () => {
+    assert(this._nodeUrl, 'Can not find sidechain node.');
+    let url = this._nodeUrl + '/viable/stage/height';
+    let res = await axios.get(url);
+    return parseInt(res.data.height);
   }
 
   getStageRootHash = async (stageHash) => {
@@ -228,7 +230,7 @@ class Sidechain {
   }
 
   _getContractAddress = async () => {
-    let url = this._nodeUrl + '/contract/address/ifc';
+    let url = this._nodeUrl + '/contract/address';
     return axios.get(url);
   }
 

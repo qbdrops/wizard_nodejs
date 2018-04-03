@@ -2,7 +2,6 @@ import IFC from '@/ifc';
 import Client from '@/client';
 import Server from '@/server';
 import Event from '@/event';
-import assert from 'assert';
 
 import Crypto from '@/crypto';
 
