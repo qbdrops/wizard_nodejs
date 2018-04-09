@@ -2,7 +2,7 @@ var path = require('path');
 module.exports = {
   entry: './index.js',
   output: {
-    filename: 'dist/infinitechain_nodejs.js',
+    filename: 'dist/wizard_nodejs.js',
     library: '',
     libraryTarget: 'umd'
   },

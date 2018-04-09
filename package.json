@@ -1,12 +1,12 @@
 {
-  "name": "infinitechain_nodejs",
+  "name": "wizard_nodejs",
   "version": "0.1.6",
   "description": "Infinitechain SDK for nodejs",
   "repository": {
     "type": "git",
-    "url": "https://github.com/TideiSunTaipei/infinitechain_server.git"
+    "url": "https://github.com/TideiSunTaipei/wizard_nodejs.git"
   },
-  "main": "dist/infinitechain_nodejs.js",
+  "main": "dist/wizard_nodejs.js",
   "scripts": {
     "test": "./node_modules/mocha/bin/mocha",
     "build": "webpack",
