@@ -32,28 +32,7 @@ class lightTransaction {
     this.lightTxData = orderedLightTxData;
     this.lightTxHash = EthUtils.sha3(JSON.stringify(this.lightTxData)).toString('hex');
 
-    this.sig = {};
-    // lightTx will always be initialized by client
-    this.signWithClientKey();
-  }
-
-  signWithClientKey () {
-    this.sig.clientLightTxHash = this._sign();
-  }
-
-  signWithServerKey () {
-    this.sig.serverLightTxHash = this._sign();
-  }
-
-  _sign () {
-    let prefix = new Buffer('\x19Ethereum Signed Message:\n');
-    let ethMsgHash = EthUtils.sha3(Buffer.concat([prefix, new Buffer(String(this.lightTxHash.length)), new Buffer(this.lightTxHash)]));
-    let sig = this._crypto.sign(ethMsgHash);
-    return {
-      r: '0x' + sig.r.toString('hex'),
-      s: '0x' + sig.s.toString('hex'),
-      v: sig.v
-    };
+    this.sig = { clientLightTxHash: {}, serverLightTxHash: {} };
   }
 }
 
