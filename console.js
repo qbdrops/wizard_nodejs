@@ -7,13 +7,13 @@ var ctx = repl.start({
   output: process.stdout
 }).context;
 
-var bundleFile = path.resolve('./dist/infinitechain_nodejs');
+var bundleFile = path.resolve('./dist/wizard_nodejs');
 
-var IFCBuilder = require('./dist/infinitechain_nodejs');
+var IFCBuilder = require('./dist/wizard_nodejs');
 ctx.IFCBuilder = IFCBuilder;
 
-chokidar.watch('./dist/infinitechain_nodejs', {ignored: /[/\\]\./}).on('change', function () {
+chokidar.watch('./dist/wizard_nodejs', {ignored: /[/\\]\./}).on('change', function () {
   delete require.cache[bundleFile];
-  var IFCBuilder = require('./dist/infinitechain_nodejs');
+  var IFCBuilder = require('./dist/wizard_nodejs');
   ctx.IFCBuilder = IFCBuilder;
 });
