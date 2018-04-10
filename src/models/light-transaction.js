@@ -4,10 +4,8 @@ import assert from 'assert';
 const allowedLightTxDataKeys = ['type', 'from', 'to', 'value', 'fee', 'LSN', 'stageHeight'];
 const allowedLightTxTypes = ['deposit', 'withdrawal', 'instantWithdraw', 'remittance'];
 
-class lightTransaction {
-  constructor (lightTxData, crypto) {
-    this._crypto = crypto;
-
+class LightTransaction {
+  constructor (lightTxData) {
     // Remove keys which are not in the whitelist
     Object.keys(lightTxData).forEach(key => {
       if (!allowedLightTxDataKeys.includes(key)) {
@@ -36,4 +34,4 @@ class lightTransaction {
   }
 }
 
-export default lightTransaction;
+export default LightTransaction;
