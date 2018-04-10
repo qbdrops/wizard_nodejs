@@ -38,11 +38,19 @@ class Signer {
     return '0x' + EthUtils.privateToAddress(this.key).toString('hex');
   }
 
-  sign = (caller, klass, object) => {
-    // 'klass' should be 'lightTransction' or 'receipt'
-    assert(Object.keys(models).includes(klass), '\'klass\' should be \'lightTransaction\' or \'receipt\'');
+  signWithServerKey = (klass, object) => {
+    return this._sign('server', klass, object);
+  }
+
+  signWithClientKey = (klass, object) => {
+    return this._sign('client', klass, object);
+  }
+
+  _sign = (caller, klass, object) => {
     // 'caller' should be 'server' or 'client'
     assert(['server', 'client'].includes(caller), '\'caller\' should be \'server\' or \'client\'');
+    // 'klass' should be 'lightTransction' or 'receipt'
+    assert(Object.keys(models).includes(klass), '\'klass\' should be \'lightTransaction\' or \'receipt\'');
     // 'object' should be instance of input model
     assert(object instanceof models[klass], '\'object\' should be instance of \'' + klass + '\'.');
 
