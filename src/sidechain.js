@@ -16,9 +16,8 @@ class Sidechain {
     this._ifc = ifc;
     this.stageCache = [];
 
-    let keyInfo = ifc.crypto.keyInfo();
-    this._key = keyInfo.eccPrivateKey;
-    this._address = keyInfo.address;
+    this._key = ifc.signer.getPrivateKey();
+    this._address = ifc.signer.getAddress();
   }
 
   getIFCContract = () => {

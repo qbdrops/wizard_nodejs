@@ -7,8 +7,8 @@ class IFC {
     this.server = server;
   }
 
-  setCrypto (crypto) {
-    this.crypto = crypto;
+  setSigner (signer) {
+    this.signer = signer;
   }
 
   setEvent (event) {

@@ -2,7 +2,7 @@ import IFC from '@/ifc';
 import Client from '@/client';
 import Server from '@/server';
 import Event from '@/event';
-import Crypto from '@/crypto';
+import Signer from '@/signer';
 import Sidechain from '@/sidechain';
 import Memory from '@/storages/memory';
 import Level from '@/storages/level';
@@ -30,11 +30,6 @@ class IFCBuilder {
 
   setSignerKey (key) {
     this._signerKey = key;
-    return this;
-  }
-
-  setCipherKey (key) {
-    this._cipherKey = key;
     return this;
   }
 
@@ -74,22 +69,21 @@ class IFCBuilder {
       nodeUrl: this._nodeUrl
     };
 
-    let cryptoConfig = {
+    let signerConfig = {
       web3Url: this._web3Url,
       nodeUrl: this._nodeUrl
     };
 
     let ifc = new IFC();
 
-    let crypto = new Crypto(cryptoConfig, ifc);
-    ifc.setCrypto(crypto);
+    let signer = new Signer(signerConfig, ifc);
+    ifc.setSigner(signer);
 
     // Generate keypair if key is not configured
-    if (this._signerKey != undefined && this._cipherKey != undefined) {
-      crypto.importSignerKey(this._signerKey);
-      crypto.importCipherKey(this._cipherKey);
+    if (this._signerKey != undefined) {
+      signer.importPrivateKey(this._signerKey);
     } else {
-      crypto.getOrNewKeyPair();
+      signer.getOrNewKeyPair();
     }
 
     let event = new Event(eventConfig, ifc);
