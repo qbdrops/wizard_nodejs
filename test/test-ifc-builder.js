@@ -1,9 +1,16 @@
-var assert = require('assert');
+import assert from 'assert';
+import IFCBuilder from '@/ifc-builder'
+import IFC from '@/ifc'
 
 describe('IFCBuilder', function () {
   describe('#constructor ()', function () {
     it('should return ifc object', function () {
-      assert.equal([1,2,3].indexOf(4), -1);
+      let ifc = new IFCBuilder().setNodeUrl('http://localhost:3000').
+        setWeb3Url('http://localhost:8545').
+        setStorage('memory').
+        build();
+
+      assert.equal(ifc instanceof IFC, true);
     });
   });
 });
