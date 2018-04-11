@@ -28,6 +28,7 @@
     "json-loader": "^0.5.7",
     "mocha": "^4.0.1",
     "mocha-webpack": "^1.1.0",
+    "nock": "^9.2.5",
     "path": "^0.12.7",
     "webpack": "^3.10.0"
   },
