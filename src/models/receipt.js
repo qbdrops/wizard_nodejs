@@ -7,7 +7,7 @@ const allowedReceiptDataKeys = ['GSN', 'lightTxHash', 'fromBalance', 'toBalance'
 class Receipt {
   constructor(lightTx, receiptData) {
     // check if lightTx instanceof LightTransaction object or not.
-    assert(lightTx instanceof LightTransaction, 'Parameter \'lightTx\' is not a lightTransaction instance.');
+    assert(lightTx instanceof LightTransaction, 'Parameter \'lightTx\' is not a LightTransaction instance.');
     Object.keys(receiptData).forEach(key => {
       if (!allowedReceiptDataKeys.includes(key)) {
         delete receiptData[key];
