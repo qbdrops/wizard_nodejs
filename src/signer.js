@@ -4,7 +4,7 @@ import assert from 'assert';
 import LightTransaction from '@/models/light-transaction';
 
 const models = {
-  lightTransaction: LightTransaction
+  lightTx: LightTransaction
 };
 
 class Signer {
@@ -49,17 +49,20 @@ class Signer {
   _sign = (caller, klass, object) => {
     // 'caller' should be 'server' or 'client'
     assert(['server', 'client'].includes(caller), '\'caller\' should be \'server\' or \'client\'');
-    // 'klass' should be 'lightTransction' or 'receipt'
-    assert(Object.keys(models).includes(klass), '\'klass\' should be \'lightTransaction\' or \'receipt\'');
+    // 'klass' should be 'lightTx' or 'receipt'
+    assert(Object.keys(models).includes(klass), '\'klass\' should be \'lightTx\' or \'receipt\'');
     // 'object' should be instance of input model
     assert(object instanceof models[klass], '\'object\' should be instance of \'' + klass + '\'.');
 
-    let h = object.lightTxHash;
+    let hashKey = klass + 'Hash';
+    let h = object[hashKey];
     let prefix = new Buffer('\x19Ethereum Signed Message:\n');
     let message = EthUtils.sha3(Buffer.concat([prefix, Buffer.from(String(h.length)), Buffer.from(h)]));
     let sig = EthUtils.ecsign(message, this.key);
-    let key = caller + 'LightTx';
-    object.sig[key] = {
+
+    let postfix = klass.charAt(0).toUpperCase() + klass.slice(1);
+    let sigKey = caller + postfix;
+    object.sig[sigKey] = {
       r: '0x' + sig.r.toString('hex'),
       s: '0x' + sig.s.toString('hex'),
       v: sig.v
