@@ -1,13 +1,13 @@
 import EthUtils from 'ethereumjs-util';
 import assert from 'assert';
-import lightTransaction from '@/models/light-transaction';
+import LightTransaction from '@/models/light-transaction';
 
 const allowedReceiptDataKeys = ['GSN', 'lightTxHash', 'fromBalance', 'toBalance'];
 
 class Receipt {
   constructor(lightTx, receiptData) {
-    // Remove keys which are not in the whitelist
-    assert(lightTx instanceof lightTransaction, 'Parameter \'lightTx\' is not a lightTransaction instance.');
+    // check if lightTx instanceof LightTransaction object or not.
+    assert(lightTx instanceof LightTransaction, 'Parameter \'lightTx\' is not a lightTransaction instance.');
     Object.keys(receiptData).forEach(key => {
       if (!allowedReceiptDataKeys.includes(key)) {
         delete receiptData[key];
