@@ -28,10 +28,8 @@ describe('Receipt', () => {
         toBalance: 500,
         hello: 'hello'
       };
-  
-      // receipt = new Receipt(lightTx, wrongReceiptData);
-      // assert.deepEqual(Object.keys(receipt.receiptData), ['GSN', 'lightTxHash', 'fromBalance', 'toBalance']);
-      assert.throws(() => { new Receipt(lightTx, wrongReceiptData); }, Error, 'Parameter \'lightTxData\' does not include key \'to\'.');
+
+      assert.throws(() => { new Receipt(lightTx, wrongReceiptData); }, Error, 'Parameter \'receiptData\' does not include key \'to\'.');
     });
 
     it('returns correct receipt', () => {
