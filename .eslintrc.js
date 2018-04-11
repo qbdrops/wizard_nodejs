@@ -34,6 +34,9 @@ module.exports = {
         }],
         "no-console": [
             "off"
+        ],
+        "object-curly-spacing": [
+            "error", "always"
         ]
     }
 };
