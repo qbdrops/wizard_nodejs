@@ -5,7 +5,7 @@ import LightTransaction from '@/models/light-transaction';
 const allowedReceiptDataKeys = ['GSN', 'lightTxHash', 'fromBalance', 'toBalance'];
 
 class Receipt {
-  constructor(lightTx, receiptData) {
+  constructor (lightTx, receiptData) {
     // check if lightTx instanceof LightTransaction object or not.
     assert(lightTx instanceof LightTransaction, 'Parameter \'lightTx\' is not a LightTransaction instance.');
     Object.keys(receiptData).forEach(key => {
