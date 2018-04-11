@@ -20,6 +20,7 @@ class Receipt {
       assert(receiptKeys.includes(key), 'Parameter \'receiptData\' does not include key \'' + key + '\'.');
       orderedReceiptData[key] = receiptData[key];
     });
+    assert(lightTx.lightTxHash === receiptData.lightTxHash, 'The \'lightTxHash\' is different in receiptData and lightTransaction.');
 
     this.lightTxHash = lightTx.lightTxHash;
     this.receiptHash = EthUtils.sha3(JSON.stringify(this.receiptData)).toString('hex');
