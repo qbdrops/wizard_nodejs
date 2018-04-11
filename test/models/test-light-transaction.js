@@ -1,9 +1,9 @@
 import assert from 'assert';
-import LightTransaction from '@/models/light-transaction'
+import LightTransaction from '@/models/light-transaction';
 
-describe('LightTransaction', function () {
-  describe('#constructor ()', function () {
-    it('removes keys which are not in the whitelist', function () {
+describe('LightTransaction', () => {
+  describe('#constructor', () => {
+    it('removes keys which are not in the whitelist', () => {
       let data = {
         fee: 3,
         type: 'deposit',
@@ -19,7 +19,7 @@ describe('LightTransaction', function () {
       assert.deepEqual(Object.keys(lightTx.lightTxData), ['type', 'from', 'to', 'value', 'fee', 'LSN', 'stageHeight']);
     });
 
-    it('checks if all lightTxDataKeys are included', function () {
+    it('checks if all lightTxDataKeys are included', () => {
       let data = {
         fee: 3,
         type: 'foo',
@@ -29,10 +29,10 @@ describe('LightTransaction', function () {
         stageHeight: 1
       };
 
-      assert.throws(() => { new LightTransaction(data) }, Error, 'Parameter \'lightTxData\' does not include key \'to\'.');
+      assert.throws(() => { new LightTransaction(data); }, Error, 'Parameter \'lightTxData\' does not include key \'to\'.');
     });
 
-    it('checks lightTx type', function () {
+    it('checks lightTx type', () => {
       let data = {
         fee: 3,
         type: 'foo',
@@ -43,10 +43,10 @@ describe('LightTransaction', function () {
         stageHeight: 1
       };
 
-      assert.throws(() => { new LightTransaction(data) }, Error, 'Parameter \'lightTxData\' does have correct \'type\'.');
+      assert.throws(() => { new LightTransaction(data); }, Error, 'Parameter \'lightTxData\' does have correct \'type\'.');
     });
 
-    it('returns correct lightTx', function () {
+    it('returns correct lightTx', () => {
       let data = {
         fee: 3,
         type: 'deposit',
@@ -62,7 +62,7 @@ describe('LightTransaction', function () {
       let result = {
         lightTxData: data,
         lightTxHash: '52eadc9689789b6b1dd281cdd488650b116b3ee071e76d6d9893e900996a0f30',
-      }
+      };
 
       assert.deepEqual(lightTx.lightTxData, result.lightTxData);
       assert.deepEqual(lightTx.lightTxHash, result.lightTxHash);
