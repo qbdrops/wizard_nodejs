@@ -8,7 +8,7 @@
   },
   "main": "dist/wizard_nodejs.js",
   "scripts": {
-    "test": "./node_modules/mocha/bin/mocha",
+    "test": "mocha-webpack --recursive",
     "build": "webpack",
     "console": "node console.js"
   },
@@ -27,6 +27,7 @@
     "eslint": "^4.14.0",
     "json-loader": "^0.5.7",
     "mocha": "^4.0.1",
+    "mocha-webpack": "^1.1.0",
     "path": "^0.12.7",
     "webpack": "^3.10.0"
   },
@@ -40,7 +41,6 @@
     "js-sha3": "^0.6.1",
     "keythereum": "^1.0.2",
     "level": "^2.1.2",
-    "node-rsa": "^0.4.2",
     "web3": "^0.20.1"
   }
 }
