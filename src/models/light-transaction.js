@@ -26,11 +26,10 @@ class LightTransaction {
     // Check lightTx type
     assert(allowedLightTxTypes.includes(lightTxData.type), 'Parameter \'lightTxData\' does have correct \'type\'.');
 
-
     this.lightTxData = orderedLightTxData;
     this.lightTxHash = EthUtils.sha3(JSON.stringify(this.lightTxData)).toString('hex');
 
-    this.sig = { clientLightTxHash: {}, serverLightTxHash: {} };
+    this.sig = { clientLightTx: {}, serverLightTx: {} };
   }
 }
 

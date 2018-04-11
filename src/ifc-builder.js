@@ -45,7 +45,7 @@ class IFCBuilder {
     return this;
   }
 
-  build = () => {
+  build () {
     let clientConfig = {
       web3Url: this._web3Url,
       nodeUrl: this._nodeUrl,

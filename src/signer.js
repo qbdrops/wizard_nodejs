@@ -58,7 +58,7 @@ class Signer {
     let prefix = new Buffer('\x19Ethereum Signed Message:\n');
     let message = EthUtils.sha3(Buffer.concat([prefix, Buffer.from(String(h.length)), Buffer.from(h)]));
     let sig = EthUtils.ecsign(message, this.key);
-    let key = caller + 'LightTxHash';
+    let key = caller + 'LightTx';
     object.sig[key] = {
       r: '0x' + sig.r.toString('hex'),
       s: '0x' + sig.s.toString('hex'),
