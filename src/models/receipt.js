@@ -2,8 +2,6 @@ import EthUtils from 'ethereumjs-util';
 import assert from 'assert';
 import lightTransaction from '@/models/light-transaction';
 
-const allowedLightTxKeys = ['lightTxHash', 'lightTxData', 'sig'];
-const allowedSignatureKeys = ['clientLtxSignature', 'serverLtxSignature'];
 const allowedReceiptDataKeys = ['GSN', 'lightTxHash', 'fromBalance', 'toBalance'];
 
 class Receipt {
@@ -28,7 +26,7 @@ class Receipt {
     this.lightTxData = lightTx.lightTxData;
     this.receiptData = orderedReceiptData;
     this.sig = lightTx.sig;
-    this.sig.serverReceiptSignature = {};
+    this.sig.serverReceipt = {};
   }
 }
 export default Receipt;
