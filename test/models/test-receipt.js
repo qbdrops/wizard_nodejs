@@ -1,44 +1,50 @@
 import assert from 'assert';
-import LightTransaction from '@/models/light-transaction'
-import Receipt from '@/models/receipt'
+import LightTransaction from '@/models/light-transaction';
+import Receipt from '@/models/receipt';
 
 describe('Receipt', () => {
-  describe('#constructor ()', () => {
-    let lightTx;
-    let receipt;
-    let receiptData;
-    it('check if lightTx instanceof LightTransaction object or not.', () => {
-      let ltxData = {
-        fee: 3,
-        type: 'deposit',
-        to: '0x456',
-        from: '0x123',
-        value: 100,
-        LSN: '123',
-        stageHeight: 1,
-        foo: 'bar'
-      };
+  describe('#constructor', () => {
+    let ltxData = {
+      fee: 3,
+      type: 'deposit',
+      to: '0x456',
+      from: '0x123',
+      value: 100,
+      LSN: '123',
+      stageHeight: 1,
+      foo: 'bar'
+    };
 
-      lightTx = new LightTransaction(ltxData);
-      assert.deepEqual(lightTx instanceof LightTransaction, true);
+    let lightTx = new LightTransaction(ltxData);
+
+    it('check if lightTx instanceof LightTransaction object or not.', () => {
+      assert.equal(lightTx instanceof LightTransaction, true);
     });
 
     it('checks if all receiptDataKeys are included', () => {
-      receiptData = {
+      let wrongReceiptData = {
         GSN: 21,
-        lightTxHash:'6e7f1007bfb89f5af93fb9498fda2e9ca727166ccabd3a7109fa83e9d46d3f1a',
-        fromBalance: 50,
-        toBalance: 500
+        lightTxHash:'12345',
+        toBalance: 500,
+        hello: 'hello'
       };
   
-      receipt = new Receipt(lightTx, receiptData);
-      assert.deepEqual(Object.keys(receipt.receiptData), ['GSN', 'lightTxHash', 'fromBalance', 'toBalance']);
+      // receipt = new Receipt(lightTx, wrongReceiptData);
+      // assert.deepEqual(Object.keys(receipt.receiptData), ['GSN', 'lightTxHash', 'fromBalance', 'toBalance']);
+      assert.throws(() => { new Receipt(lightTx, wrongReceiptData); }, Error, 'Parameter \'lightTxData\' does not include key \'to\'.');
     });
 
     it('returns correct receipt', () => {
+      let correctReceiptData = {
+        GSN: 21,
+        lightTxHash: lightTx.lightTxHash,
+        fromBalance: 50,
+        toBalance: 500
+      };
+      let receipt = new Receipt(lightTx, correctReceiptData);
       let result = {
         receiptHash: 'c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470',
-        receiptData: receiptData
+        receiptData: correctReceiptData
       };
       
       assert.deepEqual(receipt.receiptData, result.receiptData);

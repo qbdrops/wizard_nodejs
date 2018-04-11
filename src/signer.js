@@ -3,6 +3,7 @@ import keythereum from 'keythereum';
 import assert from 'assert';
 import LightTransaction from '@/models/light-transaction';
 import Receipt from '@/models/receipt';
+
 const models = {
   lightTx: LightTransaction,
   receipt: Receipt
@@ -52,7 +53,7 @@ class Signer {
     assert(['server', 'client'].includes(caller), '\'caller\' should be \'server\' or \'client\'');
     // 'klass' should be 'lightTx' or 'receipt'
     assert(Object.keys(models).includes(klass), '\'klass\' should be \'lightTx\' or \'receipt\'');
-    // 'client' can not sign the receipt.
+    // 'Client' can not sign the receipt.
     assert(!(caller ==='client' && klass === 'receipt'), '\'client\' sign receipt is not permitted.');
     // 'object' should be instance of input model
     assert(object instanceof models[klass], '\'object\' should be instance of \'' + klass + '\'.');
