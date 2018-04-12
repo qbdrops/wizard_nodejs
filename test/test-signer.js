@@ -48,13 +48,14 @@ describe('Signer', () => {
 
       let result = {
         serverLightTx: {
-          r: '0x2afadcfae03f6e780077e0673263ba60e160bc614c6ad299058c9d8723e6be0f',
-          s: '0x61fb6b270f5f1383a4e7d67a28e3c3816ecb8c5cceea91df8ee953256fe07c4a',
+          r: '0x772453cdcc3f35423c8bf5bc459ec849d9ecc4558f5c810f31b60dacb1fedad9',
+          s: '0x62a4b5e1ccd5dcf9b278ca52c31afe9bfb2ffdfa6445f903d0d96ded2f02f7e9',
           v: 28
         }
       };
 
       assert.equal(sig.serverLightTx.r, result.serverLightTx.r);
+      assert.equal(sig.serverLightTx.s, result.serverLightTx.s);
     });
   });
 
@@ -81,13 +82,14 @@ describe('Signer', () => {
 
       let result = {
         clientLightTx: {
-          r: '0x2afadcfae03f6e780077e0673263ba60e160bc614c6ad299058c9d8723e6be0f',
-          s: '0x61fb6b270f5f1383a4e7d67a28e3c3816ecb8c5cceea91df8ee953256fe07c4a',
+          r: '0x772453cdcc3f35423c8bf5bc459ec849d9ecc4558f5c810f31b60dacb1fedad9',
+          s: '0x62a4b5e1ccd5dcf9b278ca52c31afe9bfb2ffdfa6445f903d0d96ded2f02f7e9',
           v: 28
         }
       };
 
       assert.equal(sig.clientLightTx.r, result.clientLightTx.r);
+      assert.equal(sig.clientLightTx.s, result.clientLightTx.s);
     });
   });
 });

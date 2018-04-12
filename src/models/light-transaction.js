@@ -1,8 +1,7 @@
 import EthUtils from 'ethereumjs-util';
 import assert from 'assert';
 
-const allowedLightTxDataKeys = ['type', 'from', 'to', 'value', 'fee', 'LSN', 'stageHeight'];
-const allowedLightTxTypes = ['deposit', 'withdrawal', 'instantWithdraw', 'remittance'];
+const allowedLightTxDataKeys = ['from', 'to', 'value', 'fee', 'LSN', 'stageHeight'];
 
 class LightTransaction {
   constructor (lightTxData) {
@@ -23,8 +22,6 @@ class LightTransaction {
     });
 
     // Check lightTxData data format
-    // Check lightTx type
-    assert(allowedLightTxTypes.includes(lightTxData.type), 'Parameter \'lightTxData\' does have correct \'type\'.');
 
     this.lightTxData = orderedLightTxData;
     this.lightTxHash = EthUtils.sha3(JSON.stringify(this.lightTxData)).toString('hex');

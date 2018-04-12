@@ -16,7 +16,7 @@ describe('LightTransaction', () => {
       };
 
       let lightTx = new LightTransaction(data);
-      assert.deepEqual(Object.keys(lightTx.lightTxData), ['type', 'from', 'to', 'value', 'fee', 'LSN', 'stageHeight']);
+      assert.deepEqual(Object.keys(lightTx.lightTxData), ['from', 'to', 'value', 'fee', 'LSN', 'stageHeight']);
     });
 
     it('checks if all lightTxDataKeys are included', () => {
@@ -30,20 +30,6 @@ describe('LightTransaction', () => {
       };
 
       assert.throws(() => { new LightTransaction(data); }, Error, 'Parameter \'lightTxData\' does not include key \'to\'.');
-    });
-
-    it('checks lightTx type', () => {
-      let data = {
-        fee: 3,
-        type: 'foo',
-        to: '0x456',
-        from: '0x123',
-        value: 100,
-        LSN: '123',
-        stageHeight: 1
-      };
-
-      assert.throws(() => { new LightTransaction(data); }, Error, 'Parameter \'lightTxData\' does have correct \'type\'.');
     });
 
     it('returns correct lightTx', () => {
@@ -61,7 +47,7 @@ describe('LightTransaction', () => {
 
       let result = {
         lightTxData: data,
-        lightTxHash: '52eadc9689789b6b1dd281cdd488650b116b3ee071e76d6d9893e900996a0f30',
+        lightTxHash: 'a6041d6145871ef022f60659808ad19d64aa7e533b89c1c9ee0019ce3d1506a5',
       };
 
       assert.deepEqual(lightTx.lightTxData, result.lightTxData);
