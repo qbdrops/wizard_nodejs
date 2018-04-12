@@ -1,6 +1,7 @@
 import assert from 'assert';
 import IFCBuilder from '@/ifc-builder';
 import LightTransaction from '@/models/light-transaction';
+import Receipt from '@/models/receipt';
 import nock from 'nock';
 
 nock('http://localhost:3000')
@@ -16,13 +17,19 @@ describe('Signer', () => {
     build();
 
   let lightTx = new LightTransaction({
-    type: 'deposit',
     from: '0x123',
     to: '0x456',
     value: 100,
     LSN: '123',
     fee: 3,
     stageHeight: 1
+  });
+
+  let receipt = new Receipt(lightTx, {
+    GSN: '123',
+    lightTxHash: lightTx.lightTxHash,
+    fromBalance: 100,
+    toBalance: 0
   });
 
   describe('#signWithServerKey', () => {
@@ -57,6 +64,24 @@ describe('Signer', () => {
       assert.equal(sig.serverLightTx.r, result.serverLightTx.r);
       assert.equal(sig.serverLightTx.s, result.serverLightTx.s);
     });
+
+    it('returns correct receipt signature', () => {
+      let klass = 'receipt';
+      let object = receipt;
+
+      let sig = ifc.signer.signWithServerKey(klass, object).sig;
+
+      let result = {
+        serverReceipt: {
+          r: '0x8e0c8e8271e23aa47658022ee5e6e78af7ab37428325e8e3099158a025fb1601',
+          s: '0x126272b3fd5d5b1a98851f88a300c02a3184341ec4e254568975c090389a2cb5',
+          v: 27
+        }
+      };
+
+      assert.equal(sig.serverReceipt.r, result.serverReceipt.r);
+      assert.equal(sig.serverReceipt.s, result.serverReceipt.s);
+    });
   });
 
   describe('#signWithClientKey', () => {
@@ -90,6 +115,13 @@ describe('Signer', () => {
 
       assert.equal(sig.clientLightTx.r, result.clientLightTx.r);
       assert.equal(sig.clientLightTx.s, result.clientLightTx.s);
+    });
+
+    it('rejects client receipt signature', () => {
+      let klass = 'receipt';
+      let object = receipt;
+
+      assert.throws(() => { ifc.signer.signWithClientKey(klass, object).sig; }, Error, '\'client\' is not permitted to sign receipt.');
     });
   });
 });

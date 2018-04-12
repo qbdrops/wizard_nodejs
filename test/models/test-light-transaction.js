@@ -6,7 +6,6 @@ describe('LightTransaction', () => {
     it('removes keys which are not in the whitelist', () => {
       let data = {
         fee: 3,
-        type: 'deposit',
         to: '0x456',
         from: '0x123',
         value: 100,
@@ -22,7 +21,6 @@ describe('LightTransaction', () => {
     it('checks if all lightTxDataKeys are included', () => {
       let data = {
         fee: 3,
-        type: 'foo',
         from: '0x123',
         value: 100,
         LSN: '123',
@@ -35,7 +33,6 @@ describe('LightTransaction', () => {
     it('returns correct lightTx', () => {
       let data = {
         fee: 3,
-        type: 'deposit',
         to: '0x456',
         from: '0x123',
         value: 100,

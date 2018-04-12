@@ -54,7 +54,7 @@ class Signer {
     // 'klass' should be 'lightTx' or 'receipt'
     assert(Object.keys(models).includes(klass), '\'klass\' should be \'lightTx\' or \'receipt\'');
     // 'Client' can not sign the receipt.
-    assert(!(caller === 'client' && klass === 'receipt'), '\'client\' sign receipt is not permitted.');
+    assert(!(caller === 'client' && klass === 'receipt'), '\'client\' is not permitted to sign receipt.');
     // 'object' should be instance of input model
     assert(object instanceof models[klass], '\'object\' should be instance of \'' + klass + '\'.');
 
