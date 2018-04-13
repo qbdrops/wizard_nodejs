@@ -30,4 +30,5 @@ class Receipt {
     this.sig.serverReceipt = {};
   }
 }
+
 export default Receipt;
