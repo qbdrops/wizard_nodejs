@@ -8,6 +8,9 @@ class Receipt {
   constructor (lightTx, receiptData) {
     // check if lightTx instanceof LightTransaction object or not.
     assert(lightTx instanceof LightTransaction, 'Parameter \'lightTx\' is not a LightTransaction instance.');
+    // check if clientLightTx and serverLightTx are empty or not.
+    assert(!(Object.keys(lightTx.sig.clientLightTx).toString() == [].toString()), '\'clientLightTx\' signature is empty.');
+    assert(!(Object.keys(lightTx.sig.serverLightTx).toString() == [].toString()), '\'serverLightTx\' signature is empty.');
     Object.keys(receiptData).forEach(key => {
       if (!allowedReceiptDataKeys.includes(key)) {
         delete receiptData[key];

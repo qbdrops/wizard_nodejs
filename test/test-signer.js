@@ -15,6 +15,18 @@ describe('Signer', () => {
     setSignerKey('41b1a0649752af1b28b3dc29a1556eee781e4a4c3a1f7f53f90fa834de098c4d').
     setStorage('memory').
     build();
+  let sig = {
+    clientLightTx:{
+      v: 28,
+      r:'0x384f9cb16fe9333e44b4ea8bba8cb4cb7cf910252e32014397c73aff5f94480c',
+      s:'0x55305fc94b234c21d0025a8bce1fc20dbc7a83b48a66abc3cfbfdbc0a28c5709'
+    },
+    serverLightTx:{
+      v: 28,
+      r:'0x384f9cb16fe9333e44b4ea8bba8cb4cb7cf910252e32014397c73aff5f94480c',
+      s:'0x55305fc94b234c21d0025a8bce1fc20dbc7a83b48a66abc3cfbfdbc0a28c5709'
+    }
+  };
 
   let lightTx = new LightTransaction({
     from: '0x123',
@@ -23,7 +35,7 @@ describe('Signer', () => {
     LSN: '123',
     fee: 3,
     stageHeight: 1
-  });
+  }, sig);
 
   let receipt = new Receipt(lightTx, {
     GSN: '123',
