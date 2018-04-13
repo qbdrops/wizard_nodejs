@@ -6,7 +6,6 @@ describe('Receipt', () => {
   describe('#constructor', () => {
     let ltxData = {
       fee: 3,
-      type: 'deposit',
       to: '0x456',
       from: '0x123',
       value: 100,
@@ -14,9 +13,21 @@ describe('Receipt', () => {
       stageHeight: 1,
       foo: 'bar'
     };
+    let sig = {
+      clientLightTx:{
+        v: 28,
+        r:'0x384f9cb16fe9333e44b4ea8bba8cb4cb7cf910252e32014397c73aff5f94480c',
+        s:'0x55305fc94b234c21d0025a8bce1fc20dbc7a83b48a66abc3cfbfdbc0a28c5709'
+      },
+      serverLightTx:{
+        v: 28,
+        r:'0x384f9cb16fe9333e44b4ea8bba8cb4cb7cf910252e32014397c73aff5f94480c',
+        s:'0x55305fc94b234c21d0025a8bce1fc20dbc7a83b48a66abc3cfbfdbc0a28c5709'
+      } 
+    };
 
-    let lightTx = new LightTransaction(ltxData);
-
+    let lightTx = new LightTransaction(ltxData, sig);
+    
     it('check if lightTx instanceof LightTransaction object or not.', () => {
       assert.equal(lightTx instanceof LightTransaction, true);
     });
