@@ -23,7 +23,7 @@ describe('Client', () => {
     from: '0x123',
     to: '0x456',
     value: 10,
-    LSN: 17,
+    LSN: 1,
     fee: 3
   };
 
@@ -33,8 +33,8 @@ describe('Client', () => {
 
       let result = {
         clientLightTx: {
-          r: '0x4bb8e51f333e119231ccad91dd84b0648047736f16b13316513ab5696f86727a',
-          s: '0x7dd1087f0ad556bd1ca2fb4d8679e1dd02bd2d77ec2d7dfe456b609bd1d5e3c5',
+          r: '0x555f64e39e6986157aae9a4808edc11a4a75641f6d5bce0dcebbc78ce591a48f',
+          s: '0x6db5aba119fddd6ca4a661c9a9a18d23c39cc789428862c2f61ba798adda12ef',
           v: 28
         }
       };
@@ -42,13 +42,6 @@ describe('Client', () => {
       assert.equal(lightTx.sig.clientLightTx.r, result.clientLightTx.r);
       assert.equal(lightTx.sig.clientLightTx.s, result.clientLightTx.s);
       assert.equal(lightTx instanceof LightTransaction, true);
-    });
-  });
-
-  describe('#proposeDeposit', () => {
-    it('returns txHash', async () => {
-      let lightTx = await ifc.client.makeLightTx('deposit', lightTxData);
-      await ifc.client.proposeDeposit(lightTx);
     });
   });
 });
