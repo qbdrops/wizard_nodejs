@@ -50,10 +50,31 @@ IFC
   - watchFinalize
 
 ## Example
-### 1. Use `IFCBuilder` to create an ifc object
+### 1. Use `InfinitechainBuilder` to create an infinitechain object
 ```javascript
-var IFCBuilder = require('infinitechain_nodejs')
-ifc = new IFCBuilder().setNodeUrl("http://0.0.0.0:3000").setWeb3Url("http://0.0.0.0:8545").build()
+let InfinitechainBuilder = require('wizard_nodejs');
+let infinitechain = new InfinitechainBuilder()
+  .setNodeUrl(env.nodeUrl)
+  .setSidechainId(1)
+  .setWeb3Url(env.web3Url)
+  .setSignerKey(env.signerKey)
+  .setStorage('level', db)
+  .setClientAddress(serverAddress)
+  .setServerAddress(serverAddress)
+  .build();
+
+let watchBlockchainEvent = async () => {
+  await infinitechain.connect();
+  infinitechain.event.onProposeDeposit((err, result) => {
+    if (err) {
+      console.error(err);
+    }
+
+    console.log(result);
+  });
+};
+
+watchBlockchainEvent();
 ```
 ### 2. Use `crypto` to generate key pair or import your private key.
 ```javascript
