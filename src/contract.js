@@ -31,6 +31,27 @@ class Contract {
     return this._web3.eth.contract(Sidechain.abi).at(sidechainAddress);
   }
 
+  proposeDeposit = (lightTx, nonce = null) => {
+    let value = this._web3.toHex(this._web3.toWei(lightTx.lightTxData.value));
+    console.log('proposeDeposit: ', lightTx);
+
+    try {
+      let txMethodData = this.sidechain().proposeDeposit.getData(
+        '0x' + lightTx.lightTxHash,
+        lightTx.lightTxData.fee,
+        lightTx.lightTxData.LSN,
+        lightTx.sig.clientLightTx.v,
+        lightTx.sig.clientLightTx.r,
+        lightTx.sig.clientLightTx.s
+      );
+      let serializedTx = this._signRawTransaction(txMethodData, this._address, this.sidechain().address, value, nonce);
+      let txHash = this._sendRawTransaction(serializedTx);
+      return txHash;
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
   attach = (rootHash, stageHeight, objectionTime, finalizeTime, data, nonce = null) => {
     try {
       let stageHash = '0x' + this._sha3(stageHeight.toString());
@@ -149,17 +170,18 @@ class Contract {
     return stage.completed();
   }
 
-  _signRawTransaction = (txMethodData, nonce = null) => {
-    if (nonce === null) {
+  _signRawTransaction = (txMethodData, from, to, value, nonce = null) => {
+    if (nonce == null) {
       nonce = this._web3.toHex(this._web3.eth.getTransactionCount(this._address));
     }
 
     let txParams = {
+      data: txMethodData,
+      from: from,
+      to: to,
+      value: value,
       nonce: nonce,
-      gas: 4700000,
-      from: this._address,
-      to: this._infinitechainContract.address,
-      data: txMethodData
+      gas: 4700000
     };
 
     let tx = new EthereumTx(txParams);
