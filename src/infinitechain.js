@@ -1,4 +1,4 @@
-class IFC {
+class Infinitechain {
   setClient (client) {
     this.client = client;
   }
@@ -15,9 +15,13 @@ class IFC {
     this.event = event;
   }
 
-  setSidechain (sidechain) {
-    this.sidechain = sidechain;
+  setContract (contract) {
+    this.contract = contract;
+  }
+
+  setGringotts (gringotts) {
+    this.gringotts = gringotts;
   }
 }
 
-export default IFC;
+export default Infinitechain;

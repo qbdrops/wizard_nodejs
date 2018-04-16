@@ -1,57 +1,40 @@
 import Web3 from 'web3';
 import EthUtils from 'ethereumjs-util';
 import EthereumTx from 'ethereumjs-tx';
-import ifcJSON from '@/abi/IFC.json';
-import stageJSON from '@/abi/Stage.json';
+import InfinitechainManager from '@/abi/InfinitechainManager.json';
+import Sidechain from '@/abi/Sidechain.json';
 import assert from 'assert';
-import axios from 'axios';
 
-class Sidechain {
-  constructor (opt, ifc) {
-    assert(opt.web3Url != undefined, 'Opt should include web3Url.');
-    assert(opt.nodeUrl != undefined, 'Opt should include nodeUrl.');
-    this._web3Url = opt.web3Url;
-    this._nodeUrl = opt.nodeUrl;
-    this._fetchContract();
-    this._ifc = ifc;
-    this.stageCache = [];
+class Contract {
+  constructor (config, infinitechain) {
+    assert(config.web3Url != undefined, 'Opt should include web3Url.');
+    assert(config.sidechainId > 0, 'Invalid \'sidechainId\'.');
+    this._infinitechain = infinitechain;
+    this._sidechainId = config.sidechainId;
+    this._web3Url = config.web3Url;
+    this._managerAddress = null;
+    this._manager = null;
+    this._key = infinitechain.signer.getPrivateKey();
+    this._address = infinitechain.signer.getAddress();
 
-    this._key = ifc.signer.getPrivateKey();
-    this._address = ifc.signer.getAddress();
+    this._fetchManager();
   }
 
-  getIFCContract = () => {
-    return this._ifcContract;
+  manager = () => {
+    return this._manager;
   }
 
-  getStage = async (stageHash) => {
-    if(this.stageCache[stageHash]) {
-      return this.stageCache[stageHash];
-    }
+  sidechain = () => {
+    assert(this._manager != undefined, 'Infinitechain manager does not exist.');
 
-    let stageContractAddress = await this._ifcContract.getStageAddress(stageHash);
-    assert(stageContractAddress != 0, 'This stage contract does not exist.');
-
-    let stageContract = this._web3.eth.contract(stageJSON.abi).at(stageContractAddress);
-    this.stageCache[stageHash] = stageContract;
-
-    return stageContract;
+    let sidechainAddress = this._manager.sidechainAddress(this._sidechainId);
+    return this._web3.eth.contract(Sidechain.abi).at(sidechainAddress);
   }
 
-  getSlice = async (stageHeight, paymentHash) => {
-    let url = this._nodeUrl + '/slice';
-    return axios.get(url, {
-      params: {
-        stage_height: stageHeight,
-        payment_hash: paymentHash
-      }
-    });
-  }
-
-  addNewStage = (rootHash, stageHeight, objectionTime, finalizeTime, data, nonce = null) => {
+  attach = (rootHash, stageHeight, objectionTime, finalizeTime, data, nonce = null) => {
     try {
       let stageHash = '0x' + this._sha3(stageHeight.toString());
-      let txMethodData = this._ifcContract.addNewStage.getData(
+      let txMethodData = this._infinitechainContract.addNewStage.getData(
         stageHash,
         rootHash,
         objectionTime,
@@ -66,11 +49,11 @@ class Sidechain {
     }
   }
 
-  takeObjection = (payment) => {
+  challenge = (payment) => {
     try {
       let stageHash = '0x' + payment.stageHash;
       let paymentHash = '0x' + payment.paymentHash;
-      let txMethodData = this._ifcContract.takeObjection.getData(
+      let txMethodData = this._infinitechainContract.takeObjection.getData(
         [stageHash, paymentHash],
         payment.v,
         payment.r,
@@ -88,7 +71,7 @@ class Sidechain {
   finalize = (stageHeight) => {
     try {
       let stageHash = '0x' + this._sha3(stageHeight.toString());
-      let txMethodData = this._ifcContract.finalize.getData(
+      let txMethodData = this._infinitechainContract.finalize.getData(
         stageHash,
         { from: this._address }
       );
@@ -100,11 +83,11 @@ class Sidechain {
     }
   }
 
-  payPenalty = (stageHeight, paymentHashes) => {
+  compensate = (stageHeight, paymentHashes) => {
     try {
       let stageHash = '0x' + this._sha3(stageHeight.toString());
       paymentHashes = paymentHashes.map(paymentHash => '0x' + paymentHash);
-      let txMethodData = this._ifcContract.payPenalty.getData(
+      let txMethodData = this._infinitechainContract.payPenalty.getData(
         stageHash,
         paymentHashes,
         '', // Work around! To prevent solidity invalid argument error.
@@ -118,13 +101,13 @@ class Sidechain {
     }
   }
 
-  exonerate = (stageHeight, paymentHash, treeNodeIndex, slice, collidingPaymentHashes) => {
+  defend = (stageHeight, paymentHash, treeNodeIndex, slice, collidingPaymentHashes) => {
     try {
       let stageHash = '0x' + this._sha3(stageHeight.toString());
       paymentHash = '0x' + paymentHash;
       slice = slice.map(h => '0x' + h);
       collidingPaymentHashes = collidingPaymentHashes.map(h => '0x' + h);
-      let txMethodData = this._ifcContract.exonerate.getData(
+      let txMethodData = this._infinitechainContract.exonerate.getData(
         stageHash,
         paymentHash,
         treeNodeIndex,
@@ -139,15 +122,6 @@ class Sidechain {
     } catch (e) {
       console.error(e);
     }
-  }
-
-  // Sidechain status getter
-
-  getViableStageHeight = async () => {
-    assert(this._nodeUrl, 'Can not find sidechain node.');
-    let url = this._nodeUrl + '/viable/stage/height';
-    let res = await axios.get(url);
-    return parseInt(res.data.height);
   }
 
   getStageRootHash = async (stageHash) => {
@@ -175,16 +149,6 @@ class Sidechain {
     return stage.completed();
   }
 
-  // pendingStages = async () => {
-  //   let url = this._nodeUrl + '/pending/stages';
-  //   return axios.get(url);
-  // }
-
-  // pendingPayments = () => {
-  //   let url = this._nodeUrl + '/pending/payments';
-  //   return axios.get(url);
-  // }
-
   _signRawTransaction = (txMethodData, nonce = null) => {
     if (nonce === null) {
       nonce = this._web3.toHex(this._web3.eth.getTransactionCount(this._address));
@@ -194,7 +158,7 @@ class Sidechain {
       nonce: nonce,
       gas: 4700000,
       from: this._address,
-      to: this._ifcContract.address,
+      to: this._infinitechainContract.address,
       data: txMethodData
     };
 
@@ -210,33 +174,24 @@ class Sidechain {
     return txHash;
   }
 
-  _fetchContract = async () => {
-    let contractAddress = null;
+  _fetchManager = async () => {
+    let managerAddress = null;
     try {
-      let res = await this._getContractAddress();
-      contractAddress = res.data.address;
+      let res = await this._infinitechain.gringotts.fetchManagerAddress();
+      managerAddress = res.data.address;
     } catch (e) {
       console.error(e);
     }
 
-    assert(contractAddress, 'Can not fetch contract address.');
-    this.contractAddress = contractAddress;
-
+    assert(managerAddress, 'Can not fetch contract address.');
+    this._managerAddress = managerAddress;
     this._web3 = new Web3(new Web3.providers.HttpProvider(this._web3Url));
-
-    let abi = ifcJSON.abi;
-    this._ifcContract = this._web3.eth.contract(abi).at(contractAddress);
-  }
-
-  _getContractAddress = async () => {
-    let url = this._nodeUrl + '/contract/address';
-    return axios.get(url);
+    this._manager = this._web3.eth.contract(InfinitechainManager.abi).at(managerAddress);
   }
 
   _sha3 = (content) => {
     return EthUtils.sha3(content).toString('hex');
   }
-
 }
 
-export default Sidechain;
+export default Contract;

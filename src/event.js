@@ -1,41 +1,49 @@
 class Event {
-  constructor (eventConfig, ifc) {
+  constructor (eventConfig, infinitechain) {
     this.eventConfig = eventConfig;
-    this.ifc = ifc;
-    this._opt = {fromBlock: 0, toBlock: 'latest'};
+    this._infinitechain = infinitechain;
+    this._eventOpt = { fromBlock: 0, toBlock: 'latest' };
   }
 
-  watchAddNewStage (cb) {
-    let IFCContract = this.ifc.sidechain.getIFCContract();
-
-    IFCContract.AddNewStage(this._opt).watch((err, result) => {
+  onProposeDeposit (cb) {
+    let sidechain = this._infinitechain.contract.sidechain();
+    sidechain.ProposeDeposit(this._eventOpt).watch((err, result) => {
       if (err) { console.trace; }
       cb(err, result);
     });
   }
 
-  watchObjection (cb) {
-    let IFCContract = this.ifc.sidechain.getIFCContract();
+  onAttach (cb) {
+    let sidechain = this._infinitechain.contract.sidechain();
 
-    IFCContract.TakeObjection(this._opt).watch((err, result) => {
+    sidechain.Attach(this._eventOpt).watch((err, result) => {
       if (err) { console.trace; }
       cb(err, result);
     });
   }
 
-  watchExonerate (cb) {
-    let IFCContract = this.ifc.sidechain.getIFCContract();
+  onChallenge (cb) {
+    let sidechain = this._infinitechain.contract.sidechain();
 
-    IFCContract.Exonerate(this._opt).watch((err, result) => {
+    sidechain.Challenge(this._eventOpt).watch((err, result) => {
       if (err) { console.trace; }
       cb(err, result);
     });
   }
 
-  watchFinalize (cb) {
-    let IFCContract = this.ifc.sidechain.getIFCContract();
+  onDefend (cb) {
+    let sidechain = this._infinitechain.contract.sidechain();
 
-    IFCContract.Finalize(this._opt).watch((err, result) => {
+    sidechain.Defend(this._eventOpt).watch((err, result) => {
+      if (err) { console.trace; }
+      cb(err, result);
+    });
+  }
+
+  onFinalize (cb) {
+    let sidechain = this._infinitechain.contract.sidechain();
+
+    sidechain.Finalize(this._eventOpt).watch((err, result) => {
       if (err) { console.trace; }
       cb(err, result);
     });

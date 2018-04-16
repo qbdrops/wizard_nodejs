@@ -2,10 +2,10 @@ import EthUtils from 'ethereumjs-util';
 import assert from 'assert';
 
 class Client {
-  constructor (clientConfig, ifc) {
+  constructor (clientConfig, infinitechain) {
     this.clientAddress = clientConfig.clientAddress;
     this.serverAddress = clientConfig.serverAddress;
-    this.ifc = ifc;
+    this._infinitechain = infinitechain;
     this._storage = clientConfig.storage;
     this._nodeUrl = clientConfig.nodeUrl;
   }
@@ -14,7 +14,7 @@ class Client {
     assert(data.pkClient, 'Parameter \'data\' does not include key \'pkClient\'');
     assert(data.pkStakeholder, 'Parameter \'data\' does not include key \'pkStakeholder\'');
 
-    let sidechain = this.ifc.sidechain;
+    let sidechain = this._infinitechain.sidechain;
     if (stageHeight === null) {
       let sidechainHeight = await sidechain.getViableStageHeight();
       stageHeight = parseInt(sidechainHeight);
@@ -32,7 +32,7 @@ class Client {
 
   audit = async (paymentHash) => {
     try {
-      let sidechain = this.ifc.sidechain;
+      let sidechain = this._infinitechain.sidechain;
 
       // Get payment from storage
       let payment = await this.getPayment(paymentHash);
@@ -60,11 +60,11 @@ class Client {
   }
 
   takeObjection = async (payment) => {
-    return this.ifc.sidechain.takeObjection(payment);
+    return this._infinitechain.sidechain.takeObjection(payment);
   }
 
   verifyPayment = async (payment) => {
-    let crypto = this.ifc.crypto;
+    let crypto = this._infinitechain.crypto;
 
     // 1. Verify ciphers
     let cipherClient = payment.cipherClient;
@@ -181,7 +181,7 @@ class Client {
   }
 
   _computePaymentHashAndCiphers = (rawPayment) => {
-    let crypto = this.ifc.crypto;
+    let crypto = this._infinitechain.crypto;
     let serializedRawPayment = Buffer.from(JSON.stringify(rawPayment)).toString('hex');
     let cipherClient = crypto.encrypt(serializedRawPayment, rawPayment.data.pkClient);
     let cipherStakeholder = crypto.encrypt(serializedRawPayment, rawPayment.data.pkStakeholder);

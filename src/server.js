@@ -3,9 +3,9 @@ import axios from 'axios';
 import assert from 'assert';
 
 class Server {
-  constructor (serverConfig, ifc) {
+  constructor (serverConfig, infinitechain) {
     this.serverConfig = serverConfig;
-    this.ifc = ifc;
+    this._infinitechain = infinitechain;
 
     assert(serverConfig.web3Url != undefined, 'Opt should include web3Url.');    
     assert(serverConfig.nodeUrl != undefined, 'Opt should include nodeUrl.');
@@ -24,11 +24,11 @@ class Server {
     let msgHash = EthUtils.sha3(message);
     let prefix = new Buffer('\x19Ethereum Signed Message:\n');
     let ethMsgHash = EthUtils.sha3(Buffer.concat([prefix, new Buffer(String(msgHash.length)), msgHash]));
-    let signature = this.ifc.crypto.sign(ethMsgHash);
+    let signature = this._infinitechain.crypto.sign(ethMsgHash);
     let publicKey = EthUtils.ecrecover(ethMsgHash, signature.v, signature.r, signature.s);
     let address = '0x' + EthUtils.pubToAddress(publicKey).toString('hex');
 
-    assert(address == this.ifc.crypto.getSignerAddress(), 'Wrong signature.');
+    assert(address == this._infinitechain.crypto.getSignerAddress(), 'Wrong signature.');
 
     return {
       stageHeight: rawPayment.stageHeight,
@@ -74,7 +74,7 @@ class Server {
       let rootHash = res.data.rootHash;
       let stageHeight = res.data.stageHeight;
 
-      let serializedTx = this.ifc.sidechain.addNewStage(rootHash, stageHeight, objectionTime, finalizeTime, data, nonce);
+      let serializedTx = this._infinitechain.sidechain.addNewStage(rootHash, stageHeight, objectionTime, finalizeTime, data, nonce);
       console.log('Serialized: ' + serializedTx);
 
       let commitUrl = this._nodeUrl + '/commit/payments';
@@ -86,7 +86,7 @@ class Server {
   }
 
   finalize = async (stageHeight) => {
-    return this.ifc.sidechain.finalize(stageHeight);
+    return this._infinitechain.sidechain.finalize(stageHeight);
   }
 
   exonerate = async (stageHeight, paymentHash) => {
@@ -102,15 +102,15 @@ class Server {
     let collidingPaymentHashes = res.data.paymentHashArray;
     let treeNodeIndex = res.data.treeNodeIndex;
 
-    return this.ifc.sidechain.exonerate(stageHeight, paymentHash, treeNodeIndex, slice, collidingPaymentHashes);
+    return this._infinitechain.sidechain.exonerate(stageHeight, paymentHash, treeNodeIndex, slice, collidingPaymentHashes);
   }
 
   payPenalty = async (stageHeight, paymentHashes) => {
-    return this.ifc.sidechain.payPenalty(stageHeight, paymentHashes);
+    return this._infinitechain.sidechain.payPenalty(stageHeight, paymentHashes);
   }
 
   _computePaymentHashAndCiphers = (rawPayment) => {
-    let crypto = this.ifc.crypto;
+    let crypto = this._infinitechain.crypto;
     let serializedRawPayment = Buffer.from(JSON.stringify(rawPayment)).toString('hex');
     let cipherClient = crypto.encrypt(serializedRawPayment, rawPayment.data.pkClient);
     let cipherStakeholder = crypto.encrypt(serializedRawPayment, rawPayment.data.pkStakeholder);

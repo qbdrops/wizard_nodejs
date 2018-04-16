@@ -1,2 +1,2 @@
-var IFCBuilder = require('@/ifc-builder').default;
-module.exports = IFCBuilder;
+var InfinitechainBuilder = require('@/infinitechain-builder').default;
+module.exports = InfinitechainBuilder;

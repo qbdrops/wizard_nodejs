@@ -1,15 +1,21 @@
-import IFC from '@/ifc';
+import Infinitechain from '@/infinitechain';
 import Client from '@/client';
 import Server from '@/server';
 import Event from '@/event';
 import Signer from '@/signer';
-import Sidechain from '@/sidechain';
+import Gringotts from '@/gringotts';
+import Contract from '@/contract';
 import Memory from '@/storages/memory';
 import Level from '@/storages/level';
 
-class IFCBuilder {
+class InfinitechainBuilder {
   setNodeUrl (url) {
     this._nodeUrl = url;
+    return this;
+  }
+
+  setSidechainId (sidechainId) {
+    this._sidechainId = sidechainId;
     return this;
   }
 
@@ -64,9 +70,13 @@ class IFCBuilder {
       nodeUrl: this._nodeUrl
     };
 
-    let sidechainConfig = {
-      web3Url: this._web3Url,
+    let gringottsConfig = {
       nodeUrl: this._nodeUrl
+    };
+
+    let contractConfig = {
+      web3Url: this._web3Url,
+      sidechainId: this._sidechainId
     };
 
     let signerConfig = {
@@ -74,10 +84,10 @@ class IFCBuilder {
       nodeUrl: this._nodeUrl
     };
 
-    let ifc = new IFC();
+    let infinitechain = new Infinitechain();
 
-    let signer = new Signer(signerConfig, ifc);
-    ifc.setSigner(signer);
+    let signer = new Signer(signerConfig);
+    infinitechain.setSigner(signer);
 
     // Generate keypair if key is not configured
     if (this._signerKey != undefined) {
@@ -86,22 +96,24 @@ class IFCBuilder {
       signer.getOrNewKeyPair();
     }
 
-    let event = new Event(eventConfig, ifc);
-    ifc.setEvent(event);
+    let event = new Event(eventConfig, infinitechain);
+    infinitechain.setEvent(event);
+
+    let gringotts = new Gringotts(gringottsConfig, infinitechain);
+    infinitechain.setGringotts(gringotts);
+
+    let contract = new Contract(contractConfig, infinitechain);
+    infinitechain.setContract(contract);
+
+    let client = new Client(clientConfig, infinitechain);
+    infinitechain.setClient(client);
 
     // Create server object after crypto and sidechain in order to use them in server
-    let sidechain = new Sidechain(sidechainConfig, ifc);
-    ifc.setSidechain(sidechain);
+    let server = new Server(serverConfig, infinitechain);
+    infinitechain.setServer(server);
 
-    let client = new Client(clientConfig, ifc);
-    ifc.setClient(client);
-
-    // Create server object after crypto and sidechain in order to use them in server
-    let server = new Server(serverConfig, ifc);
-    ifc.setServer(server);
-
-    return ifc;
+    return infinitechain;
   }
 }
 
-export default IFCBuilder;
+export default InfinitechainBuilder;

@@ -9,11 +9,11 @@ var ctx = repl.start({
 
 var bundleFile = path.resolve('./dist/wizard_nodejs');
 
-var IFCBuilder = require('./dist/wizard_nodejs');
-ctx.IFCBuilder = IFCBuilder;
+var InfinitechainBuilder = require('./dist/wizard_nodejs');
+ctx.InfinitechainBuilder = InfinitechainBuilder;
 
-chokidar.watch('./dist/wizard_nodejs', {ignored: /[/\\]\./}).on('change', function () {
+chokidar.watch('./dist/wizard_nodejs', { ignored: /[/\\]\./ }).on('change', function () {
   delete require.cache[bundleFile];
-  var IFCBuilder = require('./dist/wizard_nodejs');
-  ctx.IFCBuilder = IFCBuilder;
+  var InfinitechainBuilder = require('./dist/wizard_nodejs');
+  ctx.InfinitechainBuilder = InfinitechainBuilder;
 });
