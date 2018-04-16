@@ -22,6 +22,10 @@ class Infinitechain {
   setGringotts (gringotts) {
     this.gringotts = gringotts;
   }
+
+  connect = async () => {
+    await this.contract._fetchManager();
+  }
 }
 
 export default Infinitechain;
