@@ -1,5 +1,8 @@
 import EthUtils from 'ethereumjs-util';
 import assert from 'assert';
+import LightTransaction from '@/models/light-transaction';
+
+const allowedLightTxTypes = ['deposit', 'withdrawal', 'instantWithdraw', 'remittance'];
 
 class Client {
   constructor (clientConfig, infinitechain) {
@@ -10,24 +13,27 @@ class Client {
     this._nodeUrl = clientConfig.nodeUrl;
   }
 
-  makeRawPayment = async (value, lsn, data, stageHeight = null) => {
-    assert(data.pkClient, 'Parameter \'data\' does not include key \'pkClient\'');
-    assert(data.pkStakeholder, 'Parameter \'data\' does not include key \'pkStakeholder\'');
+  makeLightTx = async (type, lightTxData) => {
+    assert(allowedLightTxTypes.includes(type), 'Parameter \'type\' should be one of \'deposit\', \'withdrawal\', \'instantWithdraw\' or \'remittance\'');
 
-    let sidechain = this._infinitechain.sidechain;
-    if (stageHeight === null) {
-      let sidechainHeight = await sidechain.getViableStageHeight();
-      stageHeight = parseInt(sidechainHeight);
+    let gringotts = this._infinitechain.gringotts;
+
+    if (!lightTxData.stageHeight) {
+      let sidechainHeight = await gringotts.getViableStageHeight();
+      lightTxData.stageHeight = parseInt(sidechainHeight);
     }
+    lightTxData.from = (type == 'deposit') ? '0x' : this.clientAddress;
+    lightTxData.to = ((type == 'withdrawal') || (type == 'instantWithdrawal')) ? '0x' : this.clientAddress;
 
-    return {
-      from: this.clientAddress,
-      to: this.serverAddress,
-      value: value,
-      localSequenceNumber: lsn,
-      stageHeight: stageHeight,
-      data: data
-    };
+    let lightTx = new LightTransaction(lightTxData);
+    let signer = this._infinitechain.signer;
+    let signedLightTx = signer.signWithClientKey('lightTx', lightTx);
+
+    return signedLightTx;
+  }
+
+  proposeDeposit = async (lightTx, nonce = null) => {
+    return this._infinitechain.contract.proposeDeposit(lightTx, nonce);
   }
 
   audit = async (paymentHash) => {

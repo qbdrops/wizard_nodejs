@@ -1,5 +1,5 @@
 import assert from 'assert';
-import IFCBuilder from '@/ifc-builder';
+import InfinitechainBuilder from '@/infinitechain-builder';
 import LightTransaction from '@/models/light-transaction';
 import Receipt from '@/models/receipt';
 import nock from 'nock';
@@ -9,8 +9,9 @@ nock('http://localhost:3000')
   .reply(200, { address: '0x68c34a54ec562b2b6efc8e61c54f9314b93b1a44' });
 
 describe('Signer', () => {
-  let ifc = new IFCBuilder().
+  let ifc = new InfinitechainBuilder().
     setNodeUrl('http://localhost:3000').
+    setSidechainId('1').
     setWeb3Url('http://localhost:8545').
     setSignerKey('41b1a0649752af1b28b3dc29a1556eee781e4a4c3a1f7f53f90fa834de098c4d').
     setStorage('memory').
