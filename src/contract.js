@@ -1,34 +1,22 @@
 import Web3 from 'web3';
 import EthUtils from 'ethereumjs-util';
 import EthereumTx from 'ethereumjs-tx';
-import InfinitechainManager from '@/abi/InfinitechainManager.json';
 import Sidechain from '@/abi/Sidechain.json';
 import assert from 'assert';
 
 class Contract {
   constructor (config, infinitechain) {
     assert(config.web3Url != undefined, 'Opt should include web3Url.');
-    assert(config.sidechainId > 0, 'Invalid \'sidechainId\'.');
     this._infinitechain = infinitechain;
-    this._sidechainId = config.sidechainId;
     this._web3Url = config.web3Url;
-    this._managerAddress = null;
-    this._manager = null;
+    this._sidechainAddress = null;
+    this._sidechain = null;
     this._key = infinitechain.signer.getPrivateKey();
     this._address = infinitechain.signer.getAddress();
-
-    this._fetchManager();
-  }
-
-  manager = () => {
-    return this._manager;
   }
 
   sidechain = () => {
-    assert(this._manager != undefined, 'Infinitechain manager does not exist.');
-
-    let sidechainAddress = this._manager.sidechainAddress(this._sidechainId);
-    return this._web3.eth.contract(Sidechain.abi).at(sidechainAddress);
+    return this._sidechain;
   }
 
   proposeDeposit = (lightTx, nonce = null) => {
@@ -196,19 +184,19 @@ class Contract {
     return txHash;
   }
 
-  _fetchManager = async () => {
-    let managerAddress = null;
+  fetchSidechain = async () => {
+    let sidechainAddress = null;
     try {
-      let res = await this._infinitechain.gringotts.fetchManagerAddress();
-      managerAddress = res.data.address;
+      let res = await this._infinitechain.gringotts.fetchSidechainAddress();
+      sidechainAddress = res.data.address;
     } catch (e) {
       console.error(e);
     }
 
-    assert(managerAddress, 'Can not fetch contract address.');
-    this._managerAddress = managerAddress;
+    assert(sidechainAddress, 'Can not fetch sidechain address.');
+    this._sidechainAddress = sidechainAddress;
     this._web3 = new Web3(new Web3.providers.HttpProvider(this._web3Url));
-    this._manager = this._web3.eth.contract(InfinitechainManager.abi).at(managerAddress);
+    this._sidechain = this._web3.eth.contract(Sidechain.abi).at(sidechainAddress);
   }
 
   _sha3 = (content) => {

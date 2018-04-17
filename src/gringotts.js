@@ -25,7 +25,7 @@ class Gringotts {
     return parseInt(res.data.height);
   }
 
-  fetchManagerAddress = async () => {
+  fetchSidechainAddress = async () => {
     let url = this._nodeUrl + '/contract/address';
     return axios.get(url);
   }

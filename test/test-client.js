@@ -12,7 +12,6 @@ nock('http://localhost:3000').
 describe('Client', () => {
   let ifc = new InfinitechainBuilder().
     setNodeUrl('http://localhost:3000').
-    setSidechainId('1').
     setWeb3Url('http://localhost:8545').
     setSignerKey('41b1a0649752af1b28b3dc29a1556eee781e4a4c3a1f7f53f90fa834de098c4d').
     setClientAddress('0x123').

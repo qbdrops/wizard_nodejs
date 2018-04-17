@@ -23,8 +23,8 @@ class Infinitechain {
     this.gringotts = gringotts;
   }
 
-  connect = async () => {
-    await this.contract._fetchManager();
+  initialize = async () => {
+    await this.contract.fetchSidechain();
   }
 }
 

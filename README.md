@@ -53,14 +53,13 @@ IFC
 ### 1. Use `InfinitechainBuilder` to create an infinitechain object
 ```javascript
 let InfinitechainBuilder = require('wizard_nodejs');
-let infinitechain = new InfinitechainBuilder()
-  .setNodeUrl(env.nodeUrl)
-  .setSidechainId(1)
-  .setWeb3Url(env.web3Url)
-  .setSignerKey(env.signerKey)
-  .setStorage('level', db)
-  .setClientAddress(serverAddress)
-  .setServerAddress(serverAddress)
+infinitechain = new InfinitechainBuilder()
+  .setNodeUrl('http://0.0.0.0:3000')
+  .setWeb3Url('http://0.0.0.0:8545')
+  .setSignerKey('2058a2d1b99d534dc0ec3e71876e4bcb0843fd55637211627087d53985ab04aa')
+  .setStorage('memory')
+  .setClientAddress('')
+  .setServerAddress('')
   .build();
 
 let watchBlockchainEvent = async () => {

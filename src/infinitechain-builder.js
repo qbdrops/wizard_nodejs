@@ -14,11 +14,6 @@ class InfinitechainBuilder {
     return this;
   }
 
-  setSidechainId (sidechainId) {
-    this._sidechainId = sidechainId;
-    return this;
-  }
-
   setWeb3Url (url) {
     this._web3Url = url;
     return this;
@@ -75,8 +70,7 @@ class InfinitechainBuilder {
     };
 
     let contractConfig = {
-      web3Url: this._web3Url,
-      sidechainId: this._sidechainId
+      web3Url: this._web3Url
     };
 
     let signerConfig = {
