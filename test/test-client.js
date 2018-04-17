@@ -5,11 +5,11 @@ import LightTransaction from '../src/models/light-transaction';
 
 nock('http://localhost:3000').
   get('/contract/address').
-  reply(200, { address: '0x57b9cc7ff8e82d4f7852d655383b92d439df98ea' }).
+  reply(200, { address: '0x740d51da299f76fbbd1c8828c2c04d6852700fd8' }).
   get('/viable/stage/height').
   reply(200, { height: 1 });
 
-describe('Client', () => {
+describe('Client', async () => {
   let ifc = new InfinitechainBuilder().
     setNodeUrl('http://localhost:3000').
     setWeb3Url('http://localhost:8545').
@@ -17,6 +17,8 @@ describe('Client', () => {
     setClientAddress('0x123').
     setStorage('memory').
     build();
+
+  await ifc.initialize();
 
   let lightTxData = {
     from: '0x123',
@@ -32,8 +34,8 @@ describe('Client', () => {
 
       let result = {
         clientLightTx: {
-          r: '0x555f64e39e6986157aae9a4808edc11a4a75641f6d5bce0dcebbc78ce591a48f',
-          s: '0x6db5aba119fddd6ca4a661c9a9a18d23c39cc789428862c2f61ba798adda12ef',
+          r: '0xe63c51a6a4b318c2d717639d7d48a4eb3f31b6e3e90e6f356b1fd7e1d39a18a2',
+          s: '0x1b58ecd5809c030c32152b56d023f2a273ff94e43d2c10df04ece4a988d0361f',
           v: 28
         }
       };

@@ -6,7 +6,6 @@ const allowedLightTxTypes = ['deposit', 'withdrawal', 'instantWithdraw', 'remitt
 
 class Client {
   constructor (clientConfig, infinitechain) {
-    this.clientAddress = clientConfig.clientAddress;
     this.serverAddress = clientConfig.serverAddress;
     this._infinitechain = infinitechain;
     this._storage = clientConfig.storage;
@@ -14,16 +13,14 @@ class Client {
   }
 
   makeLightTx = async (type, lightTxData) => {
-    assert(allowedLightTxTypes.includes(type), 'Parameter \'type\' should be one of \'deposit\', \'withdrawal\', \'instantWithdraw\' or \'remittance\'');
-
     let gringotts = this._infinitechain.gringotts;
 
     if (!lightTxData.stageHeight) {
       let sidechainHeight = await gringotts.getViableStageHeight();
       lightTxData.stageHeight = parseInt(sidechainHeight);
     }
-    lightTxData.from = (type == 'deposit') ? '0x' : this.clientAddress;
-    lightTxData.to = ((type == 'withdrawal') || (type == 'instantWithdrawal')) ? '0x' : this.clientAddress;
+
+    lightTxData = this._fillLightTxAddressByType(type, lightTxData);
 
     let lightTx = new LightTransaction(lightTxData);
     let signer = this._infinitechain.signer;
@@ -126,6 +123,26 @@ class Client {
   }
 
   export = () => {
+  }
+
+  _fillLightTxAddressByType = (type, lightTxData) => {
+    assert(allowedLightTxTypes.includes(type), 'Parameter \'type\' should be one of \'deposit\', \'withdrawal\', \'instantWithdraw\' or \'remittance\'');
+
+    let clientAddress = this._infinitechain.signer.getAddress();
+
+    switch (type) {
+    case 'deposit':
+      lightTxData.from = '0x0';
+      lightTxData.to = clientAddress;
+      break;
+    case 'withdrawal':
+      break;
+    case 'instantWithdrawal':
+      break;
+    case 'remittance':
+      break;
+    }
+    return lightTxData;
   }
 
   _sha3 (content) {

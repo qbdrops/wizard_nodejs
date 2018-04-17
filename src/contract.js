@@ -11,8 +11,6 @@ class Contract {
     this._web3Url = config.web3Url;
     this._sidechainAddress = null;
     this._sidechain = null;
-    this._key = infinitechain.signer.getPrivateKey();
-    this._address = infinitechain.signer.getAddress();
   }
 
   sidechain = () => {
@@ -21,6 +19,8 @@ class Contract {
 
   proposeDeposit = (lightTx, nonce = null) => {
     let value = this._web3.toHex(this._web3.toWei(lightTx.lightTxData.value));
+    let clientAddress = this._infinitechain.signer.getAddress();
+    let sidechainAddress = this.sidechain().address;
     console.log('proposeDeposit: ', lightTx);
 
     try {
@@ -32,7 +32,7 @@ class Contract {
         lightTx.sig.clientLightTx.r,
         lightTx.sig.clientLightTx.s
       );
-      let serializedTx = this._signRawTransaction(txMethodData, this._address, this.sidechain().address, value, nonce);
+      let serializedTx = this._signRawTransaction(txMethodData, clientAddress, sidechainAddress, value, nonce);
       let txHash = this._sendRawTransaction(serializedTx);
       return txHash;
     } catch (e) {
@@ -48,8 +48,7 @@ class Contract {
         rootHash,
         objectionTime,
         finalizeTime,
-        data,
-        { from: this._address }
+        data
       );
       let serializedTx = this._signRawTransaction(txMethodData, nonce);
       return serializedTx;
@@ -66,8 +65,7 @@ class Contract {
         [stageHash, paymentHash],
         payment.v,
         payment.r,
-        payment.s,
-        { from: this._address }
+        payment.s
       );
       let serializedTx = this._signRawTransaction(txMethodData);
       let txHash = this._sendRawTransaction(serializedTx);
@@ -81,8 +79,7 @@ class Contract {
     try {
       let stageHash = '0x' + this._sha3(stageHeight.toString());
       let txMethodData = this._infinitechainContract.finalize.getData(
-        stageHash,
-        { from: this._address }
+        stageHash
       );
       let serializedTx = this._signRawTransaction(txMethodData);
       let txHash = this._sendRawTransaction(serializedTx);
@@ -99,8 +96,7 @@ class Contract {
       let txMethodData = this._infinitechainContract.payPenalty.getData(
         stageHash,
         paymentHashes,
-        '', // Work around! To prevent solidity invalid argument error.
-        { from: this._address }
+        '' // Work around! To prevent solidity invalid argument error.
       );
       let serializedTx = this._signRawTransaction(txMethodData);
       let txHash = this._sendRawTransaction(serializedTx);
@@ -121,8 +117,7 @@ class Contract {
         paymentHash,
         treeNodeIndex,
         slice,
-        collidingPaymentHashes,
-        { from: this._address }
+        collidingPaymentHashes
       );
 
       let serializedTx = this._signRawTransaction(txMethodData);
@@ -160,7 +155,8 @@ class Contract {
 
   _signRawTransaction = (txMethodData, from, to, value, nonce = null) => {
     if (nonce == null) {
-      nonce = this._web3.toHex(this._web3.eth.getTransactionCount(this._address));
+      let address = this._infinitechain.signer.getAddress();
+      nonce = this._web3.toHex(this._web3.eth.getTransactionCount(address));
     }
 
     let txParams = {
@@ -173,7 +169,7 @@ class Contract {
     };
 
     let tx = new EthereumTx(txParams);
-    let key = this._key.substring(2);
+    let key = this._infinitechain.signer.getPrivateKey().substring(2);
     tx.sign(Buffer.from(key, 'hex'));
     let serializedTx = '0x' + tx.serialize().toString('hex');
     return serializedTx;
