@@ -4,11 +4,6 @@ import assert from 'assert';
 import LightTransaction from '@/models/light-transaction';
 import Receipt from '@/models/receipt';
 
-const models = {
-  lightTx: LightTransaction,
-  receipt: Receipt
-};
-
 class Signer {
   constructor () {
     this.key = null;
@@ -19,7 +14,7 @@ class Signer {
       this.key = keythereum.create({ keyBytes: 32, ivBytes: 16 }).privateKey;
     }
 
-    return '0x' + this.key.toString('hex');
+    return this.key.toString('hex');
   }
 
   importPrivateKey = (privateKey) => {
@@ -28,35 +23,38 @@ class Signer {
 
   getPrivateKey () {
     assert(this.key != null, 'ECC private key does not exist. Please generate or import your keypair.');
-    return '0x' + this.key.toString('hex');
+    return this.key.toString('hex');
   }
 
   getPublicKey () {
     assert(this.key != null, 'ECC private key does not exist. Please generate or import your keypair.');
-    return '0x' + EthUtils.privateToPublic(this.key).toString('hex');
+    return EthUtils.privateToPublic(this.key).toString('hex');
   }
 
   getAddress () {
-    return '0x' + EthUtils.privateToAddress(this.key).toString('hex');
+    return EthUtils.privateToAddress(this.key).toString('hex');
   }
 
-  signWithServerKey = (klass, object) => {
-    return this._sign('server', klass, object);
+  signWithServerKey = (object) => {
+    return this._sign('server', object);
   }
 
-  signWithClientKey = (klass, object) => {
-    return this._sign('client', klass, object);
+  signWithClientKey = (object) => {
+    return this._sign('client', object);
   }
 
-  _sign = (caller, klass, object) => {
-    // 'caller' should be 'server' or 'client'
-    assert(['server', 'client'].includes(caller), '\'caller\' should be \'server\' or \'client\'');
-    // 'klass' should be 'lightTx' or 'receipt'
-    assert(Object.keys(models).includes(klass), '\'klass\' should be \'lightTx\' or \'receipt\'');
+  _sign = (caller, object) => {
+    let klass;
+    if (object instanceof LightTransaction) {
+      klass = 'lightTx';
+    } else if (object instanceof Receipt) {
+      klass = 'receipt';
+    } else {
+      throw new Error('\'object\' should be instance of \'LightTransaction\' or \'Receipt\'.');
+    }
+
     // 'Client' can not sign the receipt.
     assert(!(caller === 'client' && klass === 'receipt'), '\'client\' is not permitted to sign receipt.');
-    // 'object' should be instance of input model
-    assert(object instanceof models[klass], '\'object\' should be instance of \'' + klass + '\'.');
 
     let hashKey = klass + 'Hash';
     let h = object[hashKey];
@@ -69,18 +67,9 @@ class Signer {
     object.sig[sigKey] = {
       r: '0x' + sig.r.toString('hex'),
       s: '0x' + sig.s.toString('hex'),
-      v: sig.v
+      v: '0x' + sig.v.toString(16).padStart(64, '0')
     };
     return object;
-  }
-
-  _verify = (message, signature) => {
-    let msgHash = EthUtils.sha3(message);
-    let prefix = new Buffer('\x19Ethereum Signed Message:\n');
-    let ethMsgHash = EthUtils.sha3(Buffer.concat([prefix, new Buffer(String(msgHash.length)), msgHash]));
-    let publicKey = EthUtils.ecrecover(ethMsgHash, signature.v, signature.r, signature.s);
-    let address = '0x' + EthUtils.pubToAddress(publicKey).toString('hex');
-    return address;
   }
 }
 
