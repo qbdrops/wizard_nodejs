@@ -62,6 +62,12 @@ class Server {
     }
   }
 
+  sendLightTx = async (lightTx) => {
+    let gringotts = this._infinitechain.gringotts;
+    let receipt = await gringotts.sendLightTxs(lightTx);
+    return receipt;
+  }
+
   commitPayments = async (objectionTime, finalizeTime, data = '', targetRootHash = '', nonce = null) => {
     let url = this._nodeUrl + '/roothash';
     let res = await axios.get(url, {

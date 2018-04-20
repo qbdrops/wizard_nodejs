@@ -1,8 +1,7 @@
 import EthUtils from 'ethereumjs-util';
 import assert from 'assert';
 import LightTransaction from '@/models/light-transaction';
-
-const allowedLightTxTypes = ['deposit', 'withdrawal', 'instantWithdraw', 'remittance'];
+import types from '@/models/types';
 
 class Client {
   constructor (clientConfig, infinitechain) {
@@ -13,18 +12,15 @@ class Client {
   }
 
   makeLightTx = async (type, lightTxData) => {
-    let gringotts = this._infinitechain.gringotts;
+    // Normalize lightTxData
+    lightTxData = await this._prepare(type, lightTxData);
 
-    if (!lightTxData.stageHeight) {
-      let sidechainHeight = await gringotts.getViableStageHeight();
-      lightTxData.stageHeight = parseInt(sidechainHeight);
-    }
-
-    lightTxData = this._fillLightTxAddressByType(type, lightTxData);
-
+    // Create lightTx
     let lightTx = new LightTransaction(lightTxData);
+
+    // Sign lightTx
     let signer = this._infinitechain.signer;
-    let signedLightTx = signer.signWithClientKey('lightTx', lightTx);
+    let signedLightTx = signer.signWithClientKey(lightTx);
 
     return signedLightTx;
   }
@@ -125,14 +121,24 @@ class Client {
   export = () => {
   }
 
-  _fillLightTxAddressByType = (type, lightTxData) => {
-    assert(allowedLightTxTypes.includes(type), 'Parameter \'type\' should be one of \'deposit\', \'withdrawal\', \'instantWithdraw\' or \'remittance\'');
+  _sha3 (content) {
+    return EthUtils.sha3(content).toString('hex');
+  }
 
+  _prepare = async (type, lightTxData) => {
+    assert(Object.keys(types).includes(type), 'Parameter \'type\' should be one of \'deposit\', \'withdrawal\', \'instantWithdraw\' or \'remittance\'');
+
+    let gringotts = this._infinitechain.gringotts;
     let clientAddress = this._infinitechain.signer.getAddress();
+
+    if (!lightTxData.stageHeight) {
+      let sidechainHeight = await gringotts.getViableStageHeight();
+      lightTxData.stageHeight = parseInt(sidechainHeight);
+    }
 
     switch (type) {
     case 'deposit':
-      lightTxData.from = '0x0';
+      lightTxData.from = '0';
       lightTxData.to = clientAddress;
       break;
     case 'withdrawal':
@@ -143,10 +149,6 @@ class Client {
       break;
     }
     return lightTxData;
-  }
-
-  _sha3 (content) {
-    return EthUtils.sha3(content).toString('hex');
   }
 
   _computeRootHashFromSlice (slice) {
