@@ -52,7 +52,8 @@ IFC
 ## Example
 ### 1. Use `InfinitechainBuilder` to create an infinitechain object
 ```javascript
-let InfinitechainBuilder = require('wizard_nodejs');
+let wizard = require('wizard_nodejs');
+let InfinitechainBuilder = wizard.InfinitechainBuilder;
 infinitechain = new InfinitechainBuilder()
   .setNodeUrl('http://0.0.0.0:3000')
   .setWeb3Url('http://0.0.0.0:8545')
