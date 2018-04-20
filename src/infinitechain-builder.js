@@ -1,6 +1,7 @@
 import Infinitechain from '@/infinitechain';
 import Client from '@/client';
 import Server from '@/server';
+import Verifier from '@/verifier';
 import Event from '@/event';
 import Signer from '@/signer';
 import Gringotts from '@/gringotts';
@@ -16,16 +17,6 @@ class InfinitechainBuilder {
 
   setWeb3Url (url) {
     this._web3Url = url;
-    return this;
-  }
-
-  setClientAddress (address) {
-    this._clientAddress = address;
-    return this;
-  }
-
-  setServerAddress (address) {
-    this._serverAddress = address;
     return this;
   }
 
@@ -78,6 +69,8 @@ class InfinitechainBuilder {
       nodeUrl: this._nodeUrl
     };
 
+    let verifierConfig = {};
+
     let infinitechain = new Infinitechain();
 
     let signer = new Signer(signerConfig);
@@ -98,6 +91,9 @@ class InfinitechainBuilder {
 
     let contract = new Contract(contractConfig, infinitechain);
     infinitechain.setContract(contract);
+
+    let verifier = new Verifier(verifierConfig, infinitechain);
+    infinitechain.setVerifier(verifier);
 
     let client = new Client(clientConfig, infinitechain);
     infinitechain.setClient(client);

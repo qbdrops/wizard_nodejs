@@ -23,8 +23,13 @@ class Infinitechain {
     this.gringotts = gringotts;
   }
 
+  setVerifier (verifier) {
+    this.verifier = verifier;
+  }
+
   initialize = async () => {
     await this.contract.fetchSidechain();
+    await this.verifier.fetchServerAddress();
   }
 }
 
