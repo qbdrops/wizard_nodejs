@@ -59,8 +59,6 @@ infinitechain = new InfinitechainBuilder()
   .setWeb3Url('http://0.0.0.0:8545')
   .setSignerKey('2058a2d1b99d534dc0ec3e71876e4bcb0843fd55637211627087d53985ab04aa')
   .setStorage('memory')
-  .setClientAddress('')
-  .setServerAddress('')
   .build();
 
 let watchBlockchainEvent = async () => {
