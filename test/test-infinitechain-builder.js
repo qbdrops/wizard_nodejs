@@ -4,7 +4,7 @@ import Infinitechain from '@/infinitechain';
 import nock from 'nock';
 
 nock('http://localhost:3000')
-  .get('/contract/address')
+  .get('/sidechain/address')
   .reply(200, { address: '0x68c34a54ec562b2b6efc8e61c54f9314b93b1a44' });
 
 describe('InfinitechainBuilder', () => {

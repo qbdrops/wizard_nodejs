@@ -5,7 +5,7 @@ import Receipt from '@/models/receipt';
 import nock from 'nock';
 
 nock('http://localhost:3000')
-  .get('/contract/address')
+  .get('/sidechain/address')
   .reply(200, { address: '0x68c34a54ec562b2b6efc8e61c54f9314b93b1a44' });
 
 describe('Signer', () => {
@@ -37,38 +37,38 @@ describe('Signer', () => {
     stageHeight: 1
   }, sig);
 
-  let receipt = new Receipt(lightTx, {
+  let receiptData = {
     GSN: '123',
     lightTxHash: lightTx.lightTxHash,
     fromBalance: 100,
     toBalance: 0
-  });
+  };
+
+  let receiptJson = {
+    lightTxData: lightTx.lightTxData,
+    lightTxHash: lightTx.lightTxHash,
+    sig: lightTx.sig,
+    receiptData: receiptData
+  };
+
+  let receipt = new Receipt(receiptJson);
 
   describe('#signWithServerKey', () => {
-    it('checks klass name', () => {
-      let klass = 'foo';
-      let object = lightTx;
-
-      assert.throws(() => { ifc.signer.signWithServerKey(klass, object); }, Error, '\'klass\' should be \'lightTx\' or \'receipt\'');
-    });
-
     it('checks object name', () => {
-      let klass = 'lightTx';
       let object = 'bar';
 
-      assert.throws(() => { ifc.signer.signWithServerKey(klass, object); }, Error, '\'object\' should be instance of \'lightTx\'.');
+      assert.throws(() => { ifc.signer.signWithServerKey(object); }, Error, '\'object\' should be instance of \'LightTransaction\' or \'Receipt\'.');
     });
 
     it('returns correct lightTx signature', () => {
-      let klass = 'lightTx';
       let object = lightTx;
 
-      let sig = ifc.signer.signWithServerKey(klass, object).sig;
+      let sig = ifc.signer.signWithServerKey(object).sig;
 
       let result = {
         serverLightTx: {
-          r: '0x772453cdcc3f35423c8bf5bc459ec849d9ecc4558f5c810f31b60dacb1fedad9',
-          s: '0x62a4b5e1ccd5dcf9b278ca52c31afe9bfb2ffdfa6445f903d0d96ded2f02f7e9',
+          r: '0x9adb9e8699f7487efc4a23dd2351deb5240416f6528be6f8deefce5289d281ce',
+          s: '0x56cccc8ee5d66357d2f3c2e44d59c5fa5122f44d7de6c9ea82b088a2743fc5b8',
           v: 28
         }
       };
@@ -78,10 +78,9 @@ describe('Signer', () => {
     });
 
     it('returns correct receipt signature', () => {
-      let klass = 'receipt';
       let object = receipt;
 
-      let sig = ifc.signer.signWithServerKey(klass, object).sig;
+      let sig = ifc.signer.signWithServerKey(object).sig;
 
       let result = {
         serverReceipt: {
@@ -97,30 +96,21 @@ describe('Signer', () => {
   });
 
   describe('#signWithClientKey', () => {
-    it('checks klass name', () => {
-      let klass = 'foo';
-      let object = lightTx;
-
-      assert.throws(() => { ifc.signer.signWithClientKey(klass, object); }, Error, '\'klass\' should be \'lightTx\' or \'receipt\'');
-    });
-
     it('checks object name', () => {
-      let klass = 'lightTx';
       let object = 'bar';
 
-      assert.throws(() => { ifc.signer.signWithClientKey(klass, object); }, Error, '\'object\' should be instance of \'lightTx\'.');
+      assert.throws(() => { ifc.signer.signWithClientKey(object); }, Error, '\'object\' should be instance of \'LightTransaction\' or \'Receipt\'.');
     });
 
     it('returns correct signature', () => {
-      let klass = 'lightTx';
       let object = lightTx;
 
-      let sig = ifc.signer.signWithClientKey(klass, object).sig;
+      let sig = ifc.signer.signWithClientKey(object).sig;
 
       let result = {
         clientLightTx: {
-          r: '0x772453cdcc3f35423c8bf5bc459ec849d9ecc4558f5c810f31b60dacb1fedad9',
-          s: '0x62a4b5e1ccd5dcf9b278ca52c31afe9bfb2ffdfa6445f903d0d96ded2f02f7e9',
+          r: '0x9adb9e8699f7487efc4a23dd2351deb5240416f6528be6f8deefce5289d281ce',
+          s: '0x56cccc8ee5d66357d2f3c2e44d59c5fa5122f44d7de6c9ea82b088a2743fc5b8',
           v: 28
         }
       };
@@ -130,10 +120,9 @@ describe('Signer', () => {
     });
 
     it('rejects client receipt signature', () => {
-      let klass = 'receipt';
       let object = receipt;
 
-      assert.throws(() => { ifc.signer.signWithClientKey(klass, object).sig; }, Error, '\'client\' is not permitted to sign receipt.');
+      assert.throws(() => { ifc.signer.signWithClientKey(object).sig; }, Error, '\'client\' is not permitted to sign receipt.');
     });
   });
 });
