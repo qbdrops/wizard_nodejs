@@ -18,19 +18,22 @@ class Contract {
   }
 
   proposeDeposit = (lightTx, nonce = null) => {
-    let value = this._web3.toHex(this._web3.toWei(lightTx.lightTxData.value));
-    let clientAddress = this._infinitechain.signer.getAddress();
+    let value = '0x' + lightTx.lightTxData.value;
+    let clientAddress = '0x' + this._infinitechain.signer.getAddress();
     let sidechainAddress = this.sidechain().address;
     console.log('proposeDeposit: ', lightTx);
 
     try {
-      let txMethodData = this.sidechain().proposeDeposit.getData(
-        '0x' + lightTx.lightTxHash,
-        lightTx.lightTxData.fee,
-        lightTx.lightTxData.LSN,
-        lightTx.sig.clientLightTx.v,
-        lightTx.sig.clientLightTx.r,
-        lightTx.sig.clientLightTx.s
+      let txMethodData = this.sidechain().delegateToLib.getData(
+        '0xdcf12aba',
+        [
+          '0x' + lightTx.lightTxHash,
+          '0x' + lightTx.lightTxData.fee,
+          '0x' + lightTx.lightTxData.LSN,
+          lightTx.sig.clientLightTx.v,
+          lightTx.sig.clientLightTx.r,
+          lightTx.sig.clientLightTx.s
+        ]
       );
       let serializedTx = this._signRawTransaction(txMethodData, clientAddress, sidechainAddress, value, nonce);
       let txHash = this._sendRawTransaction(serializedTx);
@@ -155,7 +158,7 @@ class Contract {
 
   _signRawTransaction = (txMethodData, from, to, value, nonce = null) => {
     if (nonce == null) {
-      let address = this._infinitechain.signer.getAddress();
+      let address = '0x' + this._infinitechain.signer.getAddress();
       nonce = this._web3.toHex(this._web3.eth.getTransactionCount(address));
     }
 
@@ -169,7 +172,7 @@ class Contract {
     };
 
     let tx = new EthereumTx(txParams);
-    let key = this._infinitechain.signer.getPrivateKey().substring(2);
+    let key = this._infinitechain.signer.getPrivateKey();
     tx.sign(Buffer.from(key, 'hex'));
     let serializedTx = '0x' + tx.serialize().toString('hex');
     return serializedTx;
