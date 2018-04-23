@@ -1,7 +1,7 @@
 import assert from 'assert';
 import InfinitechainBuilder from '@/infinitechain-builder';
 import nock from 'nock';
-import LightTransaction from '../src/models/light-transaction';
+import LightTransaction from '@/models/light-transaction';
 
 nock('http://localhost:3000')
   .get('/sidechain/address')

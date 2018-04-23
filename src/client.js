@@ -126,7 +126,7 @@ class Client {
   }
 
   _prepare = async (type, lightTxData) => {
-    assert(Object.keys(types).includes(type), 'Parameter \'type\' should be one of \'deposit\', \'withdrawal\', \'instantWithdraw\' or \'remittance\'');
+    assert(Object.values(types).includes(type), 'Parameter \'type\' should be one of \'deposit\', \'withdrawal\', \'instantWithdraw\' or \'remittance\'');
 
     let gringotts = this._infinitechain.gringotts;
     let clientAddress = this._infinitechain.signer.getAddress();
@@ -137,15 +137,15 @@ class Client {
     }
 
     switch (type) {
-    case 'deposit':
+    case types.deposit:
       lightTxData.from = '0';
       lightTxData.to = clientAddress;
       break;
-    case 'withdrawal':
+    case types.withdrawal:
       break;
-    case 'instantWithdrawal':
+    case types.instantWithdrawal:
       break;
-    case 'remittance':
+    case types.remittance:
       break;
     }
     return lightTxData;

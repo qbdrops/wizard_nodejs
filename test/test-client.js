@@ -1,11 +1,12 @@
 import assert from 'assert';
 import InfinitechainBuilder from '@/infinitechain-builder';
 import nock from 'nock';
-import LightTransaction from '../src/models/light-transaction';
+import LightTransaction from '@/models/light-transaction';
+import types from '@/models/types';
 
 nock('http://localhost:3000').
   get('/sidechain/address').
-  reply(200, { address: '0x6c559983c9b0ec5dd61df4671cbe12e1d9aeefc5' }).
+  reply(200, { address: '0xceb56f5781ca9ef2cc34819f778d041357c81c14' }).
   get('/server/address').
   reply(200, { address: '0x6c559983c9b0ec5dd61df4671cbe12e1d9aeefc5' }).
   get('/viable/stage/height').
@@ -31,7 +32,7 @@ describe('Client', async () => {
 
   describe('#makeLightTx', () => {
     it('returns signed lightTx', async () => {
-      let lightTx = await ifc.client.makeLightTx('deposit', lightTxData);
+      let lightTx = await ifc.client.makeLightTx(types.deposit, lightTxData);
 
       let result = {
         lightTxHash: '4e06b545fc3e8b67ce84a32d904f1eadb10ad787be493750197709f01354a1f1'
