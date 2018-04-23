@@ -20,10 +20,10 @@ class Gringotts {
     });
   }
 
-  sendLightTxs = async (lightTx) => {
+  sendLightTx = async (lightTx) => {
     assert(lightTx instanceof LightTransaction, 'Parameter \'lightTx\' should be instance of LightTransaction.');
     let url = this._nodeUrl + '/send/light_tx';
-    let res = await axios.post(url, { lightTx: lightTx.toJson() });
+    let res = await axios.post(url, { lightTxJson: lightTx.toJson() });
     let receiptJson = res.data;
     let receipt = new Receipt(receiptJson);
 

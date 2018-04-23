@@ -64,7 +64,7 @@ class Server {
 
   sendLightTx = async (lightTx) => {
     let gringotts = this._infinitechain.gringotts;
-    let receipt = await gringotts.sendLightTxs(lightTx);
+    let receipt = await gringotts.sendLightTx(lightTx);
     return receipt;
   }
 
