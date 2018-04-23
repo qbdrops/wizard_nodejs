@@ -1,3 +1,5 @@
+import types from '@/models/types';
+
 class Event {
   constructor (eventConfig, infinitechain) {
     this.eventConfig = eventConfig;
@@ -7,7 +9,15 @@ class Event {
 
   onProposeDeposit (cb) {
     let sidechain = this._infinitechain.contract.sidechain();
-    sidechain.ProposeDeposit(this._eventOpt).watch((err, result) => {
+    sidechain.Propose({ _type: types.deposit }, this._eventOpt).watch((err, result) => {
+      if (err) { console.trace; }
+      cb(err, result);
+    });
+  }
+
+  onProposeWithdrawal (cb) {
+    let sidechain = this._infinitechain.contract.sidechain();
+    sidechain.Propose({ _type: types.withdrawal }, this._eventOpt).watch((err, result) => {
       if (err) { console.trace; }
       cb(err, result);
     });
