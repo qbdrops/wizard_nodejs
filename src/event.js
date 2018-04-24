@@ -4,7 +4,7 @@ class Event {
   constructor (eventConfig, infinitechain) {
     this.eventConfig = eventConfig;
     this._infinitechain = infinitechain;
-    this._eventOpt = { fromBlock: 0, toBlock: 'latest' };
+    this._eventOpt = { toBlock: 'latest' };
   }
 
   onProposeDeposit (cb) {
