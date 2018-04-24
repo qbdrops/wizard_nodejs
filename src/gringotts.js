@@ -24,10 +24,15 @@ class Gringotts {
     assert(lightTx instanceof LightTransaction, 'Parameter \'lightTx\' should be instance of LightTransaction.');
     let url = this._nodeUrl + '/send/light_tx';
     let res = await axios.post(url, { lightTxJson: lightTx.toJson() });
-    let receiptJson = res.data;
-    let receipt = new Receipt(receiptJson);
+    res = res.data;
+    if (res.ok) {
+      let receiptJson = res.receipt;
+      let receipt = new Receipt(receiptJson);
 
-    return receipt;
+      return receipt;
+    } else {
+      throw new Error(`message: ${res.message}, code: ${res.code} `);
+    }
   }
 
   getViableStageHeight = async () => {
