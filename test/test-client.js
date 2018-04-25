@@ -35,7 +35,7 @@ describe('Client', async () => {
       let lightTx = await ifc.client.makeLightTx(types.deposit, lightTxData);
 
       let result = {
-        lightTxHash: '4e06b545fc3e8b67ce84a32d904f1eadb10ad787be493750197709f01354a1f1'
+        lightTxHash: '74d21f1502ea9ef35c8b6f50b5a42d2f874b7e16723b4508cd8d8e6063ae2ddb'
       };
 
       // let txHash = await ifc.client.proposeDeposit(lightTx);

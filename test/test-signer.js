@@ -67,8 +67,8 @@ describe('Signer', () => {
 
       let result = {
         serverLightTx: {
-          r: '0x9adb9e8699f7487efc4a23dd2351deb5240416f6528be6f8deefce5289d281ce',
-          s: '0x56cccc8ee5d66357d2f3c2e44d59c5fa5122f44d7de6c9ea82b088a2743fc5b8',
+          r: '0x9d527cf94b183f712dbd29eecad4da0aed719b1c13793a2f9ce919d699fab788',
+          s: '0x34223833bc4c4977fd3d3161c5c2d9c6af412d5f09833b1a5e18b7d0ab598e4c',
           v: 28
         }
       };
@@ -84,8 +84,8 @@ describe('Signer', () => {
 
       let result = {
         serverReceipt: {
-          r: '0x8e0c8e8271e23aa47658022ee5e6e78af7ab37428325e8e3099158a025fb1601',
-          s: '0x126272b3fd5d5b1a98851f88a300c02a3184341ec4e254568975c090389a2cb5',
+          r: '0x0179dc004782fcaaccfe7ff54b83ed879d97206dc3bd8b7f1579219ddf8a4519',
+          s: '0x7ce07cf16d452fd5a2bbd21452a2c6bda141911a5fe7e5b080b6c9fe4eea402c',
           v: 27
         }
       };
@@ -109,8 +109,8 @@ describe('Signer', () => {
 
       let result = {
         clientLightTx: {
-          r: '0x9adb9e8699f7487efc4a23dd2351deb5240416f6528be6f8deefce5289d281ce',
-          s: '0x56cccc8ee5d66357d2f3c2e44d59c5fa5122f44d7de6c9ea82b088a2743fc5b8',
+          r: '0x9d527cf94b183f712dbd29eecad4da0aed719b1c13793a2f9ce919d699fab788',
+          s: '0x34223833bc4c4977fd3d3161c5c2d9c6af412d5f09833b1a5e18b7d0ab598e4c',
           v: 28
         }
       };

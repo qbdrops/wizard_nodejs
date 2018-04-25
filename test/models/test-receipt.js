@@ -101,7 +101,7 @@ describe('Receipt', () => {
 
       let receipt = new Receipt(receiptJson);
       let result = {
-        receiptHash: 'c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470',
+        receiptHash: '335b46e5976701bed1d7b8733e2752164bb7ce442bd974fe433211c539e750b1',
         receiptData: correctReceiptData
       };
 

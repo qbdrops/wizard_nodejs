@@ -72,7 +72,7 @@ describe('LightTransaction', () => {
           to: '000000000000000000000000000000000000000000000000000000000000x456',
           value: '0000000000000000000000000000000000000000000000056bc75e2d63100000'
         },
-        lightTxHash: '41ef141419a8f2997d3f0845133418765c28438dd0593ca6a963219553019e30',
+        lightTxHash: 'cd10ce326eb5402c46136d7f1ccf3d4db16198b938b348a126e5bfe7549cd49b',
       };
 
       assert.deepEqual(lightTx.lightTxData, result.lightTxData);
@@ -172,7 +172,7 @@ describe('LightTransaction', () => {
       let lightTx = new LightTransaction(data);
 
       let expected = {
-        lightTxHash: '24531f6a2f1582dcccf48f96448d312073dfdacc705a696d72c5aaddcef73d28',
+        lightTxHash: 'bbd7d934b0d1789da4c88ee93829bb4d18eaf71bdb638e07a697b05fb0c74c95',
         lightTxData: {
           from: '000000000000000000000000ce44fa4565747558066266061786e69336b5f3a2',
           to: '000000000000000000000000fb44fa0865747558066266061786e69336b5f3a2',
@@ -205,7 +205,7 @@ describe('LightTransaction', () => {
       let lightTx = new LightTransaction(data);
 
       let expected = JSON.stringify({
-        lightTxHash: '24531f6a2f1582dcccf48f96448d312073dfdacc705a696d72c5aaddcef73d28',
+        lightTxHash: 'bbd7d934b0d1789da4c88ee93829bb4d18eaf71bdb638e07a697b05fb0c74c95',
         lightTxData: {
           from: '000000000000000000000000ce44fa4565747558066266061786e69336b5f3a2',
           to: '000000000000000000000000fb44fa0865747558066266061786e69336b5f3a2',
