@@ -1,6 +1,7 @@
 import EthUtils from 'ethereumjs-util';
 import axios from 'axios';
 import assert from 'assert';
+import Receipt from '@/models/receipt';
 
 class Server {
   constructor (serverConfig, infinitechain) {
@@ -13,33 +14,15 @@ class Server {
     this._nodeUrl = serverConfig.nodeUrl;
   }
 
-  signRawPayment = (rawPayment) => {
-    assert(this._validateRawPayment(rawPayment), 'Wrong rawPayment format.');
+  deposit = async (receipt, nonce = null) => {
+    assert(receipt instanceof Receipt, 'Parameter \'receipt\' should be instance of Receipt.');
+    return this._infinitechain.contract.deposit(receipt, nonce);
+  }
 
-    let stageHash = EthUtils.sha3(rawPayment.stageHeight.toString()).toString('hex');
-    let paymentHashAndCiphers = this._computePaymentHashAndCiphers(rawPayment);
-    let paymentHash = paymentHashAndCiphers.paymentHash;
-    let ciphers = paymentHashAndCiphers.ciphers;
-    let message = stageHash + paymentHash;
-    let msgHash = EthUtils.sha3(message);
-    let prefix = new Buffer('\x19Ethereum Signed Message:\n');
-    let ethMsgHash = EthUtils.sha3(Buffer.concat([prefix, new Buffer(String(msgHash.length)), msgHash]));
-    let signature = this._infinitechain.crypto.sign(ethMsgHash);
-    let publicKey = EthUtils.ecrecover(ethMsgHash, signature.v, signature.r, signature.s);
-    let address = '0x' + EthUtils.pubToAddress(publicKey).toString('hex');
-
-    assert(address == this._infinitechain.crypto.getSignerAddress(), 'Wrong signature.');
-
-    return {
-      stageHeight: rawPayment.stageHeight,
-      stageHash: stageHash.toString('hex'),
-      paymentHash: paymentHash.toString('hex'),
-      cipherClient: ciphers.cipherClient,
-      cipherStakeholder: ciphers.cipherStakeholder,
-      v: signature.v,
-      r: '0x' + signature.r.toString('hex'),
-      s: '0x' + signature.s.toString('hex')
-    };
+  sendLightTx = async (lightTx) => {
+    let gringotts = this._infinitechain.gringotts;
+    let receipt = await gringotts.sendLightTx(lightTx);
+    return receipt;
   }
 
   pendingRootHashes = async () => {
@@ -50,22 +33,6 @@ class Server {
     } catch (e) {
       console.log(e);
     }
-  }
-
-  sendPayments = async (payments) => {
-    try {
-      let url = this._nodeUrl + '/send/payments';
-      let res = await axios.post(url, { payments: payments });
-      return res.data;
-    } catch (e) {
-      console.log(e);
-    }
-  }
-
-  sendLightTx = async (lightTx) => {
-    let gringotts = this._infinitechain.gringotts;
-    let receipt = await gringotts.sendLightTx(lightTx);
-    return receipt;
   }
 
   commitPayments = async (objectionTime, finalizeTime, data = '', targetRootHash = '', nonce = null) => {

@@ -13,6 +13,21 @@ class Contract {
     this._sidechain = null;
   }
 
+  fetchSidechain = async () => {
+    let sidechainAddress = null;
+    try {
+      let res = await this._infinitechain.gringotts.fetchSidechainAddress();
+      sidechainAddress = res.data.address;
+    } catch (e) {
+      console.error(e);
+    }
+
+    assert(sidechainAddress, 'Can not fetch sidechain address.');
+    this._sidechainAddress = sidechainAddress;
+    this._web3 = new Web3(new Web3.providers.HttpProvider(this._web3Url));
+    this._sidechain = this._web3.eth.contract(Sidechain.abi).at(sidechainAddress);
+  }
+
   sidechain = () => {
     return this._sidechain;
   }
@@ -21,7 +36,6 @@ class Contract {
     let value = '0x' + lightTx.lightTxData.value;
     let clientAddress = '0x' + this._infinitechain.signer.getAddress();
     let sidechainAddress = this.sidechain().address;
-    console.log('proposeDeposit: ', lightTx);
 
     try {
       let txMethodData = this.sidechain().delegateToLib.getData(
@@ -35,6 +49,33 @@ class Contract {
           lightTx.sig.clientLightTx.s
         ]
       );
+      let serializedTx = this._signRawTransaction(txMethodData, clientAddress, sidechainAddress, value, nonce);
+      let txHash = this._sendRawTransaction(serializedTx);
+      return txHash;
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  deposit = (receipt, nonce = null) => {
+    let value = '0x0';
+    let clientAddress = '0x' + this._infinitechain.signer.getAddress();
+    let sidechainAddress = this.sidechain().address;
+
+    try {
+      let txMethodData = this.sidechain().delegateToLib.getData(
+        '0x7b9d7d74',
+        [
+          '0x' + receipt.receiptData.GSN,
+          '0x' + receipt.receiptData.lightTxHash,
+          '0x' + receipt.receiptData.fromBalance,
+          '0x' + receipt.receiptData.toBalance,
+          receipt.sig.serverReceipt.v,
+          receipt.sig.serverReceipt.r,
+          receipt.sig.serverReceipt.s
+        ]
+      );
+
       let serializedTx = this._signRawTransaction(txMethodData, clientAddress, sidechainAddress, value, nonce);
       let txHash = this._sendRawTransaction(serializedTx);
       return txHash;
@@ -181,21 +222,6 @@ class Contract {
   _sendRawTransaction = (serializedTx) => {
     let txHash = this._web3.eth.sendRawTransaction(serializedTx);
     return txHash;
-  }
-
-  fetchSidechain = async () => {
-    let sidechainAddress = null;
-    try {
-      let res = await this._infinitechain.gringotts.fetchSidechainAddress();
-      sidechainAddress = res.data.address;
-    } catch (e) {
-      console.error(e);
-    }
-
-    assert(sidechainAddress, 'Can not fetch sidechain address.');
-    this._sidechainAddress = sidechainAddress;
-    this._web3 = new Web3(new Web3.providers.HttpProvider(this._web3Url));
-    this._sidechain = this._web3.eth.contract(Sidechain.abi).at(sidechainAddress);
   }
 
   _sha3 = (content) => {
