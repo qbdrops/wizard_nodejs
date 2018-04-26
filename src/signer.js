@@ -58,8 +58,8 @@ class Signer {
 
     let hashKey = klass + 'Hash';
     let h = object[hashKey];
-    let prefix = new Buffer('\x19Ethereum Signed Message:\n');
-    let message = EthUtils.sha3(Buffer.concat([prefix, Buffer.from(String(h.length)), Buffer.from(h)]));
+    let prefix = new Buffer('\x19Ethereum Signed Message:\n32');
+    let message = EthUtils.sha3(Buffer.concat([prefix, Buffer.from(h, 'hex')]));
     let sig = EthUtils.ecsign(message, this.key);
 
     let postfix = klass.charAt(0).toUpperCase() + klass.slice(1);

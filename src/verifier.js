@@ -1,6 +1,7 @@
 import EthUtils from 'ethereumjs-util';
 import assert from 'assert';
 import LightTransaction from '@/models/light-transaction';
+import Receipt from '@/models/receipt';
 import types from '@/models/types';
 
 class Verifier {
@@ -17,23 +18,49 @@ class Verifier {
 
   verifyLightTx = (lightTx) => {
     assert(lightTx instanceof LightTransaction, 'Parameter \'lightTx\' is not a LightTransaction instance.');
+    return this._verify(lightTx);
+  }
+
+  verifyReceipt = (receipt) => {
+    assert(receipt instanceof Receipt, 'Parameter \'receipt\' is not a Receipt instance.');
+    return this._verify(receipt);
+  }
+
+  _verify = (object) => {
     let isValid;
-    switch (lightTx.type()) {
+
+    let klass;
+    if (object instanceof LightTransaction) {
+      klass = 'lightTx';
+    } else if (object instanceof Receipt) {
+      klass = 'receipt';
+    } else {
+      throw new Error('\'object\' should be instance of \'LightTransaction\' or \'Receipt\'.');
+    }
+
+    switch (object.type()) {
     case types.deposit: {
-      let clientAddress = lightTx.lightTxData.to.slice(-40);
+      let clientAddress = object.lightTxData.to.slice(-40);
       let serverAddress = this._serverAddress;
-      let isClientSigValid = true;
-      let isServerSigValid = true;
+      let isClientLightTxSigValid = true;
+      let isServerLightTxSigValid = true;
+      let isServerReceiptSigValid = true;
 
-      if (lightTx.hasClientLightTxSig()) {
-        isClientSigValid = (clientAddress == this._recover(lightTx.lightTxHash, lightTx.sig.clientLightTx));
+      if (object.hasClientLightTxSig()) {
+        isClientLightTxSigValid = (clientAddress == this._recover(object.lightTxHash, object.sig.clientLightTx));
       }
 
-      if (lightTx.hasServerLightTxSig()) {
-        isServerSigValid = (serverAddress == this._recover(lightTx.lightTxHash, lightTx.sig.serverLightTx));
+      if (object.hasServerLightTxSig()) {
+        isServerLightTxSigValid = (serverAddress == this._recover(object.lightTxHash, object.sig.serverLightTx));
       }
 
-      isValid = (isClientSigValid && isServerSigValid);
+      if (klass == 'receipt') {
+        if (object.hasServerReceiptSig()) {
+          isServerReceiptSigValid = (serverAddress == this._recover(object.lightTxHash, object.sig.serverLightTx));
+        }
+      }
+
+      isValid = (isClientLightTxSigValid && isServerLightTxSigValid && isServerReceiptSigValid);
       break;
     }
     case types.withdrawal:
@@ -47,8 +74,8 @@ class Verifier {
   }
 
   _recover = (msgHash, signature) => {
-    let prefix = new Buffer('\x19Ethereum Signed Message:\n');
-    let ethMsgHash = EthUtils.sha3(Buffer.concat([prefix, new Buffer(String(msgHash.length)), Buffer.from(msgHash)]));
+    let prefix = new Buffer('\x19Ethereum Signed Message:\n32');
+    let ethMsgHash = EthUtils.sha3(Buffer.concat([prefix, Buffer.from(msgHash, 'hex')]));
     let publicKey = EthUtils.ecrecover(ethMsgHash, signature.v, signature.r, signature.s);
     let address = EthUtils.pubToAddress(publicKey).toString('hex');
     return address;
