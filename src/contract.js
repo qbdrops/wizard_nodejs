@@ -72,7 +72,10 @@ class Contract {
           '0x' + receipt.receiptData.toBalance,
           receipt.sig.serverReceipt.v,
           receipt.sig.serverReceipt.r,
-          receipt.sig.serverReceipt.s
+          receipt.sig.serverReceipt.s,
+          receipt.sig.serverLightTx.v,
+          receipt.sig.serverLightTx.r,
+          receipt.sig.serverLightTx.s
         ]
       );
 
