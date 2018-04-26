@@ -16,15 +16,25 @@ class Level {
     return result;
   }
 
-  get = async (key) => {
-    let result = await this.db.get(key);
+
+  getLightTx = async (key) => {
+    let result = await this.db.get('lightTx:' + key);
     return JSON.parse(result);
   }
 
-  set = async (key, value) => {
+  getReceipt = async (key) => {
+    let result = await this.db.get('receipt:' + key);
+    return JSON.parse(result);
+  }
+
+  setLightTx = async (key, value) => {
+    await this.db.put('lightTx:' + key, JSON.stringify(value));
+  }
+
+  setReceipt = async (key, value) => {
     try {
-      await this.db.put(key, JSON.stringify(value));
-      this._appendReceiptHash(value.lightTxData.stageHeight, value.ReceiptHash);
+      await this.db.put('receipt:' + key, JSON.stringify(value));
+      this._appendReceiptHash(value.lightTxData.stageHeight, value.receiptHash);
     } catch (e) {
       console.log(e);
     }

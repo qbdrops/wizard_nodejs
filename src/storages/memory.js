@@ -1,6 +1,7 @@
 class Memory {
   constructor () {
-    this.data = {};
+    this.lightTxs = {};
+    this.receipts = {};
   }
 
   getReceiptHashesByStageHeight = async (stageHeight) => {
@@ -11,13 +12,22 @@ class Memory {
     }).map(receipt => receipt.receiptHash);
   }
 
-  get = async (key) => {
-    let result = this.data[key];
+  getLightTx = async (key) => {
+    let result = this.lightTxs[key];
     return result;
   }
 
-  set = async (key, value) => {
-    this.data[key] = value;
+  getReceipt = async (key) => {
+    let result = this.receipts[key];
+    return result;
+  }
+
+  setLightTx = async (key, value) => {
+    this.lightTxs[key] = value;
+  }
+
+  setReceipt = async (key, value) => {
+    this.receipts[key] = value;
   }
 }
 

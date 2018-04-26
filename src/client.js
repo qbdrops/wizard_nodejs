@@ -64,14 +64,27 @@ class Client {
     return this._infinitechain.sidechain.takeObjection(payment);
   }
 
+  saveLightTx = (lightTx) => {
+    assert(lightTx instanceof LightTransaction, 'Parameter \'lightTx\' should be instance of \'LightTransaction\'.');
+    this._storage.setLightTx(lightTx.lightTxtHash, lightTx.toJson());
+  }
+
   saveReceipt = (receipt) => {
     assert(receipt instanceof Receipt, 'Parameter \'receipt\' should be instance of \'Receipt\'.');
-    this._storage.set(receipt.receiptHash, receipt.toJson());
+    this._storage.setReceipt(receipt.receiptHash, receipt.toJson());
+  }
+
+  getLightTx = async (lightTxHash) => {
+    try {
+      return await this._storage.getLightTx(lightTxHash);
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   getReceipt = async (receiptHash) => {
     try {
-      return await this._storage.get(receiptHash);
+      return await this._storage.getReceipt(receiptHash);
     } catch (e) {
       console.log(e);
     }
