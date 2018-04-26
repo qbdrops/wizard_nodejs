@@ -2,6 +2,7 @@ import EthUtils from 'ethereumjs-util';
 import assert from 'assert';
 import LightTransaction from '@/models/light-transaction';
 import types from '@/models/types';
+import Receipt from './models/receipt';
 
 class Client {
   constructor (clientConfig, infinitechain) {
@@ -64,8 +65,8 @@ class Client {
   }
 
   saveReceipt = (receipt) => {
-    assert(receipt.hasOwnProperty('receiptHash'), 'Receipt should have key \'receiptHash\'');
-    this._storage.set(receipt.receiptHash, receipt);
+    assert(receipt instanceof Receipt, 'Parameter \'receipt\' should be instance of \'Receipt\'.');
+    this._storage.set(receipt.receiptHash, receipt.toJson());
   }
 
   getReceipt = async (receiptHash) => {
