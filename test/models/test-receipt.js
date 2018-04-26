@@ -28,10 +28,10 @@ describe('Receipt', () => {
 
     let correctLightTx = new LightTransaction(ltxData, sig);
     let correctReceiptData = {
-      GSN: 21,
+      GSN: '0000000000000000000000000000000000000000000000000000000000000015',
       lightTxHash: correctLightTx.lightTxHash,
-      fromBalance: 50,
-      toBalance: 500
+      fromBalance: '0000000000000000000000000000000000000000000000000000000000000032',
+      toBalance: '00000000000000000000000000000000000000000000000000000000000001f4'
     };
 
     it('check if lightTx"s serverLightTx signature is empty or not.', () => {
@@ -101,7 +101,7 @@ describe('Receipt', () => {
 
       let receipt = new Receipt(receiptJson);
       let result = {
-        receiptHash: '335b46e5976701bed1d7b8733e2752164bb7ce442bd974fe433211c539e750b1',
+        receiptHash: 'b5a554fb9337d7b258292de591c009a658a628b959d50fd4d896cfcf68270b5a',
         receiptData: correctReceiptData
       };
 
