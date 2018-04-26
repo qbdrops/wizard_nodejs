@@ -49,7 +49,7 @@ class Receipt {
     ).toString('hex');
     this.sig = receiptJson.sig;
     // Initialize serverReceipt sig if it is undefined.
-    if (!this.sig.serverReceipt) {
+    if (!this.sig.serverReceipt || !this.hasServerReceiptSig()) {
       this.sig.serverReceipt = {};
     }
   }
