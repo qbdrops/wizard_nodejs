@@ -1,33 +1,23 @@
 class Memory {
   constructor () {
-    this.payments = {};
-    this.rawPayments = {};
+    this.data = {};
   }
 
-  getPaymentHashesByStageHash = async (stageHash) => {
-    return Object.keys(this.payments).map(key => {
-      return this.payments[key];
-    }).filter(payment => {
-      return payment.stageHash == stageHash;
-    }).map(payment => payment.paymentHash);
+  getReceiptHashesByStageHeight = async (stageHeight) => {
+    return Object.keys(this.data).map(key => {
+      return this.data[key];
+    }).filter(receipt => {
+      return receipt.lightTxData.stageHeight == stageHeight;
+    }).map(receipt => receipt.receiptHash);
   }
 
-  getRawPayment = async (key) => {
-    let result = this.rawPayments[key];
+  get = async (key) => {
+    let result = this.data[key];
     return result;
   }
 
-  setRawPayment = async (key, value) => {
-    this.rawPayments[key] = value;
-  }
-
-  getPayment = async (key) => {
-    let result = this.payments[key];
-    return result;
-  }
-
-  setPayment = async (key, value) => {
-    this.payments[key] = value;
+  set = async (key, value) => {
+    this.data[key] = value;
   }
 }
 

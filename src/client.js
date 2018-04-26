@@ -26,6 +26,7 @@ class Client {
   }
 
   proposeDeposit = async (lightTx, nonce = null) => {
+    assert(lightTx instanceof LightTransaction, 'Parameter \'lightTx\' should be instance of LightTransaction.');
     return this._infinitechain.contract.proposeDeposit(lightTx, nonce);
   }
 
@@ -62,63 +63,21 @@ class Client {
     return this._infinitechain.sidechain.takeObjection(payment);
   }
 
-  verifyPayment = async (payment) => {
-    let crypto = this._infinitechain.crypto;
-
-    // 1. Verify ciphers
-    let cipherClient = payment.cipherClient;
-    let cipherStakeholder = payment.cipherStakeholder;
-    try {
-      crypto.decrypt(cipherClient);
-    } catch (e) {
-      return false;
-    }
-
-    // 2. Verify paymentHash
-    if (!(payment.paymentHash == EthUtils.sha3(cipherClient + cipherStakeholder).toString('hex'))) {
-      return false;
-    }
-
-    // 3. Check if the paymentHash is in client storage
-    let result = await this.getRawPayment(payment.paymentHash);
-    if (result == null) {
-      return false;
-    }
-
-    return true;
+  saveReceipt = (receipt) => {
+    assert(receipt.hasOwnProperty('receiptHash'), 'Receipt should have key \'receiptHash\'');
+    this._storage.set(receipt.receiptHash, receipt);
   }
 
-  getRawPayment = async (paymentHash) => {
+  getReceipt = async (receiptHash) => {
     try {
-      return await this._storage.getRawPayment(paymentHash);
+      return await this._storage.get(receiptHash);
     } catch (e) {
       console.log(e);
     }
   }
 
-  getPayment = async (paymentHash) => {
-    try {
-      return await this._storage.getPayment(paymentHash);
-    } catch (e) {
-      console.log(e);
-    }
-  }
-
-  getAllPaymentHashes = async (stageHash) => {
-    return await this._storage.getPaymentHashesByStageHash(stageHash);
-  }
-
-  saveRawPayment = (rawPayment) => {
-    let key = this._makeUnsignedPayment(rawPayment).paymentHash;
-    this._storage.setRawPayment(key, rawPayment);
-  }
-
-  savePayment = (payment) => {
-    assert(payment.hasOwnProperty('paymentHash'), 'Payment should have key \'paymentHash\'');
-    this._storage.setPayment(payment.paymentHash, payment);
-  }
-
-  export = () => {
+  getAllReceiptHashes = async (stageHeight) => {
+    return await this._storage.getReceiptHashesByStageHeight(stageHeight);
   }
 
   _sha3 (content) {

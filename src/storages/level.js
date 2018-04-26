@@ -4,10 +4,10 @@ class Level {
     this.db = db;
   }
 
-  getPaymentHashesByStageHash = async (stageHash) => {
+  getReceiptHashesByStageHeight = async (stageHeight) => {
     let result;
     try {
-      result = await this.db.get(stageHash);
+      result = await this.db.get(stageHeight);
     } catch (e) {
       result = JSON.stringify([]);
     } finally {
@@ -16,39 +16,30 @@ class Level {
     return result;
   }
 
-  getRawPayment = async (key) => {
-    let result = await this.db.get('raw:' + key);
-    return JSON.parse(result);
-  }
-
-  setRawPayment = async (key, value) => {
-    await this.db.put('raw:' + key, JSON.stringify(value));
-  }
-
-  getPayment = async (key) => {
+  get = async (key) => {
     let result = await this.db.get(key);
     return JSON.parse(result);
   }
 
-  setPayment = async (key, value) => {
+  set = async (key, value) => {
     try {
       await this.db.put(key, JSON.stringify(value));
-      this._appendPaymentHash(value.stageHash, value.paymentHash);
+      this._appendReceiptHash(value.lightTxData.stageHeight, value.ReceiptHash);
     } catch (e) {
       console.log(e);
     }
   }
 
-  _appendPaymentHash = async (stageHash, paymentHash) => {
-    let paymentHashes;
+  _appendReceiptHash = async (stageHeight, receiptHash) => {
+    let receiptHashes;
     try {
-      paymentHashes = await this.db.get(stageHash);
+      receiptHashes = await this.db.get(stageHeight);
     } catch (e) {
-      paymentHashes = JSON.stringify([]);
+      receiptHashes = JSON.stringify([]);
     } finally {
-      paymentHashes = JSON.parse(paymentHashes);
-      paymentHashes.push(paymentHash);
-      await this.db.put(stageHash, JSON.stringify(paymentHashes));
+      receiptHashes = JSON.parse(receiptHashes);
+      receiptHashes.push(receiptHash);
+      await this.db.put(stageHeight, JSON.stringify(receiptHashes));
     }
   }
 }
