@@ -66,7 +66,7 @@ class Client {
 
   saveLightTx = (lightTx) => {
     assert(lightTx instanceof LightTransaction, 'Parameter \'lightTx\' should be instance of \'LightTransaction\'.');
-    this._storage.setLightTx(lightTx.lightTxtHash, lightTx.toJson());
+    this._storage.setLightTx(lightTx.lightTxHash, lightTx.toJson());
   }
 
   saveReceipt = (receipt) => {
