@@ -34,7 +34,7 @@ class Level {
   setReceipt = async (key, value) => {
     try {
       await this.db.put('receipt:' + key, JSON.stringify(value));
-      this._appendReceiptHash(value.lightTxData.stageHeight, value.receiptHash);
+      await this._appendReceiptHash(value.lightTxData.stageHeight, value.receiptHash);
     } catch (e) {
       console.log(e);
     }
