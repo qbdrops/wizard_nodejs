@@ -1,8 +1,8 @@
 import EthUtils from 'ethereumjs-util';
 import assert from 'assert';
 import LightTransaction from '@/models/light-transaction';
-import types from '@/models/types';
 import Receipt from './models/receipt';
+import types from '@/models/types';
 
 class Client {
   constructor (clientConfig, infinitechain) {
@@ -16,6 +16,7 @@ class Client {
     // Normalize lightTxData
     lightTxData = await this._prepare(type, lightTxData);
     let lightTxJson = { lightTxData: lightTxData };
+
     // Create lightTx
     let lightTx = new LightTransaction(lightTxJson);
 
@@ -29,6 +30,41 @@ class Client {
   proposeDeposit = async (lightTx, nonce = null) => {
     assert(lightTx instanceof LightTransaction, 'Parameter \'lightTx\' should be instance of LightTransaction.');
     return this._infinitechain.contract.proposeDeposit(lightTx, nonce);
+  }
+
+  instantWithdraw = async (receipt, nonce = null) => {
+    assert(receipt instanceof Receipt, 'Parameter \'receipt\' should be instance of Receipt.');
+    return this._infinitechain.contract.instantWithdraw(receipt, nonce);
+  }
+
+  saveLightTx = async (lightTx) => {
+    assert(lightTx instanceof LightTransaction, 'Parameter \'lightTx\' should be instance of \'LightTransaction\'.');
+    await this._storage.setLightTx(lightTx.lightTxHash, lightTx.toJson());
+  }
+
+  saveReceipt = async (receipt) => {
+    assert(receipt instanceof Receipt, 'Parameter \'receipt\' should be instance of \'Receipt\'.');
+    await this._storage.setReceipt(receipt.receiptHash, receipt.toJson());
+  }
+
+  getLightTx = async (lightTxHash) => {
+    try {
+      return await this._storage.getLightTx(lightTxHash);
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  getReceipt = async (receiptHash) => {
+    try {
+      return await this._storage.getReceipt(receiptHash);
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  getAllReceiptHashes = async (stageHeight) => {
+    return await this._storage.getReceiptHashesByStageHeight(stageHeight);
   }
 
   audit = async (paymentHash) => {
@@ -64,36 +100,6 @@ class Client {
     return this._infinitechain.sidechain.takeObjection(payment);
   }
 
-  saveLightTx = async (lightTx) => {
-    assert(lightTx instanceof LightTransaction, 'Parameter \'lightTx\' should be instance of \'LightTransaction\'.');
-    await this._storage.setLightTx(lightTx.lightTxHash, lightTx.toJson());
-  }
-
-  saveReceipt = async (receipt) => {
-    assert(receipt instanceof Receipt, 'Parameter \'receipt\' should be instance of \'Receipt\'.');
-    await this._storage.setReceipt(receipt.receiptHash, receipt.toJson());
-  }
-
-  getLightTx = async (lightTxHash) => {
-    try {
-      return await this._storage.getLightTx(lightTxHash);
-    } catch (e) {
-      console.log(e);
-    }
-  }
-
-  getReceipt = async (receiptHash) => {
-    try {
-      return await this._storage.getReceipt(receiptHash);
-    } catch (e) {
-      console.log(e);
-    }
-  }
-
-  getAllReceiptHashes = async (stageHeight) => {
-    return await this._storage.getReceiptHashesByStageHeight(stageHeight);
-  }
-
   _sha3 (content) {
     return EthUtils.sha3(content).toString('hex');
   }
@@ -117,6 +123,8 @@ class Client {
     case types.withdrawal:
       break;
     case types.instantWithdrawal:
+      lightTxData.from = clientAddress;
+      lightTxData.to = '0';
       break;
     case types.remittance:
       break;

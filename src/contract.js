@@ -35,7 +35,7 @@ class Contract {
   proposeDeposit = (lightTx, nonce = null) => {
     let value = '0x' + lightTx.lightTxData.value;
     let clientAddress = '0x' + this._infinitechain.signer.getAddress();
-    let sidechainAddress = this.sidechain().address;
+    let sidechainAddress = this._sidechainAddress;
 
     try {
       let txMethodData = this.sidechain().delegateToLib.getData(
@@ -60,12 +60,46 @@ class Contract {
   deposit = (receipt, nonce = null) => {
     let value = '0x0';
     let clientAddress = '0x' + this._infinitechain.signer.getAddress();
-    let sidechainAddress = this.sidechain().address;
+    let sidechainAddress = this._sidechainAddress;
 
     try {
       let txMethodData = this.sidechain().delegateToLib.getData(
         '0x7b9d7d74',
         [
+          '0x' + receipt.receiptData.GSN,
+          '0x' + receipt.receiptData.lightTxHash,
+          '0x' + receipt.receiptData.fromBalance,
+          '0x' + receipt.receiptData.toBalance,
+          receipt.sig.serverReceipt.v,
+          receipt.sig.serverReceipt.r,
+          receipt.sig.serverReceipt.s,
+          receipt.sig.serverLightTx.v,
+          receipt.sig.serverLightTx.r,
+          receipt.sig.serverLightTx.s
+        ]
+      );
+
+      let serializedTx = this._signRawTransaction(txMethodData, clientAddress, sidechainAddress, value, nonce);
+      let txHash = this._sendRawTransaction(serializedTx);
+      return txHash;
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  instantWithdraw = (receipt, nonce = null) => {
+    let value = '0x0';
+    let clientAddress = '0x' + this._infinitechain.signer.getAddress();
+    let sidechainAddress = this._sidechainAddress;
+
+    try {
+      let txMethodData = this.sidechain().delegateToLib.getData(
+        '0xbe1946da',
+        [
+          '0x' + receipt.lightTxData.value,
+          '0x' + receipt.lightTxData.fee,
+          '0x' + receipt.lightTxData.LSN,
+          '0x' + receipt.lightTxData.stageHeight,
           '0x' + receipt.receiptData.GSN,
           '0x' + receipt.receiptData.lightTxHash,
           '0x' + receipt.receiptData.fromBalance,

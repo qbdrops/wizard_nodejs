@@ -31,6 +31,14 @@ class Event {
     });
   }
 
+  onInstantWithdraw (cb) {
+    let sidechain = this._infinitechain.contract.sidechain();
+    sidechain.VerifyReceipt({ _type: types.instantWithdrawal }, this._eventOpt).watch((err, result) => {
+      if (err) { console.trace; }
+      cb(err, result);
+    });
+  }
+
   onAttach (cb) {
     let sidechain = this._infinitechain.contract.sidechain();
 
