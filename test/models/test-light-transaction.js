@@ -6,13 +6,15 @@ describe('LightTransaction', () => {
   describe('#constructor', () => {
     it('removes keys which are not in the whitelist', () => {
       let data = {
-        fee: 3,
-        to: '0x456',
-        from: '0x123',
-        value: 100,
-        LSN: '123',
-        stageHeight: 1,
-        foo: 'bar'
+        lightTxData: {
+          fee: 3,
+          to: '0x456',
+          from: '0x123',
+          value: 100,
+          LSN: '123',
+          stageHeight: 1,
+          foo: 'bar'
+        }
       };
 
       let lightTx = new LightTransaction(data);
@@ -21,11 +23,13 @@ describe('LightTransaction', () => {
 
     it('checks if all lightTxData keys are included', () => {
       let data = {
-        fee: 3,
-        from: '0x123',
-        value: 100,
-        LSN: '123',
-        stageHeight: 1
+        lightTxData: {
+          fee: 3,
+          from: '0x123',
+          value: 100,
+          LSN: '123',
+          stageHeight: 1
+        }
       };
 
       assert.throws(() => { new LightTransaction(data); }, Error, 'Parameter \'lightTxData\' does not include key \'to\'.');
@@ -33,32 +37,35 @@ describe('LightTransaction', () => {
 
     it('checks if all sig has correct format', () => {
       let data = {
-        fee: 3,
-        from: '0x123',
-        to: '0x456',
-        value: 100,
-        LSN: '123',
-        stageHeight: 1
-      };
-
-      let sig = {
-        clientLightTx: {
-          s: '0x456',
-          v: 27
+        lightTxData: {
+          fee: 3,
+          from: '0x123',
+          to: '0x456',
+          value: 100,
+          LSN: '123',
+          stageHeight: 1
+        },
+        sig: {
+          clientLightTx: {
+            s: '0x456',
+            v: 27
+          }
         }
       };
 
-      assert.throws(() => { new LightTransaction(data, sig); }, Error, '\'sig\' does not have correct format.');
+      assert.throws(() => { new LightTransaction(data); }, Error, '\'sig\' does not have correct format.');
     });
 
     it('returns correct lightTx', () => {
       let data = {
-        fee: 3,
-        to: '0x456',
-        from: '0x123',
-        value: 100,
-        LSN: '123',
-        stageHeight: 1
+        lightTxData: {
+          fee: 3,
+          to: '0x456',
+          from: '0x123',
+          value: 100,
+          LSN: '123',
+          stageHeight: 1
+        }
       };
 
       let lightTx = new LightTransaction(data);
@@ -83,39 +90,47 @@ describe('LightTransaction', () => {
   describe('#type', () => {
     it('returns correct lightTx type', () => {
       let data1 = {
-        fee: 3,
-        to: '123',
-        from: '0',
-        value: 10,
-        LSN: '123',
-        stageHeight: 1
+        lightTxData: {
+          fee: 3,
+          to: '123',
+          from: '0',
+          value: 10,
+          LSN: '123',
+          stageHeight: 1
+        }
       };
 
       let data2 = {
-        fee: 3,
-        to: '123',
-        from: '456',
-        value: 10,
-        LSN: '123',
-        stageHeight: 1
+        lightTxData: {
+          fee: 3,
+          to: '123',
+          from: '456',
+          value: 10,
+          LSN: '123',
+          stageHeight: 1
+        }
       };
 
       let data3 = {
-        fee: 3,
-        to: '0',
-        from: '123',
-        value: 1,
-        LSN: '123',
-        stageHeight: 1
+        lightTxData: {
+          fee: 3,
+          to: '0',
+          from: '123',
+          value: 1,
+          LSN: '123',
+          stageHeight: 1
+        }
       };
 
       let data4 = {
-        fee: 3,
-        to: '0',
-        from: '123',
-        value: 11,
-        LSN: '123',
-        stageHeight: 1
+        lightTxData: {
+          fee: 3,
+          to: '0',
+          from: '123',
+          value: 11,
+          LSN: '123',
+          stageHeight: 1
+        }
       };
 
       let lightTx1 = new LightTransaction(data1);
@@ -160,12 +175,14 @@ describe('LightTransaction', () => {
 
   describe('#toJson', () => {
     let data = {
-      from: 'ce44fa4565747558066266061786e69336b5f3a2',
-      to: 'fb44fa0865747558066266061786e69336b5f3a2',
-      value: 0.5,
-      fee: 0.1,
-      LSN: 5,
-      stageHeight: 1
+      lightTxData: {
+        from: 'ce44fa4565747558066266061786e69336b5f3a2',
+        to: 'fb44fa0865747558066266061786e69336b5f3a2',
+        value: 0.5,
+        fee: 0.1,
+        LSN: 5,
+        stageHeight: 1
+      }
     };
 
     it('returns correct json object', () => {
@@ -193,12 +210,14 @@ describe('LightTransaction', () => {
 
   describe('#toString', () => {
     let data = {
-      from: 'ce44fa4565747558066266061786e69336b5f3a2',
-      to: 'fb44fa0865747558066266061786e69336b5f3a2',
-      value: 0.5,
-      fee: 0.1,
-      LSN: 5,
-      stageHeight: 1
+      lightTxData : {
+        from: 'ce44fa4565747558066266061786e69336b5f3a2',
+        to: 'fb44fa0865747558066266061786e69336b5f3a2',
+        value: 0.5,
+        fee: 0.1,
+        LSN: 5,
+        stageHeight: 1
+      }
     };
 
     it('returns correct json object', () => {

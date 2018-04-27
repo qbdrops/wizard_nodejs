@@ -4,29 +4,31 @@ import Receipt from '@/models/receipt';
 
 describe('Receipt', () => {
   describe('#constructor', () => {
-    let ltxData = {
-      fee: 3,
-      to: '0x456',
-      from: '0x123',
-      value: 100,
-      LSN: '123',
-      stageHeight: 1,
-      foo: 'bar'
-    };
-    let sig = {
-      clientLightTx:{
-        v: 28,
-        r:'0x384f9cb16fe9333e44b4ea8bba8cb4cb7cf910252e32014397c73aff5f94480c',
-        s:'0x55305fc94b234c21d0025a8bce1fc20dbc7a83b48a66abc3cfbfdbc0a28c5709'
+    let lightTxJson = {
+      lightTxData: {
+        fee: 3,
+        to: '0x456',
+        from: '0x123',
+        value: 100,
+        LSN: '123',
+        stageHeight: 1,
+        foo: 'bar'
       },
-      serverLightTx:{
-        v: 28,
-        r:'0x384f9cb16fe9333e44b4ea8bba8cb4cb7cf910252e32014397c73aff5f94480c',
-        s:'0x55305fc94b234c21d0025a8bce1fc20dbc7a83b48a66abc3cfbfdbc0a28c5709'
-      } 
+      sig: {
+        clientLightTx:{
+          v: 28,
+          r:'0x384f9cb16fe9333e44b4ea8bba8cb4cb7cf910252e32014397c73aff5f94480c',
+          s:'0x55305fc94b234c21d0025a8bce1fc20dbc7a83b48a66abc3cfbfdbc0a28c5709'
+        },
+        serverLightTx:{
+          v: 28,
+          r:'0x384f9cb16fe9333e44b4ea8bba8cb4cb7cf910252e32014397c73aff5f94480c',
+          s:'0x55305fc94b234c21d0025a8bce1fc20dbc7a83b48a66abc3cfbfdbc0a28c5709'
+        } 
+      }
     };
 
-    let correctLightTx = new LightTransaction(ltxData, sig);
+    let correctLightTx = new LightTransaction(lightTxJson);
     let correctReceiptData = {
       GSN: '0000000000000000000000000000000000000000000000000000000000000015',
       lightTxHash: correctLightTx.lightTxHash,
@@ -44,7 +46,12 @@ describe('Receipt', () => {
         }
       };
 
-      let wrongLightTx = new LightTransaction(ltxData, wrongSig);
+      let wrongLightTxJson = {
+        lightTxData: lightTxJson.lightTxData,
+        sig: wrongSig
+      };
+
+      let wrongLightTx = new LightTransaction(wrongLightTxJson);
 
       let receiptJson = {
         lightTxData: wrongLightTx.lightTxData,

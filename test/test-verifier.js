@@ -19,16 +19,18 @@ describe('Verifier', async () => {
 
   await infinitechain.initialize();
 
-  let lightTxData = {
-    from: '0',
-    to: 'fb44fa0865747558066266061786e69336b5f3a2',
-    value: 0.5,
-    fee: 0.1,
-    LSN: 1,
-    stageHeight: 1
+  let lightTxJson = {
+    lightTxData: {
+      from: '0',
+      to: 'fb44fa0865747558066266061786e69336b5f3a2',
+      value: 0.5,
+      fee: 0.1,
+      LSN: 1,
+      stageHeight: 1
+    }
   };
 
-  let lightTx = new LightTransaction(lightTxData);
+  let lightTx = new LightTransaction(lightTxJson);
   lightTx = infinitechain.signer.signWithClientKey(lightTx);
 
   describe('#verifyLightTx', () => {

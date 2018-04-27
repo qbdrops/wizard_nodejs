@@ -29,13 +29,16 @@ describe('Signer', () => {
   };
 
   let lightTx = new LightTransaction({
-    from: '0x123',
-    to: '0x456',
-    value: 100,
-    LSN: '123',
-    fee: 3,
-    stageHeight: 1
-  }, sig);
+    lightTxData: {
+      from: '0x123',
+      to: '0x456',
+      value: 100,
+      LSN: '123',
+      fee: 3,
+      stageHeight: 1
+    },
+    sig: sig
+  });
 
   let receiptData = {
     GSN: '123',
