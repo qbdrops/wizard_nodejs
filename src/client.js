@@ -15,9 +15,9 @@ class Client {
   makeLightTx = async (type, lightTxData) => {
     // Normalize lightTxData
     lightTxData = await this._prepare(type, lightTxData);
-
+    let lightTxJson = { lightTxData: lightTxData };
     // Create lightTx
-    let lightTx = new LightTransaction(lightTxData);
+    let lightTx = new LightTransaction(lightTxJson);
 
     // Sign lightTx
     let signer = this._infinitechain.signer;
