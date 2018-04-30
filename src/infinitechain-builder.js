@@ -83,9 +83,6 @@ class InfinitechainBuilder {
       signer.getOrNewKeyPair();
     }
 
-    let event = new Event(eventConfig, infinitechain);
-    infinitechain.setEvent(event);
-
     let gringotts = new Gringotts(gringottsConfig, infinitechain);
     infinitechain.setGringotts(gringotts);
 
@@ -98,7 +95,11 @@ class InfinitechainBuilder {
     let client = new Client(clientConfig, infinitechain);
     infinitechain.setClient(client);
 
-    // Create server object after crypto and sidechain in order to use them in server
+    // Create event object after client in order to use it in event
+    let event = new Event(eventConfig, infinitechain);
+    infinitechain.setEvent(event);
+
+    // Create server object after signer and contract in order to use them in server
     let server = new Server(serverConfig, infinitechain);
     infinitechain.setServer(server);
 
