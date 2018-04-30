@@ -118,11 +118,13 @@ class LightTransaction {
     return JSON.stringify(this.toJson());
   }
 
-  static parseProposal = (eventData) => {
+  static parseProposal = (type, eventData) => {
+    assert(Object.values(types).includes(type), 'Invalid type.');
+
     let lightTxJson = {
       lightTxData: {
-        from: '0',
-        to: eventData._client,
+        from: (type == types.withdrawal) ? eventData._client : '0',
+        to: (type == types.deposit) ? eventData._client : '0',
         value: eventData._value,
         LSN: eventData._lsn,
         fee: eventData._fee,
