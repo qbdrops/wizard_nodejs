@@ -131,6 +131,8 @@ class Client {
       lightTxData.to = clientAddress;
       break;
     case types.withdrawal:
+      lightTxData.from = clientAddress;
+      lightTxData.to = '0';
       break;
     case types.instantWithdrawal:
       lightTxData.from = clientAddress;
