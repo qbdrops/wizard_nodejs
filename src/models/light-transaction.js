@@ -118,7 +118,7 @@ class LightTransaction {
     return JSON.stringify(this.toJson());
   }
 
-  static parseProposeDeposit = (eventData) => {
+  static parseProposal = (eventData) => {
     let lightTxJson = {
       lightTxData: {
         from: '0',

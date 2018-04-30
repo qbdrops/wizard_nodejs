@@ -144,7 +144,7 @@ describe('LightTransaction', () => {
     });
   });
 
-  describe('#parseProposeDeposit', () => {
+  describe('#parseProposal', () => {
     let eventData = {
       _lightTxHash: '0x43bc6fd91751563ee4c22c119c7095bf917928f648d079311cae1544a0126ad5',
       _client: '0x000000000000000000000000fb44fa0865747558066266061786e69336b5f3a2',
@@ -158,7 +158,7 @@ describe('LightTransaction', () => {
     };
 
     it('returns a LightTransaction object from a proposeDeposit event', () => {
-      let lightTx = LightTransaction.parseProposeDeposit(eventData);
+      let lightTx = LightTransaction.parseProposal(eventData);
 
       let expected = {
         from: '0000000000000000000000000000000000000000000000000000000000000000',
