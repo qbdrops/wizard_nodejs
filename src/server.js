@@ -19,6 +19,11 @@ class Server {
     return this._infinitechain.contract.deposit(receipt, nonce);
   }
 
+  confirmWithdrawal = async (receipt, nonce = null) => {
+    assert(receipt instanceof Receipt, 'Parameter \'receipt\' should be instance of Receipt.');
+    return this._infinitechain.contract.confirmWithdrawal(receipt, nonce);
+  }
+
   sendLightTx = async (lightTx) => {
     let gringotts = this._infinitechain.gringotts;
     let receipt = await gringotts.sendLightTx(lightTx);

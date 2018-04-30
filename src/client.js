@@ -32,9 +32,19 @@ class Client {
     return this._infinitechain.contract.proposeDeposit(lightTx, nonce);
   }
 
+  proposeWithdrawal = async (lightTx, nonce = null) => {
+    assert(lightTx instanceof LightTransaction, 'Parameter \'lightTx\' should be instance of LightTransaction.');
+    return this._infinitechain.contract.proposeWithdrawal(lightTx, nonce);
+  }
+
   instantWithdraw = async (receipt, nonce = null) => {
     assert(receipt instanceof Receipt, 'Parameter \'receipt\' should be instance of Receipt.');
     return this._infinitechain.contract.instantWithdraw(receipt, nonce);
+  }
+
+  withdraw = async (receipt, nonce = null) => {
+    assert(receipt instanceof Receipt, 'Parameter \'receipt\' should be instance of Receipt.');
+    return this._infinitechain.contract.withdraw(receipt, nonce);
   }
 
   saveLightTx = async (lightTx) => {

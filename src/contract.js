@@ -33,7 +33,7 @@ class Contract {
   }
 
   proposeDeposit = (lightTx, nonce = null) => {
-    let value = '0x' + lightTx.lightTxData.value;
+    let txValue = '0x' + lightTx.lightTxData.value;
     let clientAddress = '0x' + this._infinitechain.signer.getAddress();
     let sidechainAddress = this._sidechainAddress;
 
@@ -49,7 +49,33 @@ class Contract {
           lightTx.sig.clientLightTx.s
         ]
       );
-      let serializedTx = this._signRawTransaction(txMethodData, clientAddress, sidechainAddress, value, nonce);
+      let serializedTx = this._signRawTransaction(txMethodData, clientAddress, sidechainAddress, txValue, nonce);
+      let txHash = this._sendRawTransaction(serializedTx);
+      return txHash;
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  proposeWithdrawal = (lightTx, nonce = null) => {
+    let txValue = '0x0';
+    let clientAddress = '0x' + this._infinitechain.signer.getAddress();
+    let sidechainAddress = this._sidechainAddress;
+
+    try {
+      let txMethodData = this.sidechain().delegateToLib.getData(
+        '0x68ff1929',
+        [
+          '0x' + lightTx.lightTxHash,
+          '0x' + lightTx.lightTxData.fee,
+          '0x' + lightTx.lightTxData.LSN,
+          '0x' + lightTx.lightTxData.value,
+          lightTx.sig.clientLightTx.v,
+          lightTx.sig.clientLightTx.r,
+          lightTx.sig.clientLightTx.s
+        ]
+      );
+      let serializedTx = this._signRawTransaction(txMethodData, clientAddress, sidechainAddress, txValue, nonce);
       let txHash = this._sendRawTransaction(serializedTx);
       return txHash;
     } catch (e) {
@@ -58,7 +84,7 @@ class Contract {
   }
 
   deposit = (receipt, nonce = null) => {
-    let value = '0x0';
+    let txValue = '0x0';
     let clientAddress = '0x' + this._infinitechain.signer.getAddress();
     let sidechainAddress = this._sidechainAddress;
 
@@ -79,7 +105,58 @@ class Contract {
         ]
       );
 
-      let serializedTx = this._signRawTransaction(txMethodData, clientAddress, sidechainAddress, value, nonce);
+      let serializedTx = this._signRawTransaction(txMethodData, clientAddress, sidechainAddress, txValue, nonce);
+      let txHash = this._sendRawTransaction(serializedTx);
+      return txHash;
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  confirmWithdrawal = (receipt, nonce = null) => {
+    let txValue = '0x0';
+    let clientAddress = '0x' + this._infinitechain.signer.getAddress();
+    let sidechainAddress = this._sidechainAddress;
+
+    try {
+      let txMethodData = this.sidechain().delegateToLib.getData(
+        '0xe0671980',
+        [
+          '0x' + receipt.receiptData.GSN,
+          '0x' + receipt.receiptData.lightTxHash,
+          '0x' + receipt.receiptData.fromBalance,
+          '0x' + receipt.receiptData.toBalance,
+          receipt.sig.serverReceipt.v,
+          receipt.sig.serverReceipt.r,
+          receipt.sig.serverReceipt.s,
+          receipt.sig.serverLightTx.v,
+          receipt.sig.serverLightTx.r,
+          receipt.sig.serverLightTx.s
+        ]
+      );
+
+      let serializedTx = this._signRawTransaction(txMethodData, clientAddress, sidechainAddress, txValue, nonce);
+      let txHash = this._sendRawTransaction(serializedTx);
+      return txHash;
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  withdraw = (receipt, nonce = null) => {
+    let txValue = '0x0';
+    let clientAddress = '0x' + this._infinitechain.signer.getAddress();
+    let sidechainAddress = this._sidechainAddress;
+
+    try {
+      let txMethodData = this.sidechain().delegateToLib.getData(
+        '0xfe2b3924',
+        [
+          '0x' + receipt.lightTxHash
+        ]
+      );
+
+      let serializedTx = this._signRawTransaction(txMethodData, clientAddress, sidechainAddress, txValue, nonce);
       let txHash = this._sendRawTransaction(serializedTx);
       return txHash;
     } catch (e) {
@@ -88,7 +165,7 @@ class Contract {
   }
 
   instantWithdraw = (receipt, nonce = null) => {
-    let value = '0x0';
+    let txValue = '0x0';
     let clientAddress = '0x' + this._infinitechain.signer.getAddress();
     let sidechainAddress = this._sidechainAddress;
 
@@ -113,7 +190,7 @@ class Contract {
         ]
       );
 
-      let serializedTx = this._signRawTransaction(txMethodData, clientAddress, sidechainAddress, value, nonce);
+      let serializedTx = this._signRawTransaction(txMethodData, clientAddress, sidechainAddress, txValue, nonce);
       let txHash = this._sendRawTransaction(serializedTx);
       return txHash;
     } catch (e) {
