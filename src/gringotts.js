@@ -51,6 +51,20 @@ class Gringotts {
     let url = this._nodeUrl + '/server/address';
     return axios.get(url);
   }
+
+  fetchRootHashes = async (stageHeight = null) => {
+    let url = this._nodeUrl + '/roothash';
+    if (stageHeight) {
+      url = url + '/' + stageHeight.toString();
+    }
+
+    return axios.get(url);
+  }
+
+  attach = async (serializedTx, receiptRootHash) => {
+    let url = this._nodeUrl + '/attach';
+    return axios.post(url, { serializedTx: serializedTx, rootHash: receiptRootHash });
+  }
 }
 
 export default Gringotts;

@@ -30,6 +30,19 @@ class Server {
     return receipt;
   }
 
+  attach = async (stageHeight = null, nonce = null) => {
+    let gringotts = this._infinitechain.gringotts;
+    let res = await gringotts.fetchRootHashes(stageHeight);
+
+    if (res.data.ok) {
+      let serializedTx = this._infinitechain.contract.attach(res.data.receiptRootHash, '', '', nonce);
+      let attachRes = await gringotts.attach(serializedTx, res.data.receiptRootHash);
+      return attachRes.data.txHash;
+    } else {
+      throw new Error(res.data.message);
+    }
+  }
+
   pendingRootHashes = async () => {
     try {
       let url = this._nodeUrl + '/pending/roothashes';
@@ -37,29 +50,6 @@ class Server {
       return res.data;
     } catch (e) {
       console.log(e);
-    }
-  }
-
-  commitPayments = async (objectionTime, finalizeTime, data = '', targetRootHash = '', nonce = null) => {
-    let url = this._nodeUrl + '/roothash';
-    let res = await axios.get(url, {
-      params: {
-        rootHash: targetRootHash
-      }
-    });
-
-    if (res.data.ok) {
-      let rootHash = res.data.rootHash;
-      let stageHeight = res.data.stageHeight;
-
-      let serializedTx = this._infinitechain.sidechain.addNewStage(rootHash, stageHeight, objectionTime, finalizeTime, data, nonce);
-      console.log('Serialized: ' + serializedTx);
-
-      let commitUrl = this._nodeUrl + '/commit/payments';
-      let commitRes = await axios.post(commitUrl, { serializedTx: serializedTx, rootHash: rootHash });
-      return commitRes.data.txHash;
-    } else {
-      throw new Error(res.data.message);
     }
   }
 

@@ -198,17 +198,21 @@ class Contract {
     }
   }
 
-  attach = (rootHash, stageHeight, objectionTime, finalizeTime, data, nonce = null) => {
+  attach = (receiptRootHash, balanceRootHash, data, nonce = null) => {
+    let txValue = '0x0';
+    let clientAddress = '0x' + this._infinitechain.signer.getAddress();
+    let sidechainAddress = this._sidechainAddress;
+
     try {
-      let stageHash = '0x' + this._sha3(stageHeight.toString());
-      let txMethodData = this._infinitechainContract.addNewStage.getData(
-        stageHash,
-        rootHash,
-        objectionTime,
-        finalizeTime,
-        data
+      let txMethodData = this.sidechain().delegateToLib.getData(
+        '0x1655e8ac',
+        [
+          '0x' + receiptRootHash,
+          '0x' + balanceRootHash,
+          '0x' + data
+        ]
       );
-      let serializedTx = this._signRawTransaction(txMethodData, nonce);
+      let serializedTx = this._signRawTransaction(txMethodData, clientAddress, sidechainAddress, txValue, nonce);
       return serializedTx;
     } catch (e) {
       console.error(e);
