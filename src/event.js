@@ -53,6 +53,7 @@ class Event {
           serverReceipt: serverReceiptSig,
         },
         receiptData: {
+          stageHeight: result.args._stageHeight,
           GSN: result.args._gsn,
           lightTxHash: result.args._lightTxHash.substring(2),
           fromBalance: result.args._fromBalance,
@@ -96,6 +97,7 @@ class Event {
           serverReceipt: serverReceiptSig,
         },
         receiptData: {
+          stageHeight: result.args._stageHeight,
           GSN: result.args._gsn,
           lightTxHash: result.args._lightTxHash.substring(2),
           fromBalance: result.args._fromBalance,

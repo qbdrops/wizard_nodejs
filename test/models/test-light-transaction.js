@@ -12,13 +12,12 @@ describe('LightTransaction', () => {
           from: '0x123',
           value: 100,
           LSN: '123',
-          stageHeight: 1,
           foo: 'bar'
         }
       };
 
       let lightTx = new LightTransaction(data);
-      assert.deepEqual(Object.keys(lightTx.lightTxData), ['from', 'to', 'value', 'fee', 'LSN', 'stageHeight']);
+      assert.deepEqual(Object.keys(lightTx.lightTxData), ['from', 'to', 'value', 'fee', 'LSN']);
     });
 
     it('checks if all lightTxData keys are included', () => {
@@ -27,8 +26,7 @@ describe('LightTransaction', () => {
           fee: 3,
           from: '0x123',
           value: 100,
-          LSN: '123',
-          stageHeight: 1
+          LSN: '123'
         }
       };
 
@@ -42,8 +40,7 @@ describe('LightTransaction', () => {
           from: '0x123',
           to: '0x456',
           value: 100,
-          LSN: '123',
-          stageHeight: 1
+          LSN: '123'
         },
         sig: {
           clientLightTx: {
@@ -64,7 +61,6 @@ describe('LightTransaction', () => {
           from: '0x123',
           value: 100,
           LSN: '123',
-          stageHeight: 1
         }
       };
 
@@ -75,11 +71,10 @@ describe('LightTransaction', () => {
           LSN: '000000000000000000000000000000000000000000000000000000000000007b',
           fee: '00000000000000000000000000000000000000000000000029a2241af62c0000',
           from: '000000000000000000000000000000000000000000000000000000000000x123',
-          stageHeight: '0000000000000000000000000000000000000000000000000000000000000001',
           to: '000000000000000000000000000000000000000000000000000000000000x456',
           value: '0000000000000000000000000000000000000000000000056bc75e2d63100000'
         },
-        lightTxHash: 'cd10ce326eb5402c46136d7f1ccf3d4db16198b938b348a126e5bfe7549cd49b',
+        lightTxHash: 'c449120b43df3b8e22e34d6759bad0d20a291f2fad9d29b65a7a5ee69ddfa7b7',
       };
 
       assert.deepEqual(lightTx.lightTxData, result.lightTxData);
@@ -95,8 +90,7 @@ describe('LightTransaction', () => {
           to: '123',
           from: '0',
           value: 10,
-          LSN: '123',
-          stageHeight: 1
+          LSN: '123'
         }
       };
 
@@ -106,8 +100,7 @@ describe('LightTransaction', () => {
           to: '123',
           from: '456',
           value: 10,
-          LSN: '123',
-          stageHeight: 1
+          LSN: '123'
         }
       };
 
@@ -117,8 +110,7 @@ describe('LightTransaction', () => {
           to: '0',
           from: '123',
           value: 1,
-          LSN: '123',
-          stageHeight: 1
+          LSN: '123'
         }
       };
 
@@ -128,8 +120,7 @@ describe('LightTransaction', () => {
           to: '0',
           from: '123',
           value: 11,
-          LSN: '123',
-          stageHeight: 1
+          LSN: '123'
         }
       };
 
@@ -151,7 +142,6 @@ describe('LightTransaction', () => {
       _value: '0x000000000000000000000000000000000000000000000000016345785d8a0000',
       _fee: '0x000000000000000000000000000000000000000000000000002386f26fc10000',
       _lsn: '0x0000000000000000000000000000000000000000000000000000000000000001',
-      _stageHeight: '0x0000000000000000000000000000000000000000000000000000000000000001',
       _v: '0x000000000000000000000000000000000000000000000000000000000000001b',
       _r: '0xe7c1ca9f2a5aa772048bc592b56a08482ac2e131c887c4f789af0c66208c0578',
       _s: '0x0abf10325d6e746e1a4ff5d3413e16dd3994778166620a51c578853a178867bd'
@@ -165,8 +155,7 @@ describe('LightTransaction', () => {
         to: '000000000000000000000000fb44fa0865747558066266061786e69336b5f3a2',
         value: '000000000000000000000000000000000000000000000000016345785d8a0000',
         fee: '000000000000000000000000000000000000000000000000002386f26fc10000',
-        LSN: '0000000000000000000000000000000000000000000000000000000000000001',
-        stageHeight: '0000000000000000000000000000000000000000000000000000000000000001'
+        LSN: '0000000000000000000000000000000000000000000000000000000000000001'
       };
 
       assert.deepEqual(lightTx.lightTxData, expected);
@@ -180,8 +169,7 @@ describe('LightTransaction', () => {
         to: '0000000000000000000000000000000000000000000000000000000000000000',
         value: '000000000000000000000000000000000000000000000000016345785d8a0000',
         fee: '000000000000000000000000000000000000000000000000002386f26fc10000',
-        LSN: '0000000000000000000000000000000000000000000000000000000000000001',
-        stageHeight: '0000000000000000000000000000000000000000000000000000000000000001'
+        LSN: '0000000000000000000000000000000000000000000000000000000000000001'
       };
 
       assert.deepEqual(lightTx.lightTxData, expected);
@@ -195,8 +183,7 @@ describe('LightTransaction', () => {
         to: 'fb44fa0865747558066266061786e69336b5f3a2',
         value: 0.5,
         fee: 0.1,
-        LSN: 5,
-        stageHeight: 1
+        LSN: 5
       }
     };
 
@@ -204,14 +191,13 @@ describe('LightTransaction', () => {
       let lightTx = new LightTransaction(data);
 
       let expected = {
-        lightTxHash: 'bbd7d934b0d1789da4c88ee93829bb4d18eaf71bdb638e07a697b05fb0c74c95',
+        lightTxHash: 'f501f5f8c1930e944cd621eadc03fb8cbfff65e99f57a026ff4665e2a3b944e8',
         lightTxData: {
           from: '000000000000000000000000ce44fa4565747558066266061786e69336b5f3a2',
           to: '000000000000000000000000fb44fa0865747558066266061786e69336b5f3a2',
           value: '00000000000000000000000000000000000000000000000006f05b59d3b20000',
           fee: '000000000000000000000000000000000000000000000000016345785d8a0000',
-          LSN: '0000000000000000000000000000000000000000000000000000000000000005',
-          stageHeight: '0000000000000000000000000000000000000000000000000000000000000001'
+          LSN: '0000000000000000000000000000000000000000000000000000000000000005'
         },
         sig: {
           clientLightTx: {},
@@ -230,8 +216,7 @@ describe('LightTransaction', () => {
         to: 'fb44fa0865747558066266061786e69336b5f3a2',
         value: 0.5,
         fee: 0.1,
-        LSN: 5,
-        stageHeight: 1
+        LSN: 5
       }
     };
 
@@ -239,14 +224,13 @@ describe('LightTransaction', () => {
       let lightTx = new LightTransaction(data);
 
       let expected = JSON.stringify({
-        lightTxHash: 'bbd7d934b0d1789da4c88ee93829bb4d18eaf71bdb638e07a697b05fb0c74c95',
+        lightTxHash: 'f501f5f8c1930e944cd621eadc03fb8cbfff65e99f57a026ff4665e2a3b944e8',
         lightTxData: {
           from: '000000000000000000000000ce44fa4565747558066266061786e69336b5f3a2',
           to: '000000000000000000000000fb44fa0865747558066266061786e69336b5f3a2',
           value: '00000000000000000000000000000000000000000000000006f05b59d3b20000',
           fee: '000000000000000000000000000000000000000000000000016345785d8a0000',
-          LSN: '0000000000000000000000000000000000000000000000000000000000000005',
-          stageHeight: '0000000000000000000000000000000000000000000000000000000000000001'
+          LSN: '0000000000000000000000000000000000000000000000000000000000000005'
         },
         sig: {
           clientLightTx: {},

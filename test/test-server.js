@@ -44,6 +44,7 @@ describe('Server', () => {
     signedLightTx = infinitechain.signer.signWithServerKey(lightTx);
 
     let receiptData = {
+      stageHeight: 1,
       GSN: 1,
       lightTxHash: signedLightTx.lightTxHash,
       fromBalance: 20,

@@ -11,7 +11,6 @@ describe('Receipt', () => {
         from: '0x123',
         value: 100,
         LSN: '123',
-        stageHeight: 1,
         foo: 'bar'
       },
       sig: {
@@ -30,6 +29,7 @@ describe('Receipt', () => {
 
     let correctLightTx = new LightTransaction(lightTxJson);
     let correctReceiptData = {
+      stageHeight: 1,
       GSN: '0000000000000000000000000000000000000000000000000000000000000015',
       lightTxHash: correctLightTx.lightTxHash,
       fromBalance: '0000000000000000000000000000000000000000000000000000000000000032',
@@ -65,6 +65,7 @@ describe('Receipt', () => {
 
     it('checks if all receiptJsonKeys are included', () => {
       let wrongReceiptData = {
+        stageHeight: 1,
         GSN: 21,
         lightTxHash:'12345',
         toBalance: 500,
@@ -82,6 +83,7 @@ describe('Receipt', () => {
 
     it('checks if all receiptDataKeys are included', () => {
       let wrongReceiptData = {
+        stageHeight: 1,
         GSN: 21,
         lightTxHash:'12345',
         toBalance: 500,
@@ -108,7 +110,7 @@ describe('Receipt', () => {
 
       let receipt = new Receipt(receiptJson);
       let result = {
-        receiptHash: 'b5a554fb9337d7b258292de591c009a658a628b959d50fd4d896cfcf68270b5a',
+        receiptHash: '8a6757990cd7d1c1e49de26d15443f63eda758950e3ab518cf94202068fe7f6f',
         receiptData: correctReceiptData
       };
 

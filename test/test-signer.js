@@ -41,6 +41,7 @@ describe('Signer', () => {
   });
 
   let receiptData = {
+    stageHeight: 1,
     GSN: '123',
     lightTxHash: lightTx.lightTxHash,
     fromBalance: 100,
@@ -70,8 +71,8 @@ describe('Signer', () => {
 
       let result = {
         serverLightTx: {
-          r: '0x58da8a2e422de6791d5d124820c6dc0f5e8e596f28e770c1b77fc130857defa1',
-          s: '0x43ac91007538734f05af0313462dc927dcff5e8f018710784154257323f36251',
+          r: '0xc0ef06f6ec58194727133e401a1439e1b8d826e17fdd82533c2f0d14df4fcad4',
+          s: '0x542197c400b1744de5c322f214de644697fbcf25601acfa4fba66b6cf08188ef',
           v: 28
         }
       };
@@ -87,8 +88,8 @@ describe('Signer', () => {
 
       let result = {
         serverReceipt: {
-          r: '0x6fddcfa97f03722cf4a9c3544b7dcecbb00942537ce14f2c132415cff4066a79',
-          s: '0x12652a7ba60fa0a108da53de523e8702fc7fe7616383f6912e8e1983baf6b0ee',
+          r: '0x76e848903a13229b799d5254f7389c969678c98b0fcae98316d197c62e9008f7',
+          s: '0x2581fddce3204d1c8a2e7b049699f62255a94888b635b71d9ddd8478bf7418e6',
           v: 27
         }
       };
@@ -112,8 +113,8 @@ describe('Signer', () => {
 
       let result = {
         clientLightTx: {
-          r: '0x58da8a2e422de6791d5d124820c6dc0f5e8e596f28e770c1b77fc130857defa1',
-          s: '0x43ac91007538734f05af0313462dc927dcff5e8f018710784154257323f36251',
+          r: '0xc0ef06f6ec58194727133e401a1439e1b8d826e17fdd82533c2f0d14df4fcad4',
+          s: '0x542197c400b1744de5c322f214de644697fbcf25601acfa4fba66b6cf08188ef',
           v: 28
         }
       };
