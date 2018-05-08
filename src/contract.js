@@ -92,6 +92,7 @@ class Contract {
       let txMethodData = this.sidechain().delegateToLib.getData(
         '0x7b9d7d74',
         [
+          '0x' + receipt.receiptData.stageHeight,
           '0x' + receipt.receiptData.GSN,
           '0x' + receipt.receiptData.lightTxHash,
           '0x' + receipt.receiptData.fromBalance,
@@ -122,6 +123,7 @@ class Contract {
       let txMethodData = this.sidechain().delegateToLib.getData(
         '0xe0671980',
         [
+          '0x' + receipt.receiptData.stageHeight,
           '0x' + receipt.receiptData.GSN,
           '0x' + receipt.receiptData.lightTxHash,
           '0x' + receipt.receiptData.fromBalance,
@@ -176,7 +178,7 @@ class Contract {
           '0x' + receipt.lightTxData.value,
           '0x' + receipt.lightTxData.fee,
           '0x' + receipt.lightTxData.LSN,
-          '0x' + receipt.lightTxData.stageHeight,
+          '0x' + receipt.receiptData.stageHeight,
           '0x' + receipt.receiptData.GSN,
           '0x' + receipt.receiptData.lightTxHash,
           '0x' + receipt.receiptData.fromBalance,

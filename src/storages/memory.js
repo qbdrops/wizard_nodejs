@@ -8,7 +8,7 @@ class Memory {
     return Object.keys(this.data).map(key => {
       return this.data[key];
     }).filter(receipt => {
-      return receipt.lightTxData.stageHeight == stageHeight;
+      return receipt.receiptData.stageHeight == stageHeight;
     }).map(receipt => receipt.receiptHash);
   }
 

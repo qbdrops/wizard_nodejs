@@ -117,13 +117,7 @@ class Client {
   _prepare = async (type, lightTxData) => {
     assert(Object.values(types).includes(type), 'Parameter \'type\' should be one of \'deposit\', \'withdrawal\', \'instantWithdraw\' or \'remittance\'');
 
-    let gringotts = this._infinitechain.gringotts;
     let clientAddress = this._infinitechain.signer.getAddress();
-
-    if (!lightTxData.stageHeight) {
-      let sidechainHeight = await gringotts.getViableStageHeight();
-      lightTxData.stageHeight = parseInt(sidechainHeight);
-    }
 
     switch (type) {
     case types.deposit:
