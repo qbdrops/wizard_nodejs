@@ -36,7 +36,7 @@ class Server {
 
     if (res.data.ok) {
       let serializedTx = this._infinitechain.contract.attach(res.data.receiptRootHash, '', '', nonce);
-      let attachRes = await gringotts.attach(serializedTx, res.data.receiptRootHash);
+      let attachRes = await gringotts.attach(serializedTx, res.data.stageHeight);
       return attachRes.data.txHash;
     } else {
       throw new Error(res.data.message);

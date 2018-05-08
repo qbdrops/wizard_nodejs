@@ -61,9 +61,9 @@ class Gringotts {
     return axios.get(url);
   }
 
-  attach = async (serializedTx, receiptRootHash) => {
+  attach = async (serializedTx, stageHeight) => {
     let url = this._nodeUrl + '/attach';
-    return axios.post(url, { serializedTx: serializedTx, rootHash: receiptRootHash });
+    return axios.post(url, { serializedTx: serializedTx, stageHeight: stageHeight });
   }
 }
 
