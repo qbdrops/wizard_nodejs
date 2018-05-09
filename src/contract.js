@@ -200,7 +200,7 @@ class Contract {
     }
   }
 
-  attach = (receiptRootHash, balanceRootHash, data, nonce = null) => {
+  attach = (receiptRootHash, accountRootHash, data, nonce = null) => {
     let txValue = '0x0';
     let clientAddress = '0x' + this._infinitechain.signer.getAddress();
     let sidechainAddress = this._sidechainAddress;
@@ -210,7 +210,7 @@ class Contract {
         '0x1655e8ac',
         [
           '0x' + receiptRootHash,
-          '0x' + balanceRootHash,
+          '0x' + accountRootHash,
           '0x' + data
         ]
       );
