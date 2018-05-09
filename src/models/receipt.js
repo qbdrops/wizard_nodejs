@@ -47,9 +47,7 @@ class Receipt {
     this.lightTxHash = lightTx.lightTxHash;
     this.lightTxData = lightTx.lightTxData;
     this.receiptData = this._normalize(orderedReceiptData);
-    this.receiptHash = EthUtils.sha3(
-      Object.values(this.receiptData).reduce((acc, curr) => acc + curr, '')
-    ).toString('hex');
+    this.receiptHash = this._sha3(Object.values(this.receiptData).reduce((acc, curr) => acc + curr, ''));
     this.sig = receiptJson.sig;
     // Initialize serverReceipt sig if it is undefined.
     if (!this.sig.serverReceipt || !this.hasServerReceiptSig()) {
@@ -105,6 +103,10 @@ class Receipt {
       sig: this.sig
     };
     return json;
+  }
+
+  _sha3 (content) {
+    return EthUtils.sha3(content).toString('hex');
   }
 }
 
