@@ -3,7 +3,7 @@ import assert from 'assert';
 import LightTransaction from '@/models/light-transaction';
 import types from '@/models/types';
 
-const allowedReceiptJsonKeys = ['lightTxHash', 'lightTxData', 'sig', 'receiptData'];
+const allowedReceiptJsonKeys = ['lightTxHash', 'lightTxData', 'sig', 'receiptData', 'metadata'];
 const allowedReceiptDataKeys = ['stageHeight', 'GSN', 'lightTxHash', 'fromBalance', 'toBalance'];
 const instantWithdrawalLimit = 10;
 
@@ -22,8 +22,8 @@ class Receipt {
       }
     });
 
-    // Check Json format
-    allowedReceiptJsonKeys.forEach(key => {
+    // Check Json format (except for 'metadata')
+    allowedReceiptJsonKeys.filter(key => key != 'metadata').forEach(key => {
       assert(Object.keys(receiptJson).includes(key), 'Parameter \'receiptJson\' does not include key \'' + key + '\'.');
     });
 
@@ -53,6 +53,7 @@ class Receipt {
     if (!this.sig.serverReceipt || !this.hasServerReceiptSig()) {
       this.sig.serverReceipt = {};
     }
+    this.metadata = (receiptJson.metadata || {});
   }
 
   _normalize = (receiptData) => {
@@ -100,7 +101,8 @@ class Receipt {
       lightTxData: this.lightTxData,
       receiptHash: this.receiptHash,
       receiptData: this.receiptData,
-      sig: this.sig
+      sig: this.sig,
+      metadata: this.metadata
     };
     return json;
   }
