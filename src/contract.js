@@ -29,6 +29,7 @@ class Contract {
   }
 
   sidechain = () => {
+    assert(this._sidechain, 'Infinitechain is not initialized yet');
     return this._sidechain;
   }
 

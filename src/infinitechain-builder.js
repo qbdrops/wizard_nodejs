@@ -92,12 +92,11 @@ class InfinitechainBuilder {
     let verifier = new Verifier(verifierConfig, infinitechain);
     infinitechain.setVerifier(verifier);
 
-    let client = new Client(clientConfig, infinitechain);
-    infinitechain.setClient(client);
-
-    // Create event object after client in order to use it in event
     let event = new Event(eventConfig, infinitechain);
     infinitechain.setEvent(event);
+
+    let client = new Client(clientConfig, infinitechain);
+    infinitechain.setClient(client);
 
     // Create server object after signer and contract in order to use them in server
     let server = new Server(serverConfig, infinitechain);

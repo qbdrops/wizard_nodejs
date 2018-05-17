@@ -1,5 +1,4 @@
 import types from '@/models/types';
-import Receipt from '@/models/receipt';
 
 class Event {
   constructor (eventConfig, infinitechain) {
