@@ -54,6 +54,8 @@ class Receipt {
       this.sig.serverReceipt = {};
     }
     this.metadata = (receiptJson.metadata || {});
+    // Compute WSN
+    this.metadata.WSN = this._sha3(this.receiptData.stageHeight + this.receiptData.GSN);
   }
 
   _normalize = (receiptData) => {
