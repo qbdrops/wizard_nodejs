@@ -1,6 +1,6 @@
 {
   "name": "wizard_nodejs",
-  "version": "1.1.10",
+  "version": "1.1.11",
   "description": "Infinitechain SDK for nodejs",
   "repository": {
     "type": "git",
