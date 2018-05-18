@@ -12,10 +12,47 @@ class Client {
     this._nodeUrl = clientConfig.nodeUrl;
   }
 
-  makeLightTx = async (type, lightTxData) => {
+  makeProposeDeposit = () => {
+    return new Promise((resolve, reject) => {
+      this._infinitechain.event.onProposeDeposit(async (err, result) => {
+        if (err) {
+          reject(err);
+        } else {
+          let DSN = result.args._dsn;
+          let LSN = Math.random() * 1e18;
+          let value = result.args._value;
+          let lightTxData = {
+            LSN: LSN,
+            value: value,
+            fee: 0.01
+          };
+          let metadata = {
+            DSN: DSN
+          };
+
+          let signedLightTx = await this.makeLightTx(types.deposit, lightTxData, metadata);
+          resolve(signedLightTx);
+        }
+      });
+    });
+  }
+
+  makeProposeWithdrawal = async (value) => {
+    let LSN = Math.random() * 1e18;
+    let lightTxData = {
+      LSN: LSN,
+      value: value,
+      fee: 0.01
+    };
+
+    let signedLightTx = await this.makeLightTx(types.withdrawal, lightTxData);
+    return signedLightTx;
+  }
+
+  makeLightTx = async (type, lightTxData, metadata = null) => {
     // Normalize lightTxData
     lightTxData = await this._prepare(type, lightTxData);
-    let lightTxJson = { lightTxData: lightTxData };
+    let lightTxJson = { lightTxData: lightTxData, metadata: metadata };
 
     // Create lightTx
     let lightTx = new LightTransaction(lightTxJson);
@@ -25,16 +62,6 @@ class Client {
     let signedLightTx = signer.signWithClientKey(lightTx);
 
     return signedLightTx;
-  }
-
-  proposeDeposit = async (lightTx, nonce = null) => {
-    assert(lightTx instanceof LightTransaction, 'Parameter \'lightTx\' should be instance of LightTransaction.');
-    return this._infinitechain.contract.proposeDeposit(lightTx, nonce);
-  }
-
-  proposeWithdrawal = async (lightTx, nonce = null) => {
-    assert(lightTx instanceof LightTransaction, 'Parameter \'lightTx\' should be instance of LightTransaction.');
-    return this._infinitechain.contract.proposeWithdrawal(lightTx, nonce);
   }
 
   instantWithdraw = async (receipt, nonce = null) => {

@@ -1,7 +1,7 @@
 import EthUtils from 'ethereumjs-util';
 import axios from 'axios';
 import assert from 'assert';
-import Receipt from '@/models/receipt';
+import types from '@/models/types';
 
 class Server {
   constructor (serverConfig, infinitechain) {
@@ -14,19 +14,26 @@ class Server {
     this._nodeUrl = serverConfig.nodeUrl;
   }
 
-  deposit = async (receipt, nonce = null) => {
-    assert(receipt instanceof Receipt, 'Parameter \'receipt\' should be instance of Receipt.');
-    return this._infinitechain.contract.deposit(receipt, nonce);
-  }
-
-  confirmWithdrawal = async (receipt, nonce = null) => {
-    assert(receipt instanceof Receipt, 'Parameter \'receipt\' should be instance of Receipt.');
-    return this._infinitechain.contract.confirmWithdrawal(receipt, nonce);
-  }
-
   sendLightTx = async (lightTx) => {
     let gringotts = this._infinitechain.gringotts;
+    let contract = this._infinitechain.contract;
+    let signer = this._infinitechain.signer;
     let receipt = await gringotts.sendLightTx(lightTx);
+    receipt = signer.signWithServerKey(receipt);
+
+    switch (receipt.type()) {
+    case types.deposit:
+      contract.deposit(receipt);
+      break;
+    case types.withdrawal:
+      contract.proposeWithdrawal(receipt);
+      break;
+    case types.instantWithdrawal:
+      contract.instantWithdraw(receipt);
+      break;
+    case types.remittance:
+      break;
+    }
     return receipt;
   }
 

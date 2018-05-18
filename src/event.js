@@ -9,15 +9,7 @@ class Event {
 
   onProposeDeposit (cb) {
     let sidechain = this._infinitechain.contract.sidechain();
-    sidechain.Propose({ _type: types.deposit }, this._eventOpt).watch((err, result) => {
-      if (err) { console.trace; }
-      cb(err, result);
-    });
-  }
-
-  onProposeWithdrawal (cb) {
-    let sidechain = this._infinitechain.contract.sidechain();
-    sidechain.Propose({ _type: types.withdrawal }, this._eventOpt).watch((err, result) => {
+    sidechain.ProposeDeposit(this._eventOpt).watch((err, result) => {
       if (err) { console.trace; }
       cb(err, result);
     });
@@ -31,9 +23,9 @@ class Event {
     });
   }
 
-  onConfirmWithdrawal (cb) {
+  onProposeWithdrawal (cb) {
     let sidechain = this._infinitechain.contract.sidechain();
-    sidechain.VerifyReceipt({ _type: types.withdrawal }, this._eventOpt).watch(async (err, result) => {
+    sidechain.VerifyReceipt({ _type: types.withdrawal }, this._eventOpt).watch((err, result) => {
       if (err) { console.trace; }
       cb(err, result);
     });

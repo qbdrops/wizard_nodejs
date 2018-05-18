@@ -3,6 +3,7 @@ import EthUtils from 'ethereumjs-util';
 import EthereumTx from 'ethereumjs-tx';
 import Sidechain from '@/abi/Sidechain.json';
 import assert from 'assert';
+import Receipt from '@/models/receipt';
 
 class Contract {
   constructor (config, infinitechain) {
@@ -33,32 +34,9 @@ class Contract {
     return this._sidechain;
   }
 
-  proposeDeposit = (lightTx, nonce = null) => {
-    let txValue = '0x' + lightTx.lightTxData.value;
-    let clientAddress = '0x' + this._infinitechain.signer.getAddress();
-    let sidechainAddress = this._sidechainAddress;
+  proposeWithdrawal = (receipt, nonce = null) => {
+    assert(receipt instanceof Receipt, 'Parameter \'lightTx\' should be instance of Receipt.');
 
-    try {
-      let txMethodData = this.sidechain().delegateToLib.getData(
-        '0xdcf12aba',
-        [
-          '0x' + lightTx.lightTxHash,
-          '0x' + lightTx.lightTxData.fee,
-          '0x' + lightTx.lightTxData.LSN,
-          lightTx.sig.clientLightTx.v,
-          lightTx.sig.clientLightTx.r,
-          lightTx.sig.clientLightTx.s
-        ]
-      );
-      let serializedTx = this._signRawTransaction(txMethodData, clientAddress, sidechainAddress, txValue, nonce);
-      let txHash = this._sendRawTransaction(serializedTx);
-      return txHash;
-    } catch (e) {
-      console.error(e);
-    }
-  }
-
-  proposeWithdrawal = (lightTx, nonce = null) => {
     let txValue = '0x0';
     let clientAddress = '0x' + this._infinitechain.signer.getAddress();
     let sidechainAddress = this._sidechainAddress;
@@ -67,13 +45,24 @@ class Contract {
       let txMethodData = this.sidechain().delegateToLib.getData(
         '0x68ff1929',
         [
-          '0x' + lightTx.lightTxHash,
-          '0x' + lightTx.lightTxData.fee,
-          '0x' + lightTx.lightTxData.LSN,
-          '0x' + lightTx.lightTxData.value,
-          lightTx.sig.clientLightTx.v,
-          lightTx.sig.clientLightTx.r,
-          lightTx.sig.clientLightTx.s
+          '0x' + receipt.lightTxHash,
+          '0x' + receipt.lightTxData.from,
+          '0x' + receipt.lightTxData.to,
+          '0x' + receipt.lightTxData.value,
+          '0x' + receipt.lightTxData.fee,
+          '0x' + receipt.lightTxData.LSN,
+          receipt.sig.clientLightTx.v,
+          receipt.sig.clientLightTx.r,
+          receipt.sig.clientLightTx.s,
+          '0x' + receipt.receiptData.GSN,
+          '0x' + receipt.receiptData.fromBalance,
+          '0x' + receipt.receiptData.toBalance,
+          receipt.sig.serverLightTx.v,
+          receipt.sig.serverLightTx.r,
+          receipt.sig.serverLightTx.s,
+          receipt.sig.serverReceipt.v,
+          receipt.sig.serverReceipt.r,
+          receipt.sig.serverReceipt.s,
         ]
       );
       let serializedTx = this._signRawTransaction(txMethodData, clientAddress, sidechainAddress, txValue, nonce);
@@ -85,6 +74,10 @@ class Contract {
   }
 
   deposit = (receipt, nonce = null) => {
+    assert(receipt instanceof Receipt, 'Parameter \'lightTx\' should be instance of Receipt.');
+    assert(receipt.metadata, 'Deposit receipt should have key \'metadata\'.');
+    assert(receipt.metadata.DSN, 'Deposit receipt metadata should have key \'DSN\'.');
+
     let txValue = '0x0';
     let clientAddress = '0x' + this._infinitechain.signer.getAddress();
     let sidechainAddress = this._sidechainAddress;
@@ -93,48 +86,25 @@ class Contract {
       let txMethodData = this.sidechain().delegateToLib.getData(
         '0x7b9d7d74',
         [
-          '0x' + receipt.receiptData.stageHeight,
+          '0x' + receipt.lightTxHash,
+          '0x' + receipt.lightTxData.from,
+          '0x' + receipt.lightTxData.to,
+          '0x' + receipt.lightTxData.value,
+          '0x' + receipt.lightTxData.fee,
+          '0x' + receipt.lightTxData.LSN,
+          receipt.sig.clientLightTx.v,
+          receipt.sig.clientLightTx.r,
+          receipt.sig.clientLightTx.s,
           '0x' + receipt.receiptData.GSN,
-          '0x' + receipt.receiptData.lightTxHash,
           '0x' + receipt.receiptData.fromBalance,
           '0x' + receipt.receiptData.toBalance,
+          receipt.sig.serverLightTx.v,
+          receipt.sig.serverLightTx.r,
+          receipt.sig.serverLightTx.s,
           receipt.sig.serverReceipt.v,
           receipt.sig.serverReceipt.r,
           receipt.sig.serverReceipt.s,
-          receipt.sig.serverLightTx.v,
-          receipt.sig.serverLightTx.r,
-          receipt.sig.serverLightTx.s
-        ]
-      );
-
-      let serializedTx = this._signRawTransaction(txMethodData, clientAddress, sidechainAddress, txValue, nonce);
-      let txHash = this._sendRawTransaction(serializedTx);
-      return txHash;
-    } catch (e) {
-      console.error(e);
-    }
-  }
-
-  confirmWithdrawal = (receipt, nonce = null) => {
-    let txValue = '0x0';
-    let clientAddress = '0x' + this._infinitechain.signer.getAddress();
-    let sidechainAddress = this._sidechainAddress;
-
-    try {
-      let txMethodData = this.sidechain().delegateToLib.getData(
-        '0xe0671980',
-        [
-          '0x' + receipt.receiptData.stageHeight,
-          '0x' + receipt.receiptData.GSN,
-          '0x' + receipt.receiptData.lightTxHash,
-          '0x' + receipt.receiptData.fromBalance,
-          '0x' + receipt.receiptData.toBalance,
-          receipt.sig.serverReceipt.v,
-          receipt.sig.serverReceipt.r,
-          receipt.sig.serverReceipt.s,
-          receipt.sig.serverLightTx.v,
-          receipt.sig.serverLightTx.r,
-          receipt.sig.serverLightTx.s
+          receipt.metadata.DSN
         ]
       );
 
@@ -168,6 +138,8 @@ class Contract {
   }
 
   instantWithdraw = (receipt, nonce = null) => {
+    assert(receipt instanceof Receipt, 'Parameter \'lightTx\' should be instance of Receipt.');
+
     let txValue = '0x0';
     let clientAddress = '0x' + this._infinitechain.signer.getAddress();
     let sidechainAddress = this._sidechainAddress;
@@ -176,20 +148,24 @@ class Contract {
       let txMethodData = this.sidechain().delegateToLib.getData(
         '0xbe1946da',
         [
+          '0x' + receipt.lightTxHash,
+          '0x' + receipt.lightTxData.from,
+          '0x' + receipt.lightTxData.to,
           '0x' + receipt.lightTxData.value,
           '0x' + receipt.lightTxData.fee,
           '0x' + receipt.lightTxData.LSN,
-          '0x' + receipt.receiptData.stageHeight,
+          receipt.sig.clientLightTx.v,
+          receipt.sig.clientLightTx.r,
+          receipt.sig.clientLightTx.s,
           '0x' + receipt.receiptData.GSN,
-          '0x' + receipt.receiptData.lightTxHash,
           '0x' + receipt.receiptData.fromBalance,
           '0x' + receipt.receiptData.toBalance,
-          receipt.sig.serverReceipt.v,
-          receipt.sig.serverReceipt.r,
-          receipt.sig.serverReceipt.s,
           receipt.sig.serverLightTx.v,
           receipt.sig.serverLightTx.r,
-          receipt.sig.serverLightTx.s
+          receipt.sig.serverLightTx.s,
+          receipt.sig.serverReceipt.v,
+          receipt.sig.serverReceipt.r,
+          receipt.sig.serverReceipt.s
         ]
       );
 
@@ -208,7 +184,7 @@ class Contract {
 
     try {
       let txMethodData = this.sidechain().delegateToLib.getData(
-        '0x1655e8ac',
+        '0x95aa4aac',
         [
           '0x' + receiptRootHash,
           '0x' + accountRootHash,
