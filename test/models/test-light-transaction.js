@@ -11,13 +11,15 @@ describe('LightTransaction', () => {
           to: '0x456',
           from: '0x123',
           value: 100,
-          LSN: '123',
+          nonce: '123',
+          assetID: 1,
+          logID: 1,
           foo: 'bar'
         }
       };
 
       let lightTx = new LightTransaction(data);
-      assert.deepEqual(Object.keys(lightTx.lightTxData), ['from', 'to', 'value', 'fee', 'LSN']);
+      assert.deepEqual(Object.keys(lightTx.lightTxData), ['from', 'to', 'assetID', 'value', 'fee', 'nonce', 'logID', 'metadataHash']);
     });
 
     it('checks if all lightTxData keys are included', () => {
@@ -26,7 +28,9 @@ describe('LightTransaction', () => {
           fee: 3,
           from: '0x123',
           value: 100,
-          LSN: '123'
+          nonce: '123',
+          assetID: 1,
+          logID: 1
         }
       };
 
@@ -40,7 +44,9 @@ describe('LightTransaction', () => {
           from: '0x123',
           to: '0x456',
           value: 100,
-          LSN: '123'
+          nonce: '123',
+          assetID: 1,
+          logID: 1
         },
         sig: {
           clientLightTx: {
@@ -60,7 +66,9 @@ describe('LightTransaction', () => {
           to: '0x456',
           from: '0x123',
           value: 100,
-          LSN: '123',
+          nonce: '123',
+          assetID: 1,
+          logID: 1
         }
       };
 
@@ -68,13 +76,16 @@ describe('LightTransaction', () => {
 
       let result = {
         lightTxData: {
-          LSN: '000000000000000000000000000000000000000000000000000000000000007b',
-          fee: '00000000000000000000000000000000000000000000000029a2241af62c0000',
           from: '000000000000000000000000000000000000000000000000000000000000x123',
           to: '000000000000000000000000000000000000000000000000000000000000x456',
-          value: '0000000000000000000000000000000000000000000000056bc75e2d63100000'
+          assetID: '0000000000000000000000000000000000000000000000000000000000000001',
+          value: '0000000000000000000000000000000000000000000000056bc75e2d63100000',
+          fee: '00000000000000000000000000000000000000000000000029a2241af62c0000',
+          nonce: '0000000000000000000000000000000000000000000000000000000000000123',
+          logID: '0000000000000000000000000000000000000000000000000000000000000001',
+          metadataHash: 'b48d38f93eaa084033fc5970bf96e559c33c4cdc07d889ab00b4d63f9590739d'
         },
-        lightTxHash: 'c449120b43df3b8e22e34d6759bad0d20a291f2fad9d29b65a7a5ee69ddfa7b7',
+        lightTxHash: '8e9f816255c81393118a34049e39b91d900f1f1350abdd3ba03db444e6a7bac7',
       };
 
       assert.deepEqual(lightTx.lightTxData, result.lightTxData);
@@ -90,7 +101,9 @@ describe('LightTransaction', () => {
           to: '123',
           from: '0',
           value: 10,
-          LSN: '123'
+          nonce: '123',
+          assetID: 1,
+          logID: 1
         }
       };
 
@@ -100,7 +113,9 @@ describe('LightTransaction', () => {
           to: '123',
           from: '456',
           value: 10,
-          LSN: '123'
+          nonce: '123',
+          assetID: 1,
+          logID: 1
         }
       };
 
@@ -110,7 +125,9 @@ describe('LightTransaction', () => {
           to: '0',
           from: '123',
           value: 1,
-          LSN: '123'
+          nonce: '123',
+          assetID: 1,
+          logID: 1
         }
       };
 
@@ -120,7 +137,9 @@ describe('LightTransaction', () => {
           to: '0',
           from: '123',
           value: 11,
-          LSN: '123'
+          nonce: '123',
+          assetID: 1,
+          logID: 1
         }
       };
 
@@ -135,47 +154,6 @@ describe('LightTransaction', () => {
     });
   });
 
-  describe('#parseProposal', () => {
-    let eventData = {
-      _lightTxHash: '0x43bc6fd91751563ee4c22c119c7095bf917928f648d079311cae1544a0126ad5',
-      _client: '0x000000000000000000000000fb44fa0865747558066266061786e69336b5f3a2',
-      _value: '0x000000000000000000000000000000000000000000000000016345785d8a0000',
-      _fee: '0x000000000000000000000000000000000000000000000000002386f26fc10000',
-      _lsn: '0x0000000000000000000000000000000000000000000000000000000000000001',
-      _v: '0x000000000000000000000000000000000000000000000000000000000000001b',
-      _r: '0xe7c1ca9f2a5aa772048bc592b56a08482ac2e131c887c4f789af0c66208c0578',
-      _s: '0x0abf10325d6e746e1a4ff5d3413e16dd3994778166620a51c578853a178867bd'
-    };
-
-    it('returns a LightTransaction object from a proposeDeposit event', () => {
-      let lightTx = LightTransaction.parseProposal(types.deposit, eventData);
-
-      let expected = {
-        from: '0000000000000000000000000000000000000000000000000000000000000000',
-        to: '000000000000000000000000fb44fa0865747558066266061786e69336b5f3a2',
-        value: '000000000000000000000000000000000000000000000000016345785d8a0000',
-        fee: '000000000000000000000000000000000000000000000000002386f26fc10000',
-        LSN: '0000000000000000000000000000000000000000000000000000000000000001'
-      };
-
-      assert.deepEqual(lightTx.lightTxData, expected);
-    });
-
-    it('returns a LightTransaction object from a proposeWithdrawal event', () => {
-      let lightTx = LightTransaction.parseProposal(types.withdrawal, eventData);
-
-      let expected = {
-        from: '000000000000000000000000fb44fa0865747558066266061786e69336b5f3a2',
-        to: '0000000000000000000000000000000000000000000000000000000000000000',
-        value: '000000000000000000000000000000000000000000000000016345785d8a0000',
-        fee: '000000000000000000000000000000000000000000000000002386f26fc10000',
-        LSN: '0000000000000000000000000000000000000000000000000000000000000001'
-      };
-
-      assert.deepEqual(lightTx.lightTxData, expected);
-    });
-  });
-
   describe('#toJson', () => {
     let data = {
       lightTxData: {
@@ -183,7 +161,9 @@ describe('LightTransaction', () => {
         to: 'fb44fa0865747558066266061786e69336b5f3a2',
         value: 0.5,
         fee: 0.1,
-        LSN: 5
+        nonce: 5,
+        assetID: 1,
+        logID: 1
       }
     };
 
@@ -191,14 +171,18 @@ describe('LightTransaction', () => {
       let lightTx = new LightTransaction(data);
 
       let expected = {
-        lightTxHash: 'f501f5f8c1930e944cd621eadc03fb8cbfff65e99f57a026ff4665e2a3b944e8',
+        lightTxHash: 'fbaafca2816a1a4f49941f1f02f63cb547a6c8119667b2dcd0d176bd4c971b2a',
         lightTxData: {
           from: '000000000000000000000000ce44fa4565747558066266061786e69336b5f3a2',
           to: '000000000000000000000000fb44fa0865747558066266061786e69336b5f3a2',
+          assetID: '0000000000000000000000000000000000000000000000000000000000000001',
           value: '00000000000000000000000000000000000000000000000006f05b59d3b20000',
           fee: '000000000000000000000000000000000000000000000000016345785d8a0000',
-          LSN: '0000000000000000000000000000000000000000000000000000000000000005'
+          nonce: '0000000000000000000000000000000000000000000000000000000000000005',
+          logID: '0000000000000000000000000000000000000000000000000000000000000001',
+          metadataHash: 'b48d38f93eaa084033fc5970bf96e559c33c4cdc07d889ab00b4d63f9590739d'
         },
+        metadata: {},
         sig: {
           clientLightTx: {},
           serverLightTx: {}
@@ -216,7 +200,9 @@ describe('LightTransaction', () => {
         to: 'fb44fa0865747558066266061786e69336b5f3a2',
         value: 0.5,
         fee: 0.1,
-        LSN: 5
+        nonce: 5,
+        assetID: 1,
+        logID: 1
       }
     };
 
@@ -224,18 +210,22 @@ describe('LightTransaction', () => {
       let lightTx = new LightTransaction(data);
 
       let expected = JSON.stringify({
-        lightTxHash: 'f501f5f8c1930e944cd621eadc03fb8cbfff65e99f57a026ff4665e2a3b944e8',
+        lightTxHash: 'fbaafca2816a1a4f49941f1f02f63cb547a6c8119667b2dcd0d176bd4c971b2a',
         lightTxData: {
           from: '000000000000000000000000ce44fa4565747558066266061786e69336b5f3a2',
           to: '000000000000000000000000fb44fa0865747558066266061786e69336b5f3a2',
+          assetID: '0000000000000000000000000000000000000000000000000000000000000001',
           value: '00000000000000000000000000000000000000000000000006f05b59d3b20000',
           fee: '000000000000000000000000000000000000000000000000016345785d8a0000',
-          LSN: '0000000000000000000000000000000000000000000000000000000000000005'
+          nonce: '0000000000000000000000000000000000000000000000000000000000000005',
+          logID: '0000000000000000000000000000000000000000000000000000000000000001',
+          metadataHash: 'b48d38f93eaa084033fc5970bf96e559c33c4cdc07d889ab00b4d63f9590739d'
         },
         sig: {
           clientLightTx: {},
           serverLightTx: {}
-        }
+        },
+        metadata: {}
       });
 
       assert.equal(lightTx.toString(), expected);

@@ -33,9 +33,10 @@ describe('Signer', () => {
       from: '0x123',
       to: '0x456',
       value: 100,
-      LSN: '123',
-      fee: 3,
-      stageHeight: 1
+      nonce: '123',
+      assetID: 1,
+      logID: 1,
+      fee: 3
     },
     sig: sig
   });
@@ -71,8 +72,8 @@ describe('Signer', () => {
 
       let result = {
         serverLightTx: {
-          r: '0xc0ef06f6ec58194727133e401a1439e1b8d826e17fdd82533c2f0d14df4fcad4',
-          s: '0x542197c400b1744de5c322f214de644697fbcf25601acfa4fba66b6cf08188ef',
+          r: '0x05a8b10fb54d2ad21e8f0462231631c054e78aca3fde2b69045dc8b20010c481',
+          s: '0x1b28f3e8dd1a6ad1951657a265bad910440ca7ac9dccefe23879816d86b4e052',
           v: 28
         }
       };
@@ -88,8 +89,8 @@ describe('Signer', () => {
 
       let result = {
         serverReceipt: {
-          r: '0x76e848903a13229b799d5254f7389c969678c98b0fcae98316d197c62e9008f7',
-          s: '0x2581fddce3204d1c8a2e7b049699f62255a94888b635b71d9ddd8478bf7418e6',
+          r: '0x126bfa2e456ddab5f9eb616604f3537c468b39420d32a1c35b0ad98c7e1493b2',
+          s: '0x6371bb2bc432f2f8fe2e4da1abdcefc60845aca2cc90f6e2d3577f88d6f2af7b',
           v: 27
         }
       };
@@ -113,8 +114,8 @@ describe('Signer', () => {
 
       let result = {
         clientLightTx: {
-          r: '0xc0ef06f6ec58194727133e401a1439e1b8d826e17fdd82533c2f0d14df4fcad4',
-          s: '0x542197c400b1744de5c322f214de644697fbcf25601acfa4fba66b6cf08188ef',
+          r: '0x05a8b10fb54d2ad21e8f0462231631c054e78aca3fde2b69045dc8b20010c481',
+          s: '0x1b28f3e8dd1a6ad1951657a265bad910440ca7ac9dccefe23879816d86b4e052',
           v: 28
         }
       };

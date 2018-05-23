@@ -10,7 +10,9 @@ describe('Receipt', () => {
         to: '0x456',
         from: '0x123',
         value: 100,
-        LSN: '123',
+        nonce: '123',
+        assetID: 1,
+        logID: 1,
         foo: 'bar'
       },
       sig: {
@@ -110,7 +112,7 @@ describe('Receipt', () => {
 
       let receipt = new Receipt(receiptJson);
       let result = {
-        receiptHash: '8a6757990cd7d1c1e49de26d15443f63eda758950e3ab518cf94202068fe7f6f',
+        receiptHash: 'cb6b25c182c6ffbb694b077263015f4ed5a1fed27918ea992178ff5c73211db1',
         receiptData: correctReceiptData
       };
 
