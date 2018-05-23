@@ -1,15 +1,11 @@
 import EthUtils from 'ethereumjs-util';
 import axios from 'axios';
-import assert from 'assert';
 import types from '@/models/types';
 
 class Server {
   constructor (serverConfig, infinitechain) {
     this.serverConfig = serverConfig;
     this._infinitechain = infinitechain;
-
-    assert(serverConfig.web3Url != undefined, 'Opt should include web3Url.');    
-    assert(serverConfig.nodeUrl != undefined, 'Opt should include nodeUrl.');
     this._web3Url = serverConfig.web3Url;
     this._nodeUrl = serverConfig.nodeUrl;
   }

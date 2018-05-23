@@ -5,7 +5,6 @@ import Receipt from '@/models/receipt';
 
 class Gringotts {
   constructor (config, infinitechain) {
-    assert(config.nodeUrl != undefined, 'Opt should include nodeUrl.');
     this._nodeUrl = config.nodeUrl;
     this._infinitechain = infinitechain;
   }

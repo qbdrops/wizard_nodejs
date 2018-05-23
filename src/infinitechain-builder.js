@@ -1,3 +1,4 @@
+import assert from 'assert';
 import Infinitechain from '@/infinitechain';
 import Client from '@/client';
 import Server from '@/server';
@@ -38,6 +39,10 @@ class InfinitechainBuilder {
   }
 
   build () {
+    assert(this._nodeUrl != undefined, '\'nodeUrl\' is not provided.');
+    assert(this._web3Url != undefined, '\'nodeUrl\' is not provided.');
+    assert(this._signerKey != undefined, '\'signerKey\' is not provided.');
+
     let clientConfig = {
       web3Url: this._web3Url,
       nodeUrl: this._nodeUrl,
