@@ -7,7 +7,6 @@ import Receipt from '@/models/receipt';
 
 class Contract {
   constructor (config, infinitechain) {
-    assert(config.web3Url != undefined, 'Opt should include web3Url.');
     this._infinitechain = infinitechain;
     this._web3Url = config.web3Url;
     this._sidechainAddress = null;
@@ -48,9 +47,12 @@ class Contract {
           '0x' + receipt.lightTxHash,
           '0x' + receipt.lightTxData.from,
           '0x' + receipt.lightTxData.to,
+          '0x' + receipt.lightTxData.assetID,
           '0x' + receipt.lightTxData.value,
           '0x' + receipt.lightTxData.fee,
-          '0x' + receipt.lightTxData.LSN,
+          '0x' + receipt.lightTxData.nonce,
+          '0x' + receipt.lightTxData.logID,
+          '0x' + receipt.lightTxData.metadataHash,
           receipt.sig.clientLightTx.v,
           receipt.sig.clientLightTx.r,
           receipt.sig.clientLightTx.s,
@@ -75,8 +77,6 @@ class Contract {
 
   deposit = (receipt, nonce = null) => {
     assert(receipt instanceof Receipt, 'Parameter \'lightTx\' should be instance of Receipt.');
-    assert(receipt.metadata, 'Deposit receipt should have key \'metadata\'.');
-    assert(receipt.metadata.DSN, 'Deposit receipt metadata should have key \'DSN\'.');
 
     let txValue = '0x0';
     let clientAddress = '0x' + this._infinitechain.signer.getAddress();
@@ -89,9 +89,12 @@ class Contract {
           '0x' + receipt.lightTxHash,
           '0x' + receipt.lightTxData.from,
           '0x' + receipt.lightTxData.to,
+          '0x' + receipt.lightTxData.assetID,
           '0x' + receipt.lightTxData.value,
           '0x' + receipt.lightTxData.fee,
-          '0x' + receipt.lightTxData.LSN,
+          '0x' + receipt.lightTxData.nonce,
+          '0x' + receipt.lightTxData.logID,
+          '0x' + receipt.lightTxData.metadataHash,
           receipt.sig.clientLightTx.v,
           receipt.sig.clientLightTx.r,
           receipt.sig.clientLightTx.s,
@@ -103,8 +106,7 @@ class Contract {
           receipt.sig.serverLightTx.s,
           receipt.sig.serverReceipt.v,
           receipt.sig.serverReceipt.r,
-          receipt.sig.serverReceipt.s,
-          receipt.metadata.DSN
+          receipt.sig.serverReceipt.s
         ]
       );
 
@@ -151,9 +153,12 @@ class Contract {
           '0x' + receipt.lightTxHash,
           '0x' + receipt.lightTxData.from,
           '0x' + receipt.lightTxData.to,
+          '0x' + receipt.lightTxData.assetID,
           '0x' + receipt.lightTxData.value,
           '0x' + receipt.lightTxData.fee,
-          '0x' + receipt.lightTxData.LSN,
+          '0x' + receipt.lightTxData.nonce,
+          '0x' + receipt.lightTxData.logID,
+          '0x' + receipt.lightTxData.metadataHash,
           receipt.sig.clientLightTx.v,
           receipt.sig.clientLightTx.r,
           receipt.sig.clientLightTx.s,

@@ -18,19 +18,18 @@ class Client {
         if (err) {
           reject(err);
         } else {
-          let DSN = result.args._dsn;
-          let LSN = Math.random() * 1e18;
+          let logID = result.args._dsn;
+          let nonce = this._getNonce();
           let value = result.args._value;
           let lightTxData = {
-            LSN: LSN,
+            assetID: 1,
             value: value,
-            fee: 0.01
-          };
-          let metadata = {
-            DSN: DSN
+            fee: 0.01,
+            nonce: nonce,
+            logID: logID
           };
 
-          let signedLightTx = await this.makeLightTx(types.deposit, lightTxData, metadata);
+          let signedLightTx = await this.makeLightTx(types.deposit, lightTxData);
           resolve(signedLightTx);
         }
       });
@@ -38,11 +37,16 @@ class Client {
   }
 
   makeProposeWithdrawal = async (value) => {
-    let LSN = Math.random() * 1e18;
+    let nonce = this._getNonce();
+    let clientAddress = this._infinitechain.signer.getAddress();
+    let normalizedClientAddress = clientAddress.slice(-40).padStart(64, '0').slice(-64);
+    let logID = this._sha3(normalizedClientAddress + nonce);
     let lightTxData = {
-      LSN: LSN,
+      assetID: 1,
       value: value,
-      fee: 0.01
+      fee: 0.01,
+      nonce: nonce,
+      logID: logID
     };
 
     let signedLightTx = await this.makeLightTx(types.withdrawal, lightTxData);
@@ -50,8 +54,9 @@ class Client {
   }
 
   makeLightTx = async (type, lightTxData, metadata = null) => {
-    // Normalize lightTxData
+    // Prepare lightTxData
     lightTxData = await this._prepare(type, lightTxData);
+
     let lightTxJson = { lightTxData: lightTxData, metadata: metadata };
 
     // Create lightTx
@@ -160,9 +165,15 @@ class Client {
       lightTxData.to = '0';
       break;
     case types.remittance:
+      lightTxData.nonce = this._getNonce();
+      lightTxData.logID = '0';
       break;
     }
     return lightTxData;
+  }
+
+  _getNonce () {
+    return this._sha3((Math.random()).toString());
   }
 
   _computeRootHashFromSlice (slice) {
