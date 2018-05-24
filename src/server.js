@@ -39,8 +39,8 @@ class Server {
 
     if (res.data.ok) {
       let serializedTx = this._infinitechain.contract.attach(
-        res.data.receiptRootHash,
-        res.data.accountRootHash,
+        res.data.trees.receiptRootHash,
+        res.data.trees.accountRootHash,
         '',
         nonce
       );
