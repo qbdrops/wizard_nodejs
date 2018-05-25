@@ -12,68 +12,62 @@ class Auditor {
   }
 
   audit = async (stageReceipts, accounts) => { // previous stage accounts
-    let wrongSignature = [];
-    let type1 = [];
-    let type2 = [];
-    let type3 = [];
-    let type4 = [];
-    let type5 = [];
+    let objectedReceipts = [];
     let existGSN = {};// type1 use
-    let gsnCounter = 1;// type4 use
     let bond = 1000000;// fetch bond by sidechain contract
-    bond = bond.padStart(64, '0').slice(-64);
-    bond = new BigNumber('0x' + bond);
+    bond = new BigNumber(bond);
     // Arrange the receipts by GSN
-    let orderReceipts = stageReceipts.sort(function (a, b) {
-      return a.receiptData.GSN - b.receiptData.GSN;
+    let orderedReceipts = stageReceipts.sort(function (a, b) {
+      return parseInt('0x' + a.receiptData.GSN) - parseInt('0x' + b.receiptData.GSN);
     });
 
-    orderReceipts.forEach(receipt => {
+    orderedReceipts.forEach(receipt => {
       // verify signature
-      let result = this._verifySignature(receipt, wrongSignature);
-      if (result == false) {
-        wrongSignature.push({
+      let result = this._verifySignature(receipt);
+      if (!result) {
+        objectedReceipts.push({
           wrongSignature: receipt
         });
       }
       // type1 double GSN
       let type1Result = this._type1Filter(receipt, existGSN);
-      if (type1Result.isOK == false) {
-        type1.push(type1Result.wrongReceipts);
+      if (!type1Result.isOK) {
+        objectedReceipts.push({
+          type1Receipt: type1Result.wrongReceipts
+        });
       }
       existGSN = type1Result.existGSN;
       // type2 and type3 incorrect balance
       let type2And3Result = this._type2And3Filter(receipt, accounts);
-      if (type2And3Result.isOK == false) {
+      if (!type2And3Result.isOK) {
         if (type2And3Result.value > bond) {
           // wrong receipt value is larger than bond
-          type2.push(receipt);
+          objectedReceipts.push({
+            type2Receipt: receipt
+          });
         } else {
           // wrong receipt value is less than bond
-          type3.push(receipt);
+          objectedReceipts.push({
+            type3Receipt: receipt
+          });
         }
       }
       // type4 continual GSN
-      let type4Result = this._type4Filter(receipt, gsnCounter, orderReceipts);
-      if (type4Result.isOK == false) {
-        type4.push(type4Result.wrongReceipts);
+      let type4Result = this._type4Filter(receipt, orderedReceipts);
+      if (!type4Result.isOK) {
+        objectedReceipts.push({
+          type3Receipt: type4Result.wrongReceipts
+        });
       }
-      gsnCounter++;
       // type5 data correct
       let type5Result = this._type5Filter(receipt);
-      if (type5Result == false) {
-        type5.push(receipt);
+      if (!type5Result) {
+        objectedReceipts.push({
+          type5Receipt: receipt
+        });
       }
     });
-
-    return {
-      wrongSignature: wrongSignature,
-      type1: type1,
-      type2: type2,
-      type3: type3,
-      type4: type4,
-      type5: type5
-    };
+    return objectedReceipts;
   }
 
   _verifySignature = (receiptJson) => {
@@ -178,27 +172,17 @@ class Auditor {
     };
   }
 
-  _type4Filter = (receiptJson, gsnCounter, orderReceipts) => {
+  _type4Filter = (receiptJson, orderedReceipts) => {
     let wrongReceipts;
     let result = true;
-    if (receiptJson.receiptData.GSN != gsnCounter) {
-      if (orderReceipts[gsnCounter - 2] === undefined || orderReceipts[gsnCounter] === undefined) {
-        if (orderReceipts[gsnCounter - 2] === undefined) {
-          wrongReceipts = {
-            receipt: orderReceipts[gsnCounter]
-          };
-          result = false;
-        }
-        if (orderReceipts[gsnCounter] === undefined) {
-          wrongReceipts = {
-            receipt: orderReceipts[gsnCounter - 2]
-          };
-          result = false;
-        }
-      } else {
+    let currentGSN = parseInt('0x' + receiptJson.receiptData.GSN);
+    let previousGSN = parseInt('0x' + orderedReceipts[currentGSN - 2].receiptData.GSN);
+    let gsnResult = previousGSN - currentGSN;
+    if (orderedReceipts[currentGSN - 2] != undefined) {// avoid the first receipt error
+      if (gsnResult != 1) {
         wrongReceipts = {
-          receipt1: orderReceipts[gsnCounter - 2],
-          receipt2: orderReceipts[gsnCounter]
+          receipt1: receiptJson,
+          receipt2: orderedReceipts[currentGSN - 2]
         };
         result = false;
       }
