@@ -1,4 +1,7 @@
 import BigNumber from 'bignumber.js';
+import Receipt from './models/receipt';
+import types from '@/models/types';
+import EthUtils from 'ethereumjs-util';
 
 class Auditor {
   constructor (auditorConfig, infinitechain) {
@@ -8,7 +11,7 @@ class Auditor {
     this._nodeUrl = auditorConfig.nodeUrl;
   }
 
-  filterWrongReceipts = async (stageReceipts, accounts) => { // previous stage accounts
+  audit = async (stageReceipts, accounts) => { // previous stage accounts
     let wrongSignature = [];
     let type1 = [];
     let type2 = [];
@@ -18,24 +21,49 @@ class Auditor {
     let existGSN = {};// type1 use
     let gsnCounter = 1;// type4 use
     let bond = 1000000;// fetch bond by sidechain contract
-
+    bond = bond.padStart(64, '0').slice(-64);
+    bond = new BigNumber('0x' + bond);
     // Arrange the receipts by GSN
-    let orderReceipts = stageReceipts.map(receipt => {
-      orderReceipts[receipt.receiptData.GSN] = receipt;
+    let orderReceipts = stageReceipts.sort(function (a, b) {
+      return a.receiptData.GSN - b.receiptData.GSN;
     });
 
-    orderReceipts.map(receipt => {
+    orderReceipts.forEach(receipt => {
       // verify signature
-      this._verifySignatyure(receipt, wrongSignature);
+      let result = this._verifySignature(receipt, wrongSignature);
+      if (result == false) {
+        wrongSignature.push({
+          wrongSignature: receipt
+        });
+      }
       // type1 double GSN
-      this._type1Filter(receipt, existGSN, type1);
-      // type2 incorrect balance (bigger than bond)
-      // type3 incorrect balance (less than bond)
-      this._type2And3Filter(receipt, accounts, bond, type2, type3);
+      let type1Result = this._type1Filter(receipt, existGSN);
+      if (type1Result.isOK == false) {
+        type1.push(type1Result.wrongReceipts);
+      }
+      existGSN = type1Result.existGSN;
+      // type2 and type3 incorrect balance
+      let type2And3Result = this._type2And3Filter(receipt, accounts);
+      if (type2And3Result.isOK == false) {
+        if (type2And3Result.value > bond) {
+          // wrong receipt value is larger than bond
+          type2.push(receipt);
+        } else {
+          // wrong receipt value is less than bond
+          type3.push(receipt);
+        }
+      }
       // type4 continual GSN
-      this._type4Filter(receipt, gsnCounter, orderReceipts, type4);
+      let type4Result = this._type4Filter(receipt, gsnCounter, orderReceipts);
+      if (type4Result.isOK == false) {
+        type4.push(type4Result.wrongReceipts);
+      }
+      gsnCounter++;
       // type5 data correct
-      this._type5Filter(receipt, type5);
+      let type5Result = this._type5Filter(receipt);
+      if (type5Result == false) {
+        type5.push(receipt);
+      }
     });
 
     return {
@@ -48,77 +76,88 @@ class Auditor {
     };
   }
 
-  _verifySignatyure = (receipt, wrongSignature) => {
-    receipt.sig.clientLightTx.v = parseInt(receipt.sig.clientLightTx.v);
-    let recoverClientAddress = this._infinitechain.verifier._recover(receipt.lightTxHash, receipt.sig.clientLightTx);
-    if (recoverClientAddress != receipt.lightTxData.from || recoverClientAddress != receipt.lightTxData.to) {
-      wrongSignature.push({
-        wrongClientLightTxSig: receipt
-      });
+  _verifySignature = (receiptJson) => {
+    let verifier = this._infinitechain.verifier;
+    let receipt = new Receipt(receiptJson);
+    let type = receipt.type();
+    let from = receiptJson.lightTxData.from;
+    let to = receiptJson.lightTxData.to;
+    receiptJson.sig.clientLightTx.v = parseInt(receiptJson.sig.clientLightTx.v);
+    let recoverClientAddress = verifier._recover(receiptJson.lightTxHash, receiptJson.sig.clientLightTx).toString('hex').padStart(64, '0');
+    if (type == types.deposit) {
+      if (recoverClientAddress == to) {
+        return false;
+      }
+    } else if (type == types.withdrawal || type == types.instantWithdrawal || type == types.remittance) {
+      if (recoverClientAddress == from) {
+        return false;
+      }
     }
-    receipt.sig.serverLightTx.v = parseInt(receipt.sig.serverLightTx.v);
-    let recoverServerLightTxAddress = this._infinitechain.verifier._recover(receipt.lightTxHash, receipt.sig.serverLightTx);
+
+    receiptJson.sig.serverLightTx.v = parseInt(receiptJson.sig.serverLightTx.v);
+    let recoverServerLightTxAddress = verifier._recover(receiptJson.lightTxHash, receiptJson.sig.serverLightTx).toString('hex').padStart(64, '0');
     if (recoverServerLightTxAddress != this.serverAddress) {
-      wrongSignature.push({
-        wrongServerLightTxSig: receipt
-      });
+      return false;
     }
-    receipt.sig.serverReceipt.v = parseInt(receipt.sig.serverReceipt.v);
-    let recoverServerReceiptAddress = this._infinitechain.verifier._recover(receipt.receiptHash, receipt.sig.serverReceipt);
+    receiptJson.sig.serverReceipt.v = parseInt(receiptJson.sig.serverReceipt.v);
+    let recoverServerReceiptAddress = verifier._recover(receiptJson.receiptHash, receiptJson.sig.serverReceipt).toString('hex').padStart(64, '0');
     if (recoverServerReceiptAddress != this.serverAddress) {
-      wrongSignature.push({
-        wrongServerReceiptSig: receipt
-      });
+      return false;
     }
   }
 
-  _type1Filter = (receipt, existGSN, type1) => {
-    let gsn = receipt.receiptData.GSN;
+  _type1Filter = (receiptJson, existGSN) => {
+    let gsn = receiptJson.receiptData.GSN;
+    let wrongReceipts;
+    let result = true;
     if (!Object.keys(existGSN).includes(gsn)) {
-      existGSN.gsn = receipt;
+      existGSN.gsn = receiptJson;
     } else {
       let receipt1 = existGSN.gsn;
-      let wrongReceipts = {
+      wrongReceipts = {
         receipt1: receipt1,
-        receipt2: receipt
+        receipt2: receiptJson
       };
-      type1.push(wrongReceipts);
+      result = false;
     }
+    return {
+      isOK: result,
+      existGSN: existGSN,
+      wrongReceipts: wrongReceipts
+    };
   }
 
-  _type2And3Filter = (receipt, accounts, bond, type2, type3) => {
+  _type2And3Filter = (receiptJson, accounts) => {
     let initBalance = '0000000000000000000000000000000000000000000000000000000000000000';
     let fromBalance = initBalance;
     let toBalance = initBalance;
-    if (receipt.lightTxData.to === null) { // deposit receipt
+    let result = true;
+    let value;
+    let receipt = new Receipt(receiptJson);
+    let type = receipt.type();
+    if (type == types.deposit) {
       let value = new BigNumber('0x' + receipt.lightTxData.value);
       toBalance = accounts[receipt.lightTxdata.from].balance;
       toBalance = new BigNumber('0x' + toBalance);
       toBalance = toBalance.plus(value);
       toBalance = toBalance.toString(16).padStart(64, '0');
-      accounts[receipt.lightTxdata.from].balance = toBalance;
-    } else if (receipt.lightTxData.from === null) { // withdraw receipt
-      let value = new BigNumber('0x' + receipt.lightTxData.value);
-      fromBalance = accounts[receipt.lightTxdata.to].balance;
+      accounts[receipt.lightTxData.from].balance = toBalance;
+    } else if (type == types.withdrawal || type == types.instantWithdrawal) { // withdraw receipt
+      value = new BigNumber('0x' + receipt.lightTxData.value);
+      fromBalance = accounts[receipt.lightTxData.to].balance;
       fromBalance = new BigNumber('0x' + fromBalance);
       if (fromBalance.isGreaterThanOrEqualTo(value)) {
         fromBalance = fromBalance.minus(value);
         fromBalance = fromBalance.toString(16).padStart(64, '0');
-        accounts[receipt.lightTxdata.to].balance = fromBalance;
+        accounts[receipt.lightTxData.to].balance = fromBalance;
       } else {
         // Insufficient balance
-        let limit = bond.padStart(64, '0').slice(-64);
-        limit = new BigNumber('0x' + limit);
-        if (value > limit) { // wrong receipt value is larger than bond
-          type2.push(receipt);
-        } else { // wrong receipt value is less than bond
-          type3.push(receipt);
-        }
+        result = false;
       }
-    } else if (receipt.lightTxData.from && receipt.lightTxData.to) { // remittance receipt
-      let value = new BigNumber('0x' + receipt.lightTxData.value);
-      fromBalance = accounts[receipt.lightTxdata.from].balance;
-      toBalance = accounts[receipt.lightTxdata.to].balance;
+    } else { // remittance receipt
+      value = new BigNumber('0x' + receipt.lightTxData.value);
+      fromBalance = accounts[receipt.lightTxData.from].balance;
+      toBalance = accounts[receipt.lightTxData.to].balance;
       fromBalance = new BigNumber('0x' + fromBalance);
       toBalance = new BigNumber('0x' + toBalance);
       if (fromBalance.isGreaterThanOrEqualTo(value)) {
@@ -129,46 +168,60 @@ class Auditor {
         accounts[receipt.lightTxdata.from].balance = fromBalance;
         accounts[receipt.lightTxdata.to].balance = toBalance;
       } else {
-        type2.push(receipt); // Insufficient balance
+        // Insufficient balance
+        result = false;
       }
     }
+    return {
+      isOK: result,
+      value: value
+    };
   }
 
-  _type4Filter = (receipt, gsnCounter, orderReceipts, type4) => {
-    if (receipt.receiptData.GSN != gsnCounter) {
+  _type4Filter = (receiptJson, gsnCounter, orderReceipts) => {
+    let wrongReceipts;
+    let result = true;
+    if (receiptJson.receiptData.GSN != gsnCounter) {
       if (orderReceipts[gsnCounter - 2] === undefined || orderReceipts[gsnCounter] === undefined) {
         if (orderReceipts[gsnCounter - 2] === undefined) {
-          let wrongReceipts = {
+          wrongReceipts = {
             receipt: orderReceipts[gsnCounter]
           };
-          type4.push(wrongReceipts);
+          result = false;
         }
         if (orderReceipts[gsnCounter] === undefined) {
-          let wrongReceipts = {
+          wrongReceipts = {
             receipt: orderReceipts[gsnCounter - 2]
           };
-          type4.push(wrongReceipts);
+          result = false;
         }
       } else {
-        let wrongReceipts = {
+        wrongReceipts = {
           receipt1: orderReceipts[gsnCounter - 2],
           receipt2: orderReceipts[gsnCounter]
         };
-        type4.push(wrongReceipts);
+        result = false;
       }
     }
-    gsnCounter++;
+    return {
+      isOK: result,
+      wrongReceipts: wrongReceipts
+    };
   }
 
-  _type5Filter = (receipt, type5) => {
-    let computedLightTxHash = this._sha3(Object.values(receipt.lightTxData).reduce((acc, curr) => acc + curr, ''));
-    let computedReceiptHash = this._sha3(Object.values(receipt.receiptData).reduce((acc, curr) => acc + curr, ''));
-    if (receipt.lightTxHash != computedLightTxHash) {
-      type5.push(receipt);
+  _type5Filter = (receiptJson) => {
+    let computedLightTxHash = this._sha3(Object.values(receiptJson.lightTxData).reduce((acc, curr) => acc + curr, ''));
+    let computedReceiptHash = this._sha3(Object.values(receiptJson.receiptData).reduce((acc, curr) => acc + curr, ''));
+    if (receiptJson.lightTxHash != computedLightTxHash) {
+      return false;
     }
-    if (receipt.receiptHash != computedReceiptHash) {
-      type5.push(receipt);
+    if (receiptJson.receiptHash != computedReceiptHash) {
+      return false;
     }
+  }
+
+  _sha3 (content) {
+    return EthUtils.sha3(content).toString('hex');
   }
 }
 
