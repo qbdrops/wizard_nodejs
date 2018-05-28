@@ -12,30 +12,22 @@ class Auditor {
   }
 
   audit = async (stageReceipts, accounts) => { // previous stage accounts
-    let existedGSN = {};// type1 used
     let bond = 1000000;// fetch bond by sidechain contract
     bond = new BigNumber(bond);
+
     // Arrange the receipts by GSN
-    let orderedReceipts = stageReceipts.sort(function (a, b) {
-      return parseInt(a.receiptData.GSN, 16) - parseInt(b.receiptData.GSN, 16);
+    let orderedReceipts = stageReceipts.sort(function (r1, r2) {
+      return parseInt(r1.receiptData.GSN, 16) - parseInt(r2.receiptData.GSN, 16);
     });
 
     let challengedReceipts = orderedReceipts.reduce((acc, curr) => {
       // recover receipt object
       let receipt = new Receipt(curr);
-      // verify signature
-      let wrongSignatureResult = this._verifySignature(receipt);
-      if (!wrongSignatureResult) {
-        acc.challengedReceipts.push({
-          wrongSignature: receipt.toJson()
-        });
-      }
+
       // type1 double GSN
       let type1Result = this._type1Filter(receipt, acc.existedGSN);
       if (!type1Result.ok) {
-        acc.challengedReceipts.push({
-          type1Receipt: type1Result.wrongReceipts
-        });
+        acc.challengedReceipts.type1.push(type1Result.wrongReceipts);
       }
       acc.existedGSN = type1Result.existedGSN;
       // type2 and type3 incorrect balance
@@ -43,61 +35,33 @@ class Auditor {
       if (!type2And3Result.ok) {
         if (type2And3Result.value > bond) {
           // wrong receipt value is larger than bond
-          acc.challengedReceipts.push({
-            type2Receipt: receipt.toJson()
-          });
+          acc.challengedReceipts.type2.push(receipt.toJson());
         } else {
           // wrong receipt value is less than bond
-          challengedReceipts.push({
-            type3Receipt: receipt.toJson()
-          });
+          acc.challengedReceipts.type3.push(receipt.toJson());
         }
       }
       // type4 continual GSN
       let type4Result = this._type4Filter(receipt, orderedReceipts);
       if (!type4Result.ok) {
-        acc.challengedReceipts.push({
-          type4Receipt: type4Result.wrongReceipts
-        });
+        acc.challengedReceipts.type4.push(type4Result.wrongReceipts);
       }
       // type5 data correct
       let type5Result = this._type5Filter(receipt);
       if (!type5Result) {
-        acc.challengedReceipts.push({
-          type5Receipt: receipt.toJson()
-        });
+        acc.challengedReceipts.type5.push(receipt.toJson());
       }
-    }, { challengedReceipts: challengedReceipts, existedGSN: existedGSN });
+    }, {
+      challengedReceipts: {
+        type1: [],
+        type2: [],
+        type3: [],
+        type4: [],
+        type5: []
+      },
+      existedGSN: []
+    });
     return challengedReceipts;
-  }
-
-  _verifySignature = (receipt) => {
-    let verifier = this._infinitechain.verifier;
-    let type = receipt.type();
-    let from = receipt.lightTxData.from;
-    let to = receipt.lightTxData.to;
-    receipt.sig.clientLightTx.v = parseInt(receipt.sig.clientLightTx.v);
-    let recoverClientAddress = verifier._recover(receipt.lightTxHash, receipt.sig.clientLightTx).toString('hex').padStart(64, '0');
-    if (type == types.deposit) {
-      if (recoverClientAddress == to) {
-        return false;
-      }
-    } else if (type == types.withdrawal || type == types.instantWithdrawal || type == types.remittance) {
-      if (recoverClientAddress == from) {
-        return false;
-      }
-    }
-
-    receipt.sig.serverLightTx.v = parseInt(receipt.sig.serverLightTx.v);
-    let recoverServerLightTxAddress = verifier._recover(receipt.lightTxHash, receipt.sig.serverLightTx).toString('hex').padStart(64, '0');
-    if (recoverServerLightTxAddress != this.serverAddress) {
-      return false;
-    }
-    receipt.sig.serverReceipt.v = parseInt(receipt.sig.serverReceipt.v);
-    let recoverServerReceiptAddress = verifier._recover(receipt.receiptHash, receipt.sig.serverReceipt).toString('hex').padStart(64, '0');
-    if (recoverServerReceiptAddress != this.serverAddress) {
-      return false;
-    }
   }
 
   _type1Filter = (receipt, existedGSN) => {
