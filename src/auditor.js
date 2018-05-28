@@ -12,45 +12,44 @@ class Auditor {
   }
 
   audit = async (stageReceipts, accounts) => { // previous stage accounts
-    let objectedReceipts = [];
+    let challengeReceipts = [];
     let existGSN = {};// type1 use
     let bond = 1000000;// fetch bond by sidechain contract
     bond = new BigNumber(bond);
     // Arrange the receipts by GSN
     let orderedReceipts = stageReceipts.sort(function (a, b) {
-      return parseInt('0x' + a.receiptData.GSN) - parseInt('0x' + b.receiptData.GSN);
+      return parseInt(a.receiptData.GSN, 16) - parseInt(b.receiptData.GSN, 16);
     });
 
-    orderedReceipts.forEach(receiptJson => {
-
+    orderedReceipts.reduce((acc, curr) => {
       // recover receipt object
-      let receipt = new Receipt(receiptJson);
+      let receipt = new Receipt(curr);
       // verify signature
       let wrongSignatureResult = this._verifySignature(receipt);
       if (!wrongSignatureResult) {
-        objectedReceipts.push({
+        acc.challengeReceipts.push({
           wrongSignature: receipt.toJson()
         });
       }
       // type1 double GSN
-      let type1Result = this._type1Filter(receipt, existGSN);
+      let type1Result = this._type1Filter(receipt, acc.existGSN);
       if (!type1Result.isOK) {
-        objectedReceipts.push({
+        acc.challengeReceipts.push({
           type1Receipt: type1Result.wrongReceipts
         });
       }
-      existGSN = type1Result.existGSN;
+      acc.existGSN = type1Result.existGSN;
       // type2 and type3 incorrect balance
       let type2And3Result = this._type2And3Filter(receipt, accounts);
       if (!type2And3Result.isOK) {
         if (type2And3Result.value > bond) {
           // wrong receipt value is larger than bond
-          objectedReceipts.push({
+          acc.challengeReceipts.push({
             type2Receipt: receipt.toJson()
           });
         } else {
           // wrong receipt value is less than bond
-          objectedReceipts.push({
+          challengeReceipts.push({
             type3Receipt: receipt.toJson()
           });
         }
@@ -58,19 +57,19 @@ class Auditor {
       // type4 continual GSN
       let type4Result = this._type4Filter(receipt, orderedReceipts);
       if (!type4Result.isOK) {
-        objectedReceipts.push({
+        acc.challengeReceipts.push({
           type4Receipt: type4Result.wrongReceipts
         });
       }
       // type5 data correct
       let type5Result = this._type5Filter(receipt);
       if (!type5Result) {
-        objectedReceipts.push({
+        acc.challengeReceipts.push({
           type5Receipt: receipt.toJson()
         });
       }
-    });
-    return objectedReceipts;
+    }, { challengeReceipts: challengeReceipts, existGSN: existGSN });
+    return challengeReceipts;
   }
 
   _verifySignature = (receipt) => {
@@ -176,8 +175,8 @@ class Auditor {
   _type4Filter = (receipt, orderedReceipts) => {
     let wrongReceipts;
     let result = true;
-    let currentGSN = parseInt('0x' + receipt.receiptData.GSN);
-    let previousGSN = parseInt('0x' + orderedReceipts[currentGSN - 2].receiptData.GSN);
+    let currentGSN = parseInt(receipt.receiptData.GSN, 16);
+    let previousGSN = parseInt(orderedReceipts[currentGSN - 2].receiptData.GSN, 16);
     let gsnResult = previousGSN - currentGSN;
     if (orderedReceipts[currentGSN - 2] != undefined) {// avoid the first receipt error
       if (gsnResult != 1) {
