@@ -21,12 +21,15 @@ class Auditor {
       return parseInt('0x' + a.receiptData.GSN) - parseInt('0x' + b.receiptData.GSN);
     });
 
-    orderedReceipts.forEach(receipt => {
+    orderedReceipts.forEach(receiptJson => {
+
+      // recover receipt object
+      let receipt = new Receipt(receiptJson);
       // verify signature
-      let result = this._verifySignature(receipt);
-      if (!result) {
+      let wrongSignatureResult = this._verifySignature(receipt);
+      if (!wrongSignatureResult) {
         objectedReceipts.push({
-          wrongSignature: receipt
+          wrongSignature: receipt.toJson()
         });
       }
       // type1 double GSN
@@ -43,12 +46,12 @@ class Auditor {
         if (type2And3Result.value > bond) {
           // wrong receipt value is larger than bond
           objectedReceipts.push({
-            type2Receipt: receipt
+            type2Receipt: receipt.toJson()
           });
         } else {
           // wrong receipt value is less than bond
           objectedReceipts.push({
-            type3Receipt: receipt
+            type3Receipt: receipt.toJson()
           });
         }
       }
@@ -56,28 +59,27 @@ class Auditor {
       let type4Result = this._type4Filter(receipt, orderedReceipts);
       if (!type4Result.isOK) {
         objectedReceipts.push({
-          type3Receipt: type4Result.wrongReceipts
+          type4Receipt: type4Result.wrongReceipts
         });
       }
       // type5 data correct
       let type5Result = this._type5Filter(receipt);
       if (!type5Result) {
         objectedReceipts.push({
-          type5Receipt: receipt
+          type5Receipt: receipt.toJson()
         });
       }
     });
     return objectedReceipts;
   }
 
-  _verifySignature = (receiptJson) => {
+  _verifySignature = (receipt) => {
     let verifier = this._infinitechain.verifier;
-    let receipt = new Receipt(receiptJson);
     let type = receipt.type();
-    let from = receiptJson.lightTxData.from;
-    let to = receiptJson.lightTxData.to;
-    receiptJson.sig.clientLightTx.v = parseInt(receiptJson.sig.clientLightTx.v);
-    let recoverClientAddress = verifier._recover(receiptJson.lightTxHash, receiptJson.sig.clientLightTx).toString('hex').padStart(64, '0');
+    let from = receipt.lightTxData.from;
+    let to = receipt.lightTxData.to;
+    receipt.sig.clientLightTx.v = parseInt(receipt.sig.clientLightTx.v);
+    let recoverClientAddress = verifier._recover(receipt.lightTxHash, receipt.sig.clientLightTx).toString('hex').padStart(64, '0');
     if (type == types.deposit) {
       if (recoverClientAddress == to) {
         return false;
@@ -88,29 +90,29 @@ class Auditor {
       }
     }
 
-    receiptJson.sig.serverLightTx.v = parseInt(receiptJson.sig.serverLightTx.v);
-    let recoverServerLightTxAddress = verifier._recover(receiptJson.lightTxHash, receiptJson.sig.serverLightTx).toString('hex').padStart(64, '0');
+    receipt.sig.serverLightTx.v = parseInt(receipt.sig.serverLightTx.v);
+    let recoverServerLightTxAddress = verifier._recover(receipt.lightTxHash, receipt.sig.serverLightTx).toString('hex').padStart(64, '0');
     if (recoverServerLightTxAddress != this.serverAddress) {
       return false;
     }
-    receiptJson.sig.serverReceipt.v = parseInt(receiptJson.sig.serverReceipt.v);
-    let recoverServerReceiptAddress = verifier._recover(receiptJson.receiptHash, receiptJson.sig.serverReceipt).toString('hex').padStart(64, '0');
+    receipt.sig.serverReceipt.v = parseInt(receipt.sig.serverReceipt.v);
+    let recoverServerReceiptAddress = verifier._recover(receipt.receiptHash, receipt.sig.serverReceipt).toString('hex').padStart(64, '0');
     if (recoverServerReceiptAddress != this.serverAddress) {
       return false;
     }
   }
 
-  _type1Filter = (receiptJson, existGSN) => {
-    let gsn = receiptJson.receiptData.GSN;
+  _type1Filter = (receipt, existGSN) => {
+    let gsn = receipt.receiptData.GSN;
     let wrongReceipts;
     let result = true;
     if (!Object.keys(existGSN).includes(gsn)) {
-      existGSN.gsn = receiptJson;
+      existGSN.gsn = receipt.toJson();
     } else {
       let receipt1 = existGSN.gsn;
       wrongReceipts = {
         receipt1: receipt1,
-        receipt2: receiptJson
+        receipt2: receipt.toJson
       };
       result = false;
     }
@@ -121,13 +123,12 @@ class Auditor {
     };
   }
 
-  _type2And3Filter = (receiptJson, accounts) => {
+  _type2And3Filter = (receipt, accounts) => {
     let initBalance = '0000000000000000000000000000000000000000000000000000000000000000';
     let fromBalance = initBalance;
     let toBalance = initBalance;
     let result = true;
     let value;
-    let receipt = new Receipt(receiptJson);
     let type = receipt.type();
     if (type == types.deposit) {
       let value = new BigNumber('0x' + receipt.lightTxData.value);
@@ -172,16 +173,16 @@ class Auditor {
     };
   }
 
-  _type4Filter = (receiptJson, orderedReceipts) => {
+  _type4Filter = (receipt, orderedReceipts) => {
     let wrongReceipts;
     let result = true;
-    let currentGSN = parseInt('0x' + receiptJson.receiptData.GSN);
+    let currentGSN = parseInt('0x' + receipt.receiptData.GSN);
     let previousGSN = parseInt('0x' + orderedReceipts[currentGSN - 2].receiptData.GSN);
     let gsnResult = previousGSN - currentGSN;
     if (orderedReceipts[currentGSN - 2] != undefined) {// avoid the first receipt error
       if (gsnResult != 1) {
         wrongReceipts = {
-          receipt1: receiptJson,
+          receipt1: receipt.toJson(),
           receipt2: orderedReceipts[currentGSN - 2]
         };
         result = false;
@@ -193,13 +194,13 @@ class Auditor {
     };
   }
 
-  _type5Filter = (receiptJson) => {
-    let computedLightTxHash = this._sha3(Object.values(receiptJson.lightTxData).reduce((acc, curr) => acc + curr, ''));
-    let computedReceiptHash = this._sha3(Object.values(receiptJson.receiptData).reduce((acc, curr) => acc + curr, ''));
-    if (receiptJson.lightTxHash != computedLightTxHash) {
+  _type5Filter = (receipt) => {
+    let computedLightTxHash = this._sha3(Object.values(receipt.lightTxData).reduce((acc, curr) => acc + curr, ''));
+    let computedReceiptHash = this._sha3(Object.values(receipt.receiptData).reduce((acc, curr) => acc + curr, ''));
+    if (receipt.lightTxHash != computedLightTxHash) {
       return false;
     }
-    if (receiptJson.receiptHash != computedReceiptHash) {
+    if (receipt.receiptHash != computedReceiptHash) {
       return false;
     }
   }
