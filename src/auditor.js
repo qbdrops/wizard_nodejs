@@ -11,7 +11,49 @@ class Auditor {
     this._nodeUrl = auditorConfig.nodeUrl;
   }
 
-  audit = async (stageReceipts, accounts) => { // previous stage accounts
+  audit = async (stageHeight) => {
+    // Fetch receipts and accounts
+    let gringotts = this._infinitechain.gringotts;
+    let _result = await gringotts.getOffchainReceipts(stageHeight);
+    let receipts = _result.data.receipts;
+    _result = await gringotts.getAccountBalances();
+    let balances = _result.data.balances;
+
+    // Sort the receipts by GSN
+    receipts = receipts.sort(function (r1, r2) {
+      return parseInt(r1.receiptData.GSN, 16) - parseInt(r2.receiptData.GSN, 16);
+    }).map(receiptJson => new Receipt(receiptJson));
+
+    // Group the sorted receipts by addresses
+    let receiptsGroup = receipts.reduce((acc, receipt) => {
+      let type = receipt.type();
+      if (type == types.deposit) {
+        let targetAddress = receipt.lightTxData.to;
+        acc = this._pushOrNew(acc, targetAddress, receipt);
+      } else if (type == types.withdrawal || type == types.instantWithdrawal) {
+        let targetAddress = receipt.lightTxData.from;
+        acc = this._pushOrNew(acc, targetAddress, receipt);
+      } else {// remittance
+        let targetFromAddress = receipt.lightTxData.from;
+        let targetToAddress = receipt.lightTxData.to;
+        acc = this._pushOrNew(acc, targetFromAddress, receipt);
+        acc = this._pushOrNew(acc, targetToAddress, receipt);
+      }
+      return acc;
+    }, {});
+    return receiptsGroup;
+  }
+
+  _pushOrNew = (obj, key, value) => {
+    if (obj[key]) {
+      obj[key].push(value);
+    } else {
+      obj[key] = [value];
+    }
+    return obj;
+  }
+
+  _audit = async (stageReceipts, accounts) => { // previous stage accounts
     let bond = 1000000;// fetch bond by sidechain contract
     bond = new BigNumber(bond);
 
