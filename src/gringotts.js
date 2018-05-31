@@ -64,6 +64,16 @@ class Gringotts {
     let url = this._nodeUrl + '/attach';
     return axios.post(url, { serializedTx: serializedTx, stageHeight: stageHeight });
   }
+
+  getOffchainReceipts = async (stageHeight) => {
+    let url = this._nodeUrl + '/receipts/' + stageHeight;
+    return axios.get(url);
+  }
+
+  getAccountBalances = async () => {
+    let url = this._nodeUrl + '/balances';
+    return axios.get(url);
+  }
 }
 
 export default Gringotts;

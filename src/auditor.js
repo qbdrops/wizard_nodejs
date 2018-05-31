@@ -11,13 +11,18 @@ class Auditor {
     this._nodeUrl = auditorConfig.nodeUrl;
   }
 
-  audit = async (stageHeight) => {
-    // Fetch receipts and accounts
+  audit = async (stageHeight, receipts = null, balances = null) => {
     let gringotts = this._infinitechain.gringotts;
-    let _result = await gringotts.getOffchainReceipts(stageHeight);
-    let receipts = _result.data.receipts;
-    _result = await gringotts.getAccountBalances();
-    let balances = _result.data.balances;
+    if (!receipts) {
+      // Fetch receipts and accounts
+      let resReceipts = await gringotts.getOffchainReceipts(stageHeight);
+      receipts = resReceipts.data.receipts;
+    }
+
+    if (!balances) {
+      let resBalance = await gringotts.getAccountBalances();
+      balances = resBalance.data.balances;
+    }
 
     // Sort the receipts by GSN
     receipts = receipts.sort(function (r1, r2) {
@@ -41,6 +46,10 @@ class Auditor {
       }
       return acc;
     }, {});
+
+    let receiptsWithRepeatedGSN = this._repeatedGSNFilter(receipts);
+    console.log(receiptsWithRepeatedGSN);
+
     return receiptsGroup;
   }
 
@@ -51,6 +60,19 @@ class Auditor {
       obj[key] = [value];
     }
     return obj;
+  }
+
+  _repeatedGSNFilter = (receipts) => {
+    let counts = receipts.reduce((acc, receipt) => {
+      let gsn = receipt.receiptData.GSN;
+      acc = this._pushOrNew(acc, gsn, receipt);
+      return acc;
+    }, {});
+
+    let repeatedGSN = Object.keys(counts).filter(gsn => counts[gsn].length > 1);
+    let receiptsWithRepeatedGSN = counts[repeatedGSN];
+
+    return receiptsWithRepeatedGSN;
   }
 
   _audit = async (stageReceipts, accounts) => { // previous stage accounts
