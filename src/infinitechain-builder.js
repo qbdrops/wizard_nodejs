@@ -28,9 +28,9 @@ class InfinitechainBuilder {
 
   setStorage (storage, db = null) {
     if (storage == 'memory') {
-      this.storage = new Memory();
+      this._storage = new Memory();
     } else if (storage == 'level') {
-      this.storage = new Level(db);
+      this._storage = new Level(db);
     } else {
       throw new Error('Not supported storage type.');
     }
@@ -40,15 +40,15 @@ class InfinitechainBuilder {
 
   build () {
     assert(this._nodeUrl != undefined, '\'nodeUrl\' is not provided.');
-    assert(this._web3Url != undefined, '\'nodeUrl\' is not provided.');
-    assert(this._signerKey != undefined, '\'signerKey\' is not provided.');
+    assert(this._web3Url != undefined, '\'web3Url\' is not provided.');
+    assert(this._storage != undefined, '\'storage\' is not provided.');
 
     let clientConfig = {
       web3Url: this._web3Url,
       nodeUrl: this._nodeUrl,
       clientAddress: this._clientAddress,
       serverAddress: this._serverAddress,
-      storage: this.storage
+      storage: this._storage
     };
 
     let serverConfig = {
