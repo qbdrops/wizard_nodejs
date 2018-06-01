@@ -11,7 +11,7 @@ class Auditor {
     this._nodeUrl = auditorConfig.nodeUrl;
   }
 
-  audit = async (stageHeight, receipts = null, balances = null) => {
+  audit = async (stageHeight, receipts = null, balances = null, bond = null) => {
     let gringotts = this._infinitechain.gringotts;
     if (!receipts) {
       // Fetch receipts and accounts
@@ -48,7 +48,8 @@ class Auditor {
     }, {});
 
     let receiptsWithRepeatedGSN = this._repeatedGSNFilter(receipts);
-    console.log(receiptsWithRepeatedGSN);
+    let receiptWithWrongBalance = this._wrongBalanceFilter(receiptsGroup, balances, bond);
+    console.log(receiptWithWrongBalance);
 
     return receiptsGroup;
   }
@@ -73,6 +74,87 @@ class Auditor {
     let receiptsWithRepeatedGSN = counts[repeatedGSN];
 
     return receiptsWithRepeatedGSN;
+  }
+
+  _wrongBalanceFilter = (receiptsGroup, balances, bond) => {
+    bond = new BigNumber(bond, 16);
+    let filterResult = Object.keys(receiptsGroup).reduce((acc, address) => { // each address check the balance by their own receipts
+      let receipts = receiptsGroup[address];
+      let initBalance = new BigNumber(balances[address], 16);
+
+      let wrongBalanceResult = receipts.reduce((acc, receipt) => {
+        let type = receipt.type();
+        let value = new BigNumber(receipt.lightTxData.value, 16);
+        if (type == types.deposit) {
+          let expectedBalance = acc.balance.plus(value);
+          let receiptBalance = new BigNumber(receipt.receiptData.toBalance);
+          let diff = expectedBalance.minus(receiptBalance).abs();
+
+          if (diff == 0) {
+            acc.balance = receiptBalance;
+          } else {
+            acc.wrongBalanceSum = acc.wrongBalanceSum.plus(diff);
+            acc.wrongBalanceReceipts.push([acc.prevReceipt, receipt]);
+          }
+        } else if (type == types.withdrawal || type == types.instantWithdrawal) {
+          let expectedBalance = acc.balance.minus(value);
+          let receiptBalance = new BigNumber(receipt.receiptData.fromBalance);
+          let diff = expectedBalance.minus(receiptBalance).abs();
+
+          if (diff == 0) {
+            acc.balance = receiptBalance;
+          } else {
+            acc.wrongBalanceSum = acc.wrongBalanceSum.plus(diff);
+            acc.wrongBalanceReceipts.push([acc.prevReceipt, receipt]);
+          }
+        } else {// remittance
+          if (address == receipt.lightTxData.from) {
+            let expectedBalance = acc.balance.minus(value);
+            let receiptBalance = new BigNumber(receipt.receiptData.fromBalance);
+            let diff = expectedBalance.minus(receiptBalance).abs();
+
+            if (diff == 0) {
+              acc.balance = receiptBalance;
+            } else {
+              acc.wrongBalanceSum = acc.wrongBalanceSum.plus(diff);
+              acc.wrongBalanceReceipts.push([acc.prevReceipt, receipt]);
+            }
+          } else {
+            let expectedBalance = acc.balance.plus(value);
+            let receiptBalance = new BigNumber(receipt.receiptData.toBalance);
+            let diff = expectedBalance.minus(receiptBalance).abs();
+
+            if (diff == 0) {
+              acc.balance = receiptBalance;
+            } else {
+              acc.wrongBalanceSum = acc.wrongBalanceSum.plus(diff);
+              acc.wrongBalanceReceipts.push([acc.prevReceipt, receipt]);
+            }
+          }
+        }
+        acc.prevReceipt = receipt;
+        return acc;
+      }, {
+        balance: initBalance,
+        wrongBalanceReceipts: [],
+        prevReceipt: null,
+        wrongBalanceSum: new BigNumber(0)
+      });
+      wrongBalanceResult.wrongBalanceReceipts.forEach(receipts => {
+        acc.wrongBalanceReceipts.push(receipts);
+      });
+      acc.wrongBalanceSum = acc.wrongBalanceSum.plus(wrongBalanceResult.wrongBalanceSum);
+      return acc;
+    }, {
+      wrongBalanceReceipts: [],
+      wrongBalanceSum: new BigNumber(0)
+    });
+
+    return filterResult.wrongBalanceSum.isGreaterThan(bond) ? {
+      type2: filterResult.wrongBalanceReceipts
+    } : {
+      type3: filterResult.wrongBalanceReceipts
+    };
   }
 
   _audit = async (stageReceipts, accounts) => { // previous stage accounts
