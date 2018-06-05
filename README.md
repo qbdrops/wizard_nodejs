@@ -64,4 +64,3 @@ infinitechain.initialize().then(() => {
 #### infinitechain.signer.onChallenge
 #### infinitechain.signer.onDefend
 #### infinitechain.signer.onFinalize
-```
