@@ -274,9 +274,9 @@ class Contract {
     }
   }
 
-  getStageRootHash = async (stageHash) => {
-    let stage = await this.getStage(stageHash);
-    return stage.rootHash();
+  getStageRootHash = async (stageHeight) => {
+    let rootHashes = await this._sidechain.stages(stageHeight);
+    return rootHashes;
   }
 
   getObjectionablePaymentHashes = async (stageHash) => {

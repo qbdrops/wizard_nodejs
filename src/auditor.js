@@ -2,6 +2,7 @@ import BigNumber from 'bignumber.js';
 import Receipt from './models/receipt';
 import types from '@/models/types';
 import EthUtils from 'ethereumjs-util';
+import IndexedMerkleTree from '@/utils/indexed-merkle-tree';
 
 class Auditor {
   constructor (auditorConfig, infinitechain) {
@@ -14,7 +15,6 @@ class Auditor {
   audit = async (stageHeight, receipts = null, balances = null, bond = null) => {
     let gringotts = this._infinitechain.gringotts;
     if (!receipts) {
-      // Fetch receipts and accounts
       let resReceipts = await gringotts.getOffchainReceipts(stageHeight);
       receipts = resReceipts.data.receipts;
     }
@@ -23,6 +23,13 @@ class Auditor {
       let resBalance = await gringotts.getAccountBalances();
       balances = resBalance.data.balances;
     }
+
+    if (!bond) {
+      bond = (1000*1e18).toString(16);
+    }
+
+    // Reconstruct receiptTree from treeNodes
+    let receiptTree = new IndexedMerkleTree(stageHeight, receipts.map(receipt => receipt.receiptHash));
 
     // Sort the receipts by GSN
     receipts = receipts.sort(function (r1, r2) {
@@ -38,7 +45,7 @@ class Auditor {
       } else if (type == types.withdrawal || type == types.instantWithdrawal) {
         let targetAddress = receipt.lightTxData.from;
         acc = this._pushOrNew(acc, targetAddress, receipt);
-      } else {// remittance
+      } else {
         let targetFromAddress = receipt.lightTxData.from;
         let targetToAddress = receipt.lightTxData.to;
         acc = this._pushOrNew(acc, targetFromAddress, receipt);
@@ -48,11 +55,16 @@ class Auditor {
     }, {});
 
     let receiptsWithRepeatedGSN = this._repeatedGSNFilter(receipts);
-    let receiptWithWrongBalance = this._wrongBalanceFilter(receiptsGroup, balances, bond);
-    console.log(receiptsWithRepeatedGSN);
-    console.log(receiptWithWrongBalance);
+    let receiptsWithWrongBalance = this._wrongBalanceFilter(receiptsGroup, balances, bond);
+    let receiptsWithSkippedGSN = this._skippedGSNFilter(receipts);
+    let receiptWithoutIntegrity = await this._integrityFilter(receipts, receiptTree);
 
-    return receiptsGroup;
+    return {
+      receiptsWithRepeatedGSN: receiptsWithRepeatedGSN,
+      receiptsWithWrongBalance: receiptsWithWrongBalance,
+      receiptsWithSkippedGSN: receiptsWithSkippedGSN,
+      receiptWithoutIntegrity: receiptWithoutIntegrity
+    };
   }
 
   _pushOrNew = (obj, key, value) => {
@@ -76,8 +88,24 @@ class Auditor {
     return receiptsWithRepeatedGSN;
   }
 
-  _wrongBalanceFilter = (receiptsGroup, balances, bond) => {
-    bond = new BigNumber(bond, 16);
+  _skippedGSNFilter = (receipts) => {
+    let result = receipts.reduce((acc, receipt) => {
+      if (acc.prevReceipt) {
+        let prevGSN = new BigNumber(acc.prevReceipt.receiptData.GSN, 16);
+        let GSN = new BigNumber(receipt.receiptData.GSN, 16);
+        let diff = GSN.minus(prevGSN).abs();
+        if (diff != 1) {
+          acc.receiptsWithSkippedGSN.push([acc.prevReceipt, receipt]);
+        }
+      }
+      acc.prevReceipt = receipt;
+      return acc;
+    }, { prevReceipt: null, receiptsWithSkippedGSN: [] });
+
+    return result.receiptsWithSkippedGSN;
+  }
+
+  _wrongBalanceFilter = (receiptsGroup, balances) => {
     let filterResult = Object.keys(receiptsGroup).reduce((acc, address) => { // each address check the balance by their own receipts
       let receipts = receiptsGroup[address];
       let initBalance = new BigNumber(balances[address], 16);
@@ -90,46 +118,42 @@ class Auditor {
           let receiptBalance = new BigNumber(receipt.receiptData.toBalance, 16);
           let diff = expectedBalance.minus(receiptBalance).abs();
 
-          if (diff == 0) {
-            acc.balance = receiptBalance;
-          } else {
+          if (diff != 0) {
             acc.wrongBalanceSum = acc.wrongBalanceSum.plus(diff);
             acc.wrongBalanceReceipts.push([acc.prevReceipt, receipt]);
           }
+          acc.balance = receiptBalance;
         } else if (type == types.withdrawal || type == types.instantWithdrawal) {
           let expectedBalance = acc.balance.minus(value);
           let receiptBalance = new BigNumber(receipt.receiptData.fromBalance, 16);
           let diff = expectedBalance.minus(receiptBalance).abs();
 
-          if (diff == 0) {
-            acc.balance = receiptBalance;
-          } else {
+          if (diff != 0) {
             acc.wrongBalanceSum = acc.wrongBalanceSum.plus(diff);
             acc.wrongBalanceReceipts.push([acc.prevReceipt, receipt]);
           }
+          acc.balance = receiptBalance;
         } else {// remittance
           if (address == receipt.lightTxData.from) {
             let expectedBalance = acc.balance.minus(value);
             let receiptBalance = new BigNumber(receipt.receiptData.fromBalance, 16);
             let diff = expectedBalance.minus(receiptBalance).abs();
 
-            if (diff == 0) {
-              acc.balance = receiptBalance;
-            } else {
+            if (diff != 0) {
               acc.wrongBalanceSum = acc.wrongBalanceSum.plus(diff);
               acc.wrongBalanceReceipts.push([acc.prevReceipt, receipt]);
             }
+            acc.balance = receiptBalance;
           } else {
             let expectedBalance = acc.balance.plus(value);
             let receiptBalance = new BigNumber(receipt.receiptData.toBalance, 16);
             let diff = expectedBalance.minus(receiptBalance).abs();
 
-            if (diff == 0) {
-              acc.balance = receiptBalance;
-            } else {
+            if (diff != 0) {
               acc.wrongBalanceSum = acc.wrongBalanceSum.plus(diff);
               acc.wrongBalanceReceipts.push([acc.prevReceipt, receipt]);
             }
+            acc.balance = receiptBalance;
           }
         }
         acc.prevReceipt = receipt;
@@ -150,47 +174,56 @@ class Auditor {
       wrongBalanceSum: new BigNumber(0)
     });
 
-    return filterResult.wrongBalanceSum.isGreaterThan(bond) ? {
-      type2: filterResult.wrongBalanceReceipts
-    } : {
-      type3: filterResult.wrongBalanceReceipts
-    };
+    return filterResult.wrongBalanceReceipts;
   }
 
-  _type4Filter = (receipt, orderedReceipts) => {
-    let wrongReceipts;
-    let result = true;
-    let currentGSN = parseInt(receipt.receiptData.GSN, 16);
-    let previousGSN = parseInt(orderedReceipts[currentGSN - 2].receiptData.GSN, 16);
-    let gsnResult = previousGSN - currentGSN;
-    if (orderedReceipts[currentGSN - 2] != undefined) {// avoid the first receipt error
-      if (gsnResult != 1) {
-        wrongReceipts = {
-          receipt1: receipt.toJson(),
-          receipt2: orderedReceipts[currentGSN - 2]
-        };
-        result = false;
+  _integrityFilter = async (receipts, tree) => {
+    let contract = this._infinitechain.contract;
+
+    // 1. Get receiptRootHash from blockchain
+    let rootHashes = await contract.getStageRootHash(tree.stageHeight);
+    let receiptRootHash = rootHashes[0];
+
+    let result = receipts.reduce((acc, receipt) => {
+      // 2. Get slice and compute root hash
+      let slice = tree.getSlice(receipt.receiptHash);
+      let receiptHashArray = tree.getAllLeafElements(receipt.receiptHash);
+      let computedReceiptRootHash;
+      if (receiptHashArray.includes(receipt.receiptHash)) {
+        computedReceiptRootHash = '0x' + this._computeRootHashFromSlice(slice, tree.stageHeight);
+        // 3. Compare
+        if (computedReceiptRootHash != receiptRootHash) {
+          acc.receiptsWithoutIntegirty.push(receipt);
+        }
+      } else {
+        acc.receiptsWithoutIntegirty.push(receipt);
       }
-    }
-    return {
-      ok: result,
-      wrongReceipts: wrongReceipts
-    };
-  }
+      return acc;
+    }, {
+      receiptsWithoutIntegirty: []
+    });
 
-  _type5Filter = (receipt) => {
-    let computedLightTxHash = this._sha3(Object.values(receipt.lightTxData).reduce((acc, curr) => acc + curr, ''));
-    let computedReceiptHash = this._sha3(Object.values(receipt.receiptData).reduce((acc, curr) => acc + curr, ''));
-    if (receipt.lightTxHash != computedLightTxHash) {
-      return false;
-    }
-    if (receipt.receiptHash != computedReceiptHash) {
-      return false;
-    }
+    return result.receiptsWithoutIntegirty;
   }
 
   _sha3 (content) {
     return EthUtils.sha3(content).toString('hex');
+  }
+
+  _computeRootHashFromSlice (slice, stageHeight) {
+    let firstNode = slice.shift();
+
+    let rootNode = slice.reduce((acc, curr) => {
+      if (acc.treeNodeIndex % 2 == 0) {
+        acc.treeNodeHash = this._sha3(acc.treeNodeHash.concat(curr.treeNodeHash));
+      } else {
+        acc.treeNodeHash = this._sha3(curr.treeNodeHash.concat(acc.treeNodeHash));
+      }
+      acc.treeNodeIndex = parseInt(acc.treeNodeIndex / 2);
+      return acc;
+    }, firstNode);
+
+    return this._sha3(rootNode.treeNodeHash + stageHeight.toString(16).padStart(64, '0'));
   }
 }
 
