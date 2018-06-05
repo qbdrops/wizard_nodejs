@@ -8,12 +8,14 @@ import initialBalances from '#/test-auditor-data/initial-balances.json';
 import receipts from '#/test-auditor-data/normal.json';
 import receiptsWithRepeatedGSN from '#/test-auditor-data/repeated-GSN.json';
 import receiptsWithWrongBalances from '#/test-auditor-data/wrong-balances.json';
+import receiptsWithSkippedGSN from '#/test-auditor-data/skipped-GSN.json';
+import receiptsWithoutIntegrity from '#/test-auditor-data/integrity.json';
 
 nock('http://localhost:3000').
   get('/sidechain/address').
-  reply(200, { address: '0x30e2098182a70ff37721783b3ae22dc09b84f254' }).
+  reply(200, { address: '0x7da24d4a346e0c4bb6e1f03c303a846faa467beb' }).
   get('/server/address').
-  reply(200, { address: '0x6c559983c9b0ec5dd61df4671cbe12e1d9aeefc5' });
+  reply(200, { address: '0xfb44fa0865747558066266061786e69336b5f3a2' });
 
 describe('Auditor', () => {
   let infinitechain;
@@ -35,8 +37,11 @@ describe('Auditor', () => {
   describe('#audit', () => {
     it('returns correct result', async () => {
       // await infinitechain.auditor.audit(stageHeight, receiptsWithRepeatedGSN, initialBalances, bond);
-      await infinitechain.auditor.audit(stageHeight, receiptsWithWrongBalances, initialBalances, bond);
+      // await infinitechain.auditor.audit(stageHeight, receiptsWithWrongBalances, initialBalances, bond);
       // await infinitechain.auditor.audit(stageHeight, receipts, initialBalances, bond);
+      // await infinitechain.auditor.audit(stageHeight, receipts, initialBalances, bond);
+      let res = await infinitechain.auditor.audit(stageHeight, receiptsWithoutIntegrity, initialBalances, bond);
+      console.log(res);
     });
   });
 });

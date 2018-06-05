@@ -9,8 +9,7 @@
   "main": "dist/wizard_nodejs.js",
   "scripts": {
     "test": "mocha-webpack --recursive",
-    "tclient": "mocha-webpack test/test-client.js",
-    "tserver": "mocha-webpack test/test-server.js",
+    "testAuditor": "mocha-webpack test/test-auditor.js",
     "build": "webpack",
     "console": "node console.js"
   },
