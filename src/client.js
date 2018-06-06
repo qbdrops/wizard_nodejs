@@ -75,16 +75,6 @@ class Client {
     return signedLightTx;
   }
 
-  instantWithdraw = async (receipt, nonce = null) => {
-    assert(receipt instanceof Receipt, 'Parameter \'receipt\' should be instance of Receipt.');
-    return this._infinitechain.contract.instantWithdraw(receipt, nonce);
-  }
-
-  withdraw = async (receipt, nonce = null) => {
-    assert(receipt instanceof Receipt, 'Parameter \'receipt\' should be instance of Receipt.');
-    return this._infinitechain.contract.withdraw(receipt, nonce);
-  }
-
   saveLightTx = async (lightTx) => {
     assert(lightTx instanceof LightTransaction, 'Parameter \'lightTx\' should be instance of \'LightTransaction\'.');
     await this._storage.setLightTx(lightTx.lightTxHash, lightTx.toJson());
@@ -186,84 +176,6 @@ class Client {
 
   _getNonce () {
     return this._sha3((Math.random()).toString());
-  }
-
-  _computeRootHashFromSlice (slice) {
-    let firstNode = slice.shift();
-
-    let rootNode = slice.reduce((acc, curr) => {
-      if (acc.treeNodeIndex % 2 == 0) {
-        acc.treeNodeHash = this._sha3(acc.treeNodeHash.concat(curr.treeNodeHash));
-      } else {
-        acc.treeNodeHash = this._sha3(curr.treeNodeHash.concat(acc.treeNodeHash));
-      }
-      acc.treeNodeIndex = parseInt(acc.treeNodeIndex / 2);
-      return acc;
-    }, firstNode);
-
-    return rootNode.treeNodeHash;
-  }
-
-  _makeUnsignedPayment = (rawPayment) => {
-    assert(this._validateRawPayment(rawPayment), 'Wrong rawPayment format.');
-
-    let stageHash = EthUtils.sha3(rawPayment.stageHeight.toString()).toString('hex');
-
-    let paymentHashAndCiphers = this._computePaymentHashAndCiphers(rawPayment);
-    let paymentHash = paymentHashAndCiphers.paymentHash;
-    let ciphers = paymentHashAndCiphers.ciphers;
-
-    return {
-      stageHeight: rawPayment.stageHeight,
-      stageHash: stageHash.toString('hex'),
-      paymentHash: paymentHash.toString('hex'),
-      cipherClient: ciphers.cipherClient,
-      cipherStakeholder: ciphers.cipherStakeholder
-    };
-  }
-
-  _validateRawPayment = (rawPayment) => {
-    if (!rawPayment.hasOwnProperty('from') ||
-        !rawPayment.hasOwnProperty('to') ||
-        !rawPayment.hasOwnProperty('value') ||
-        !rawPayment.hasOwnProperty('localSequenceNumber') ||
-        !rawPayment.hasOwnProperty('stageHeight') ||
-        !rawPayment.hasOwnProperty('data')) {
-      return false;
-    }
-
-    let data = rawPayment.data;
-
-    if (!data.hasOwnProperty('pkClient') ||
-        !data.hasOwnProperty('pkStakeholder')) {
-      return false;
-    }
-
-    return true;
-  }
-
-  _computePaymentHashAndCiphers = (rawPayment) => {
-    let crypto = this._infinitechain.crypto;
-    let serializedRawPayment = Buffer.from(JSON.stringify(rawPayment)).toString('hex');
-    let cipherClient = crypto.encrypt(serializedRawPayment, rawPayment.data.pkClient);
-    let cipherStakeholder = crypto.encrypt(serializedRawPayment, rawPayment.data.pkStakeholder);
-    let paymentHash = EthUtils.sha3(cipherClient + cipherStakeholder).toString('hex');
-
-    return {
-      paymentHash: paymentHash,
-      ciphers: {
-        cipherClient: cipherClient,
-        cipherStakeholder: cipherStakeholder,
-      }
-    };
-  }
-
-  _computeTreeNodeHash = (paymentHashArray) => {
-    let hash = paymentHashArray.reduce((acc, curr) => {
-      return acc.concat(curr);
-    });
-
-    return this._sha3(hash);
   }
 }
 
