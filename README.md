@@ -176,7 +176,7 @@ This funtion is used to verify the light transaction which format is correct or 
 `isValid` - `boolean`
 #### infinitechain.verifier.verifyReceipt
 ```
-infinitechain.verifier.verifyLightTx(receipt)
+infinitechain.verifier.verifyReceipt(receipt)
 ```
 This funtion is used to verify the receipt which format is correct or not.
 ##### Parameter
