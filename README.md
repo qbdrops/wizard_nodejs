@@ -71,7 +71,7 @@ infinitechain.client.makeLightTx(type, lightTxData, metadata)
 ```
 This function is called by makeProposeDeposit and makeProposeWithdrawal function. It could be used to make different types of light transactions, like deposit, withdraw, instantWithdraw and remittance.
 ##### Parameter
-1. `light transaction type` - `string`: The type of light transaction, included deposit, instantWithdraw, withdraw or remittnace.
+1. `light transaction type` - `string`: The type of light transaction, included deposit, instantWithdraw, withdraw or remittance.
 2. `light transaction data` - `object`: The important information of a light trnasaction.
 3. `metadata` - `object`: The additional information of a light trnasaction.
 
