@@ -34,23 +34,23 @@ infinitechain.initialize().then(() => {
 ### Client
 #### infinitechain.client.makeProposeDeposit
 ```
-infinitechain.client.makeProposeDeposit ()
+infinitechain.client.makeProposeDeposit()
 ```
 If client transfers ETH or ERC20 tokens to the Bolt contract, Bolt contract will execute proposeDeposit function automatically. After that, client can use the Bolt SDK to execute makeProposeDeposit function. This function will listen a proposeDeposit event. When this function has already listened the deposit event, it will make a deposit light transaction. At last, client will get the light transaction and send it to server.
 ##### Parameter
 `None`
 ##### Return
-`object: light transaction`
+`light transaction` - `object`
 
 #### infinitechain.client.makeProposeWithdrawal
 ```
-infinitechain.client.makeProposeWithdrawal (withdrawValue)
+infinitechain.client.makeProposeWithdrawal(withdrawValue)
 ```
-Client can use this function to make a withdrawal light transaction and send it to server.
+Client can use this function to make a withdrawal and send it to server.
 ##### Parameter
-`1. integer: withdraw value`
+1. `withdraw value` - `integer`: The value of ether or tokens that you want to withdraw.
 ##### Return
-`object: lightTx`
+`lightTx` - `object`
 #### infinitechain.client.makeLightTx
 ```
 let type = 'deposit'
@@ -62,126 +62,127 @@ let lightTxData = {
       assetID: 1,
       logID: 1,
       fee: '0.01'
-    }
+}
 let metadata = {
     foo: 'bar'
 }
 
-infinitechain.client.makeLightTx (type, lightTxData, metadata)
+infinitechain.client.makeLightTx(type, lightTxData, metadata)
 ```
-This function is called by makeProposeDeposit and makeProposeWithdrawal function. It could be used to make different type of light transaction, like deposit, withdraw, instantWithdraw and remittance.
+This function is called by makeProposeDeposit and makeProposeWithdrawal function. It could be used to make different types of light transactions, like deposit, withdraw, instantWithdraw and remittance.
 ##### Parameter
-`1. string: light transaction type`
-`2. object: light transaction data`
-`3. object: metadata`
+1. `light transaction type` - `string`: The type of light transaction, included deposit, instantWithdraw, withdraw or remittnace.
+2. `light transaction data` - `object`: The important information of a light trnasaction.
+3. `metadata` - `object`: The additional information of a light trnasaction.
 
 ##### Return
-`object: light transaction`
+`light transaction` - `object`
 #### infinitechain.client.saveLightTx
 ```
-infinitechain.client.saveLightTx (lightTransaction)
+infinitechain.client.saveLightTx(lightTransaction)
 ```
 This function is used to save the json format of light transaction.
 ##### Parameter
-`1. object: light transaction`
+1. `light transaction` - `object`: The json format of light transaction that you want to store.
 ##### Return
 `None`
 #### infinitechain.client.saveReceipt
 ```
-infinitechain.client.saveReceipt (receipt)
+infinitechain.client.saveReceipt(receipt)
 ```
 This function is used to save the json format of receipt.
 ##### Parameter
-`1. object: receipt`
+1. `receipt` - `object`: The json format of receipt that you want to store.
 
 ##### Return
 `None`
 #### infinitechain.client.getLightTx
 ```
-infinitechain.client.getLightTx (lightTxHash)
+infinitechain.client.getLightTx(lightTxHash)
 ```
 This function is used to get the json format of light transaction according to light transaction hash.
 ##### Parameter
-`1. string: light transaction hash`
+1. `light transaction hash` - `string`: The hash value of a light transaction that you want to get.
 ##### Return
-`object: light transaction`
+`light transaction` - `object`
 #### infinitechain.client.getReceipt
 ```
-infinitechain.client.getReceipt (receiptHash)
+infinitechain.client.getReceipt(receiptHash)
 ```
 This function is used to get the json format of receipt according to receipt hash.
 ##### Parameter
-`1. string: receipt hash`
+1. `receipt hash` - `string`: The hash value of a receipt that you want to get.
 ##### Return
-`object: receipt`
+`receipt` - `object`
 #### infinitechain.client.getAllReceiptHashes
 ```
-infinitechain.client.getAllReceiptHashes (stageHeight)
+infinitechain.client.getAllReceiptHashes(stageHeight)
 ```
 This function is used to get all receipt hashes of stage height.
 ##### Parameter
-`1. integer: stage height`
+1. `stage height` - `integer`: The height of stage that you want to get the mapping receipts.
 ##### Return
-`array: receipts`
+`receipts` - `array`
 ### Server
 #### infinitechain.server.sendLightTx
 ```
-infinitechain.server.sendLightTx (lightTransaction)
+infinitechain.server.sendLightTx(lightTransaction)
 ```
 Server can use this function to send the light transaction to gringotts and wait the gringotts send back the receipt.
 ##### Parameter
-`1. object: light transaction`
+1. `light transaction` - `object`: The light transaction which received from client.
 ##### Return
-`object: receipt`
+`receipt` - `object`
 #### infinitechain.server.attach
 ```
-infinitechain.server.attach ()
+infinitechain.server.attach()
 ```
 If server wants to put the receipts to the main chain, it can use this function to send a request to notify gringotts. After that, gringotts will use the receipts to compute two root hashes and send them back to server. At last, server will call the attach funtion in order to add a new stage and include the two root hashes on Bolt contract.
 ##### Parameter
 `None`
 ##### Return
-`string: transaction hash`
+`transaction hash` - `string`
 #### infinitechain.server.finalize ()
 #### infinitechain.server.defend ()
 
 ### Signer
 #### infinitechain.signer.signWithServerKey
 ```
-infinitechain.signer.signWithServerKey (json object)
+infinitechain.signer.signWithServerKey(json object)
 ```
 Server can use this function to sign the light transaction or receipt.
 ##### Parameter
-`1. object: light transaction or receipt`
+1. `light transaction or receipt` - `object`: The light transaction or receipt that you want to sign.
 ##### Return
-`object: signedLightTransaction or signedReceipt`
+`signedLightTransaction or signedReceipt` - `object`
 #### infinitechain.signer.signWithClientKey
 ```
-infinitechain.signer.signWithClientKey (light transaction)
+infinitechain.signer.signWithClientKey(light transaction)
 ```
 Client can use this function to sign the light transaction.
 ##### Parameter
-`1. object: light transaction`
+1. `light transaction` - `object`: The light transaction that you want to sign.
 ##### Return
-`object: signedLightTransaction`
+`signedLightTransaction` - `object`
 ### Verifier
 #### infinitechain.signer.verifyLightTx
 ```
-infinitechain.signer.verifyLightTx (light transaction)
+infinitechain.signer.verifyLightTx(light transaction)
 ```
 This funtion is used to verify the light transaction which format is correct or not.
 ##### Parameter
-`1. object: light transaction`
+1. `light transaction` - `object`: The light transaction which you want to verify.
 ##### Return
-`boolean: isValid`
+`isValid` - `boolean`
 #### infinitechain.signer.verifyReceipt
 ```
+infinitechain.signer.verifyLightTx(receipt)
 ```
 This funtion is used to verify the receipt which format is correct or not.
 ##### Parameter
-`1. object: receipt`
+1. `receipt` - `object`: The receipt which you want to verify.
 ##### Return
-`boolean: isValid`
+`isValid` - `boolean`
 ## Event
 #### infinitechain.signer.onProposeDeposit
 ```
@@ -193,7 +194,7 @@ Listen the proposeDeposit event.
 ##### Parameter
 `None`
 ##### Return
-`object: result`
+`result` - `object`
 #### infinitechain.signer.onDeposit
 ```
 infinitechain.event.onDeposit(async (err, result) => {
@@ -204,7 +205,7 @@ Listen the deposit event.
 ##### Parameter
 `None`
 ##### Return
-`object: result`
+`result - object`
 #### infinitechain.signer.onProposeWithdrawal
 ```
 infinitechain.event.onProposeWiothdrawal(async (err, result) => {
@@ -215,7 +216,7 @@ Listen the proposeWithdrawal event.
 ##### Parameter
 `None`
 ##### Return
-`object: result`
+`result` - `object`
 #### infinitechain.signer.onInstantWithdraw
 ```
 infinitechain.event.onInstantWithdraw(async (err, result) => {
@@ -226,7 +227,7 @@ Listen the instantWithdraw event.
 ##### Parameter
 `None`
 ##### Return
-`object: result`
+`result` - `object`
 #### infinitechain.signer.onAttach
 ```
 infinitechain.event.onAttach(async (err, result) => {
@@ -237,7 +238,7 @@ Listen the attach event.
 ##### Parameter
 `None`
 ##### Return
-`object: result`
+`result` - `object`
 #### infinitechain.signer.onChallenge
 #### infinitechain.signer.onDefend
 #### infinitechain.signer.onFinalize
