@@ -165,18 +165,18 @@ Client can use this function to sign the light transaction.
 ##### Return
 `signedLightTransaction` - `object`
 ### Verifier
-#### infinitechain.signer.verifyLightTx
+#### infinitechain.verifier.verifyLightTx
 ```
-infinitechain.signer.verifyLightTx(light transaction)
+infinitechain.verifier.verifyLightTx(light transaction)
 ```
 This funtion is used to verify the light transaction which format is correct or not.
 ##### Parameter
 1. `light transaction` - `object`: The light transaction which you want to verify.
 ##### Return
 `isValid` - `boolean`
-#### infinitechain.signer.verifyReceipt
+#### infinitechain.verifier.verifyReceipt
 ```
-infinitechain.signer.verifyLightTx(receipt)
+infinitechain.verifier.verifyLightTx(receipt)
 ```
 This funtion is used to verify the receipt which format is correct or not.
 ##### Parameter
@@ -184,7 +184,7 @@ This funtion is used to verify the receipt which format is correct or not.
 ##### Return
 `isValid` - `boolean`
 ## Event
-#### infinitechain.signer.onProposeDeposit
+#### infinitechain.event.onProposeDeposit
 ```
 infinitechain.event.onProposeDeposit(async (err, result) => {
     console.log(result)
@@ -195,7 +195,7 @@ Listen the proposeDeposit event.
 `None`
 ##### Return
 `result` - `object`
-#### infinitechain.signer.onDeposit
+#### infinitechain.event.onDeposit
 ```
 infinitechain.event.onDeposit(async (err, result) => {
     console.log(result)
@@ -206,7 +206,7 @@ Listen the deposit event.
 `None`
 ##### Return
 `result - object`
-#### infinitechain.signer.onProposeWithdrawal
+#### infinitechain.event.onProposeWithdrawal
 ```
 infinitechain.event.onProposeWiothdrawal(async (err, result) => {
     console.log(result)
@@ -217,7 +217,7 @@ Listen the proposeWithdrawal event.
 `None`
 ##### Return
 `result` - `object`
-#### infinitechain.signer.onInstantWithdraw
+#### infinitechain.event.onInstantWithdraw
 ```
 infinitechain.event.onInstantWithdraw(async (err, result) => {
     console.log(result)
@@ -228,7 +228,7 @@ Listen the instantWithdraw event.
 `None`
 ##### Return
 `result` - `object`
-#### infinitechain.signer.onAttach
+#### infinitechain.event.onAttach
 ```
 infinitechain.event.onAttach(async (err, result) => {
     console.log(result)
@@ -239,6 +239,6 @@ Listen the attach event.
 `None`
 ##### Return
 `result` - `object`
-#### infinitechain.signer.onChallenge
-#### infinitechain.signer.onDefend
-#### infinitechain.signer.onFinalize
+#### infinitechain.event.onChallenge
+#### infinitechain.event.onDefend
+#### infinitechain.event.onFinalize
