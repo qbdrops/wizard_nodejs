@@ -187,8 +187,8 @@ This funtion is used to verify the receipt which format is correct or not.
 #### infinitechain.signer.onProposeDeposit
 ```
 infinitechain.event.onProposeDeposit(async (err, result) => {
-        console.log(result)
-      });
+    console.log(result)
+});
 ```
 Listen the proposeDeposit event.
 ##### Parameter
@@ -198,8 +198,8 @@ Listen the proposeDeposit event.
 #### infinitechain.signer.onDeposit
 ```
 infinitechain.event.onDeposit(async (err, result) => {
-        console.log(result)
-      });
+    console.log(result)
+});
 ```
 Listen the deposit event.
 ##### Parameter
@@ -209,8 +209,8 @@ Listen the deposit event.
 #### infinitechain.signer.onProposeWithdrawal
 ```
 infinitechain.event.onProposeWiothdrawal(async (err, result) => {
-        console.log(result)
-      });
+    console.log(result)
+});
 ```
 Listen the proposeWithdrawal event.
 ##### Parameter
@@ -220,8 +220,8 @@ Listen the proposeWithdrawal event.
 #### infinitechain.signer.onInstantWithdraw
 ```
 infinitechain.event.onInstantWithdraw(async (err, result) => {
-        console.log(result)
-      });
+    console.log(result)
+});
 ```
 Listen the instantWithdraw event.
 ##### Parameter
@@ -231,8 +231,8 @@ Listen the instantWithdraw event.
 #### infinitechain.signer.onAttach
 ```
 infinitechain.event.onAttach(async (err, result) => {
-        console.log(result)
-      });
+    console.log(result)
+});
 ```
 Listen the attach event.
 ##### Parameter
