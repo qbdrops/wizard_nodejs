@@ -12,7 +12,10 @@ class Client {
     this._nodeUrl = clientConfig.nodeUrl;
   }
 
-  makeProposeDeposit = () => {
+  makeProposeDeposit = (assetID) => {
+    if (!assetID) {
+      assetID = 0;
+    }
     return new Promise((resolve, reject) => {
       this._infinitechain.event.onProposeDeposit(async (err, result) => {
         if (err) {
@@ -22,7 +25,7 @@ class Client {
           let nonce = this._getNonce();
           let value = result.args._value;
           let lightTxData = {
-            assetID: 1,
+            assetID: assetID,
             value: value,
             fee: 0.01,
             nonce: nonce,
@@ -36,13 +39,16 @@ class Client {
     });
   }
 
-  makeProposeWithdrawal = async (value) => {
+  makeProposeWithdrawal = async (assetID, value) => {
+    if (!assetID) {
+      assetID = 0;
+    }
     let nonce = this._getNonce();
     let clientAddress = this._infinitechain.signer.getAddress();
     let normalizedClientAddress = clientAddress.slice(-40).padStart(64, '0').slice(-64);
     let logID = this._sha3(normalizedClientAddress + nonce);
     let lightTxData = {
-      assetID: 1,
+      assetID: assetID,
       value: value,
       fee: 0.01,
       nonce: nonce,
