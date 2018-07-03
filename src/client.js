@@ -134,12 +134,12 @@ class Client {
         let stageHash = '0x' + payment.stageHash;
         let stageRootHash = await sidechain.getStageRootHash(stageHash);
 
-        // 3. Compare
-        return (localStageRootHash == stageRootHash);
-        
-        // 4. Check if custom rewrite the business logic function
+        // 3. Check if custom rewrite the business logic function and compare
         if (typeof customLogic === "function"){
-          customLogic(); 
+          let businessLogicBool = customLogic();
+          return (businessLogicBool && (localStageRootHash == stageRootHash));
+        } else {
+          return (localStageRootHash == stageRootHash);
         }
           
       } else {
