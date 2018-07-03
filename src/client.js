@@ -115,7 +115,7 @@ class Client {
     return await this._storage.getReceiptHashesByStageHeight(stageHeight);
   }
 
-  audit = async (paymentHash) => {
+  audit = async (paymentHash, customLogic) => {
     try {
       let sidechain = this._infinitechain.sidechain;
 
@@ -136,6 +136,12 @@ class Client {
 
         // 3. Compare
         return (localStageRootHash == stageRootHash);
+        
+        // 4. Check if custom rewrite the business logic function
+        if (typeof customLogic === "function"){
+          customLogic(); 
+        }
+          
       } else {
         return false;
       }
