@@ -1,7 +1,7 @@
 import Web3 from 'web3';
 import EthUtils from 'ethereumjs-util';
 import EthereumTx from 'ethereumjs-tx';
-import Sidechain from '@/abi/Sidechain.json';
+import Booster from '@/abi/Booster.json';
 import assert from 'assert';
 import Receipt from '@/models/receipt';
 
@@ -9,28 +9,28 @@ class Contract {
   constructor (config, infinitechain) {
     this._infinitechain = infinitechain;
     this._web3Url = config.web3Url;
-    this._sidechainAddress = null;
-    this._sidechain = null;
+    this._boosterAddress = null;
+    this._booster = null;
   }
 
-  fetchSidechain = async () => {
-    let sidechainAddress = null;
+  fetchBooster = async () => {
+    let boosterAddress = null;
     try {
-      let res = await this._infinitechain.gringotts.fetchSidechainAddress();
-      sidechainAddress = res.data.address;
+      let res = await this._infinitechain.gringotts.fetchBoosterAddress();
+      boosterAddress = res.data.address;
     } catch (e) {
       console.error(e);
     }
 
-    assert(sidechainAddress, 'Can not fetch sidechain address.');
-    this._sidechainAddress = sidechainAddress;
+    assert(boosterAddress, 'Can not fetch booster address.');
+    this._boosterAddress = boosterAddress;
     this._web3 = new Web3(new Web3.providers.HttpProvider(this._web3Url));
-    this._sidechain = this._web3.eth.contract(Sidechain.abi).at(sidechainAddress);
+    this._booster = this._web3.eth.contract(Booster.abi).at(boosterAddress);
   }
 
-  sidechain = () => {
-    assert(this._sidechain, 'Infinitechain is not initialized yet');
-    return this._sidechain;
+  booster = () => {
+    assert(this._booster, 'Infinitechain is not initialized yet');
+    return this._booster;
   }
 
   proposeWithdrawal = (receipt, nonce = null) => {
@@ -38,10 +38,10 @@ class Contract {
 
     let txValue = '0x0';
     let clientAddress = '0x' + this._infinitechain.signer.getAddress();
-    let sidechainAddress = this._sidechainAddress;
+    let boosterAddress = this._boosterAddress;
 
     try {
-      let txMethodData = this.sidechain().delegateToCryptoFlowLib.getData(
+      let txMethodData = this.booster().delegateToCryptoFlowLib.getData(
         '0x68ff1929',
         [
           '0x' + receipt.lightTxHash,
@@ -68,7 +68,7 @@ class Contract {
           receipt.sig.serverReceipt.s,
         ]
       );
-      let serializedTx = this._signRawTransaction(txMethodData, clientAddress, sidechainAddress, txValue, nonce);
+      let serializedTx = this._signRawTransaction(txMethodData, clientAddress, boosterAddress, txValue, nonce);
       let txHash = this._sendRawTransaction(serializedTx);
       return txHash;
     } catch (e) {
@@ -81,10 +81,10 @@ class Contract {
 
     let txValue = '0x0';
     let clientAddress = '0x' + this._infinitechain.signer.getAddress();
-    let sidechainAddress = this._sidechainAddress;
+    let boosterAddress = this._boosterAddress;
 
     try {
-      let txMethodData = this.sidechain().delegateToCryptoFlowLib.getData(
+      let txMethodData = this.booster().delegateToCryptoFlowLib.getData(
         '0x7b9d7d74',
         [
           '0x' + receipt.lightTxHash,
@@ -112,7 +112,7 @@ class Contract {
         ]
       );
 
-      let serializedTx = this._signRawTransaction(txMethodData, clientAddress, sidechainAddress, txValue, nonce);
+      let serializedTx = this._signRawTransaction(txMethodData, clientAddress, boosterAddress, txValue, nonce);
       let txHash = this._sendRawTransaction(serializedTx);
       return txHash;
     } catch (e) {
@@ -123,17 +123,17 @@ class Contract {
   withdraw = (receipt, nonce = null) => {
     let txValue = '0x0';
     let clientAddress = '0x' + this._infinitechain.signer.getAddress();
-    let sidechainAddress = this._sidechainAddress;
+    let boosterAddress = this._boosterAddress;
 
     try {
-      let txMethodData = this.sidechain().delegateToCryptoFlowLib.getData(
+      let txMethodData = this.booster().delegateToCryptoFlowLib.getData(
         '0xfe2b3924',
         [
           '0x' + receipt.lightTxHash
         ]
       );
 
-      let serializedTx = this._signRawTransaction(txMethodData, clientAddress, sidechainAddress, txValue, nonce);
+      let serializedTx = this._signRawTransaction(txMethodData, clientAddress, boosterAddress, txValue, nonce);
       let txHash = this._sendRawTransaction(serializedTx);
       return txHash;
     } catch (e) {
@@ -146,10 +146,10 @@ class Contract {
 
     let txValue = '0x0';
     let clientAddress = '0x' + this._infinitechain.signer.getAddress();
-    let sidechainAddress = this._sidechainAddress;
+    let boosterAddress = this._boosterAddress;
 
     try {
-      let txMethodData = this.sidechain().delegateToCryptoFlowLib.getData(
+      let txMethodData = this.booster().delegateToCryptoFlowLib.getData(
         '0xbe1946da',
         [
           '0x' + receipt.lightTxHash,
@@ -177,7 +177,7 @@ class Contract {
         ]
       );
 
-      let serializedTx = this._signRawTransaction(txMethodData, clientAddress, sidechainAddress, txValue, nonce);
+      let serializedTx = this._signRawTransaction(txMethodData, clientAddress, boosterAddress, txValue, nonce);
       let txHash = this._sendRawTransaction(serializedTx);
       return txHash;
     } catch (e) {
@@ -188,10 +188,10 @@ class Contract {
   attach = (receiptRootHash, accountRootHash, data, nonce = null) => {
     let txValue = '0x0';
     let clientAddress = '0x' + this._infinitechain.signer.getAddress();
-    let sidechainAddress = this._sidechainAddress;
+    let boosterAddress = this._boosterAddress;
 
     try {
-      let txMethodData = this.sidechain().delegateToChallengedLib.getData(
+      let txMethodData = this.booster().delegateToChallengedLib.getData(
         '0x95aa4aac',
         [
           '0x' + receiptRootHash,
@@ -199,7 +199,7 @@ class Contract {
           '0x' + data
         ]
       );
-      let serializedTx = this._signRawTransaction(txMethodData, clientAddress, sidechainAddress, txValue, nonce);
+      let serializedTx = this._signRawTransaction(txMethodData, clientAddress, boosterAddress, txValue, nonce);
       return serializedTx;
     } catch (e) {
       console.error(e);
@@ -209,9 +209,9 @@ class Contract {
   challenge = (payment) => {
     try {
       let stageHash = '0x' + payment.stageHash;
-      let paymentHash = '0x' + payment.paymentHash;
+      let lightTxHash = '0x' + payment.lightTxHash;
       let txMethodData = this._infinitechainContract.takeObjection.getData(
-        [stageHash, paymentHash],
+        [stageHash, lightTxHash],
         payment.v,
         payment.r,
         payment.s
@@ -238,13 +238,13 @@ class Contract {
     }
   }
 
-  compensate = (stageHeight, paymentHashes) => {
+  compensate = (stageHeight, lightTxHashes) => {
     try {
       let stageHash = '0x' + this._sha3(stageHeight.toString());
-      paymentHashes = paymentHashes.map(paymentHash => '0x' + paymentHash);
+      lightTxHashes = lightTxHashes.map(lightTxHash => '0x' + lightTxHash);
       let txMethodData = this._infinitechainContract.payPenalty.getData(
         stageHash,
-        paymentHashes,
+        lightTxHashes,
         '' // Work around! To prevent solidity invalid argument error.
       );
       let serializedTx = this._signRawTransaction(txMethodData);
@@ -255,18 +255,18 @@ class Contract {
     }
   }
 
-  defend = (stageHeight, paymentHash, treeNodeIndex, slice, collidingPaymentHashes) => {
+  defend = (stageHeight, lightTxHash, treeNodeIndex, slice, collidingLightTxHashes) => {
     try {
       let stageHash = '0x' + this._sha3(stageHeight.toString());
-      paymentHash = '0x' + paymentHash;
+      lightTxHash = '0x' + lightTxHash;
       slice = slice.map(h => '0x' + h);
-      collidingPaymentHashes = collidingPaymentHashes.map(h => '0x' + h);
+      collidingLightTxHashes = collidingLightTxHashes.map(h => '0x' + h);
       let txMethodData = this._infinitechainContract.exonerate.getData(
         stageHash,
-        paymentHash,
+        lightTxHash,
         treeNodeIndex,
         slice,
-        collidingPaymentHashes
+        collidingLightTxHashes
       );
 
       let serializedTx = this._signRawTransaction(txMethodData);
@@ -278,18 +278,18 @@ class Contract {
   }
 
   getStageRootHash = async (stageHeight) => {
-    let rootHashes = await this._sidechain.stages(stageHeight);
+    let rootHashes = await this._booster.stages(stageHeight);
     return rootHashes;
   }
 
-  getObjectionablePaymentHashes = async (stageHash) => {
+  getObjectionableLightTxHashes = async (stageHash) => {
     let stage = await this.getStage(stageHash);
-    return stage.getObjectionablePaymentHashes();
+    return stage.getObjectionableLightTxHashes();
   }
 
-  getObjection = async (stageHash, paymentHash) => {
+  getObjection = async (stageHash, lightTxHash) => {
     let stage = await this.getStage(stageHash);
-    let objection = stage.objections(paymentHash);
+    let objection = stage.objections(lightTxHash);
     return {
       clientAddress: objection[0],
       objectionSuccess: objection[1],

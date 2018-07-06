@@ -6,7 +6,7 @@ import Receipt from '@/models/receipt';
 import types from '@/models/types';
 
 nock('http://localhost:3000').
-  get('/sidechain/address').
+  get('/booster/address').
   reply(200, { address: '0x30e2098182a70ff37721783b3ae22dc09b84f254' }).
   get('/server/address').
   reply(200, { address: '0x6c559983c9b0ec5dd61df4671cbe12e1d9aeefc5' }).

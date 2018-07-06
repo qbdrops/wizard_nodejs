@@ -105,24 +105,24 @@ class Client {
     return await this._storage.getReceiptHashesByStageHeight(stageHeight);
   }
 
-  audit = async (paymentHash, customLogic) => {
+  audit = async (lightTxHash, customLogic) => {
     try {
-      let sidechain = this._infinitechain.sidechain;
+      let booster = this._infinitechain.booster;
 
       // Get payment from storage
-      let payment = await this.getPayment(paymentHash);
+      let payment = await this.getPayment(lightTxHash);
 
       // 1. Get slice and compute root hash
-      let body = await sidechain.getSlice(payment.stageHeight, paymentHash);
+      let body = await booster.getSlice(payment.stageHeight, lightTxHash);
       let slice = body.data.slice;
-      let paymentHashArray = body.data.paymentHashArray;
+      let lightTxHashArray = body.data.lightTxHashArray;
       var localStageRootHash = '';
-      if (paymentHashArray.includes(paymentHash)) {
+      if (lightTxHashArray.includes(lightTxHash)) {
 
         localStageRootHash = '0x' + this._computeRootHashFromSlice(slice);
         // 2. Get root hash from blockchain
         let stageHash = '0x' + payment.stageHash;
-        let stageRootHash = await sidechain.getStageRootHash(stageHash);
+        let stageRootHash = await booster.getStageRootHash(stageHash);
 
         // 3. Check if custom rewrite the business logic function and compare
         if (typeof customLogic === "function"){
@@ -141,7 +141,7 @@ class Client {
   }
 
   takeObjection = async (payment) => {
-    return this._infinitechain.sidechain.takeObjection(payment);
+    return this._infinitechain.booster.takeObjection(payment);
   }
 
   _sha3 (content) {
@@ -176,6 +176,84 @@ class Client {
 
   _getNonce () {
     return this._sha3((Math.random()).toString());
+  }
+
+  _computeRootHashFromSlice (slice) {
+    let firstNode = slice.shift();
+
+    let rootNode = slice.reduce((acc, curr) => {
+      if (acc.treeNodeIndex % 2 == 0) {
+        acc.treeNodeHash = this._sha3(acc.treeNodeHash.concat(curr.treeNodeHash));
+      } else {
+        acc.treeNodeHash = this._sha3(curr.treeNodeHash.concat(acc.treeNodeHash));
+      }
+      acc.treeNodeIndex = parseInt(acc.treeNodeIndex / 2);
+      return acc;
+    }, firstNode);
+
+    return rootNode.treeNodeHash;
+  }
+
+  _makeUnsignedPayment = (rawPayment) => {
+    assert(this._validateRawPayment(rawPayment), 'Wrong rawPayment format.');
+
+    let stageHash = EthUtils.sha3(rawPayment.stageHeight.toString()).toString('hex');
+
+    let lightTxHashAndCiphers = this._computeLightTxHashAndCiphers(rawPayment);
+    let lightTxHash = lightTxHashAndCiphers.lightTxHash;
+    let ciphers = lightTxHashAndCiphers.ciphers;
+
+    return {
+      stageHeight: rawPayment.stageHeight,
+      stageHash: stageHash.toString('hex'),
+      lightTxHash: lightTxHash.toString('hex'),
+      cipherClient: ciphers.cipherClient,
+      cipherStakeholder: ciphers.cipherStakeholder
+    };
+  }
+
+  _validateRawPayment = (rawPayment) => {
+    if (!rawPayment.hasOwnProperty('from') ||
+        !rawPayment.hasOwnProperty('to') ||
+        !rawPayment.hasOwnProperty('value') ||
+        !rawPayment.hasOwnProperty('localSequenceNumber') ||
+        !rawPayment.hasOwnProperty('stageHeight') ||
+        !rawPayment.hasOwnProperty('data')) {
+      return false;
+    }
+
+    let data = rawPayment.data;
+
+    if (!data.hasOwnProperty('pkClient') ||
+        !data.hasOwnProperty('pkStakeholder')) {
+      return false;
+    }
+
+    return true;
+  }
+
+  _computeLightTxHashAndCiphers = (rawPayment) => {
+    let crypto = this._infinitechain.crypto;
+    let serializedRawPayment = Buffer.from(JSON.stringify(rawPayment)).toString('hex');
+    let cipherClient = crypto.encrypt(serializedRawPayment, rawPayment.data.pkClient);
+    let cipherStakeholder = crypto.encrypt(serializedRawPayment, rawPayment.data.pkStakeholder);
+    let lightTxHash = EthUtils.sha3(cipherClient + cipherStakeholder).toString('hex');
+
+    return {
+      lightTxHash: lightTxHash,
+      ciphers: {
+        cipherClient: cipherClient,
+        cipherStakeholder: cipherStakeholder,
+      }
+    };
+  }
+
+  _computeTreeNodeHash = (lightTxHashArray) => {
+    let hash = lightTxHashArray.reduce((acc, curr) => {
+      return acc.concat(curr);
+    });
+
+    return this._sha3(hash);
   }
 }
 

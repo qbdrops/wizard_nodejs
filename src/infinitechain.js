@@ -32,7 +32,7 @@ class Infinitechain {
   }
 
   initialize = async () => {
-    await this.contract.fetchSidechain();
+    await this.contract.fetchBooster();
     await this.verifier.fetchServerAddress();
   }
 }

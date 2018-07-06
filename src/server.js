@@ -52,27 +52,27 @@ class Server {
   }
 
   finalize = async (stageHeight) => {
-    return this._infinitechain.sidechain.finalize(stageHeight);
+    return this._infinitechain.booster.finalize(stageHeight);
   }
 
-  defend = async (stageHeight, paymentHash) => {
+  defend = async (stageHeight, lightTxHash) => {
     let url = this._nodeUrl + '/slice';
     let res = await axios.get(url, {
       params: {
-        stage_height: stageHeight, payment_hash: paymentHash
+        stage_height: stageHeight, payment_hash: lightTxHash
       }
     });
 
     let slice = res.data.slice;
     slice = slice.map(h => h.treeNodeHash);
-    let collidingPaymentHashes = res.data.paymentHashArray;
+    let collidingLightTxHashes = res.data.lightTxHashArray;
     let treeNodeIndex = res.data.treeNodeIndex;
 
-    return this._infinitechain.sidechain.exonerate(stageHeight, paymentHash, treeNodeIndex, slice, collidingPaymentHashes);
+    return this._infinitechain.booster.exonerate(stageHeight, lightTxHash, treeNodeIndex, slice, collidingLightTxHashes);
   }
 
-  compensate = async (stageHeight, paymentHashes) => {
-    return this._infinitechain.sidechain.payPenalty(stageHeight, paymentHashes);
+  compensate = async (stageHeight, lightTxHashes) => {
+    return this._infinitechain.booster.payPenalty(stageHeight, lightTxHashes);
   }
 }
 

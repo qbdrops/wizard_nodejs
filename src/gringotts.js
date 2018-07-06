@@ -44,14 +44,14 @@ class Gringotts {
   }
 
   getViableStageHeight = async () => {
-    assert(this._nodeUrl, 'Can not find sidechain node.');
+    assert(this._nodeUrl, 'Can not find booster node.');
     let url = this._nodeUrl + '/viable/stage/height';
     let res = await axios.get(url);
     return parseInt(res.data.height);
   }
 
-  fetchSidechainAddress = async () => {
-    let url = this._nodeUrl + '/sidechain/address';
+  fetchBoosterAddress = async () => {
+    let url = this._nodeUrl + '/booster/address';
     return axios.get(url);
   }
 
