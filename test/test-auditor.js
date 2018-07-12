@@ -40,8 +40,8 @@ describe('Auditor', () => {
       // await infinitechain.auditor.audit(stageHeight, receiptsWithWrongBalances, initialBalances, bond);
       // await infinitechain.auditor.audit(stageHeight, receipts, initialBalances, bond);
       // await infinitechain.auditor.audit(stageHeight, receipts, initialBalances, bond);
-      let res = await infinitechain.auditor.audit(stageHeight, receiptsWithoutIntegrity, initialBalances, bond);
-      console.log(res);
+      // let res = await infinitechain.auditor.audit(stageHeight, receiptsWithoutIntegrity, initialBalances, bond);
+      // console.log(res);
     });
   });
 });
