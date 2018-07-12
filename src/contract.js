@@ -41,7 +41,7 @@ class Contract {
     let sidechainAddress = this._sidechainAddress;
 
     try {
-      let txMethodData = this.sidechain().delegateToLib.getData(
+      let txMethodData = this.sidechain().delegateToCryptoFlowLib.getData(
         '0x68ff1929',
         [
           '0x' + receipt.lightTxHash,
@@ -83,7 +83,7 @@ class Contract {
     let sidechainAddress = this._sidechainAddress;
 
     try {
-      let txMethodData = this.sidechain().delegateToLib.getData(
+      let txMethodData = this.sidechain().delegateToCryptoFlowLib.getData(
         '0x7b9d7d74',
         [
           '0x' + receipt.lightTxHash,
@@ -124,7 +124,7 @@ class Contract {
     let sidechainAddress = this._sidechainAddress;
 
     try {
-      let txMethodData = this.sidechain().delegateToLib.getData(
+      let txMethodData = this.sidechain().delegateToCryptoFlowLib.getData(
         '0xfe2b3924',
         [
           '0x' + receipt.lightTxHash
@@ -147,7 +147,7 @@ class Contract {
     let sidechainAddress = this._sidechainAddress;
 
     try {
-      let txMethodData = this.sidechain().delegateToLib.getData(
+      let txMethodData = this.sidechain().delegateToCryptoFlowLib.getData(
         '0xbe1946da',
         [
           '0x' + receipt.lightTxHash,
@@ -188,7 +188,7 @@ class Contract {
     let sidechainAddress = this._sidechainAddress;
 
     try {
-      let txMethodData = this.sidechain().delegateToLib.getData(
+      let txMethodData = this.sidechain().delegateToChallengedLib.getData(
         '0x95aa4aac',
         [
           '0x' + receiptRootHash,
