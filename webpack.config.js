@@ -25,7 +25,8 @@ module.exports = {
     extensions: ['.js', '.json'],
     alias: {
       '@': path.resolve('src'),
-      '@@': path.resolve('.')
+      '@@': path.resolve('.'),
+      '#': path.resolve('test')
     }
   },
   target: 'node'

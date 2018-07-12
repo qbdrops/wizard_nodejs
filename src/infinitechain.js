@@ -27,6 +27,10 @@ class Infinitechain {
     this.verifier = verifier;
   }
 
+  setAuditor (auditor) {
+    this.auditor = auditor;
+  }
+
   initialize = async () => {
     await this.contract.fetchSidechain();
     await this.verifier.fetchServerAddress();

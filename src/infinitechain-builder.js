@@ -1,6 +1,7 @@
 import assert from 'assert';
 import Infinitechain from '@/infinitechain';
 import Client from '@/client';
+import Auditor from '@/auditor';
 import Server from '@/server';
 import Verifier from '@/verifier';
 import Event from '@/event';
@@ -49,6 +50,13 @@ class InfinitechainBuilder {
       clientAddress: this._clientAddress,
       serverAddress: this._serverAddress,
       storage: this._storage
+    };
+
+    let auditorConfig = {
+      web3Url: this._web3Url,
+      nodeUrl: this._nodeUrl,
+      serverAddress: this._serverAddress,
+      storage: this.storage
     };
 
     let serverConfig = {
@@ -103,6 +111,8 @@ class InfinitechainBuilder {
     let client = new Client(clientConfig, infinitechain);
     infinitechain.setClient(client);
 
+    let auditor = new Auditor(auditorConfig, infinitechain);
+    infinitechain.setAuditor(auditor);
     // Create server object after signer and contract in order to use them in server
     let server = new Server(serverConfig, infinitechain);
     infinitechain.setServer(server);

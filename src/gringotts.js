@@ -9,12 +9,21 @@ class Gringotts {
     this._infinitechain = infinitechain;
   }
 
-  slice = async (stageHeight, paymentHash) => {
+  getSlice = async (stageHeight, lightTxHash) => {
     let url = this._nodeUrl + '/slice';
     return axios.get(url, {
       params: {
         stage_height: stageHeight,
-        payment_hash: paymentHash
+        light_tx_hash: lightTxHash
+      }
+    });
+  }
+
+  getTrees = async (stageHeight) => {
+    let url = this._nodeUrl + '/trees';
+    return axios.get(url, {
+      params: {
+        stage_height: stageHeight
       }
     });
   }
@@ -63,6 +72,16 @@ class Gringotts {
   attach = async (serializedTx, stageHeight) => {
     let url = this._nodeUrl + '/attach';
     return axios.post(url, { serializedTx: serializedTx, stageHeight: stageHeight });
+  }
+
+  getOffchainReceipts = async (stageHeight) => {
+    let url = this._nodeUrl + '/receipts/' + stageHeight;
+    return axios.get(url);
+  }
+
+  getAccountBalances = async () => {
+    let url = this._nodeUrl + '/balances';
+    return axios.get(url);
   }
 }
 
