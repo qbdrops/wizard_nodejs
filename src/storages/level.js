@@ -2,6 +2,16 @@ class Level {
   constructor (db) {
     // Use level db
     this.db = db;
+    this.syncer;
+    this._infinitechain;
+  }
+
+  setInfinitechain (infinitechain) {
+    this._infinitechain = infinitechain;
+  }
+
+  setReceiptSyncer (syncer) {
+    this.syncer = syncer;
   }
 
   getReceiptHashesByStageHeight = async (stageHeight) => {
@@ -9,9 +19,7 @@ class Level {
     try {
       result = await this.db.get(stageHeight);
     } catch (e) {
-      result = JSON.stringify([]);
-    } finally {
-      result = JSON.parse(result);
+      result = [];
     }
     return result;
   }
@@ -19,22 +27,24 @@ class Level {
 
   getLightTx = async (key) => {
     let result = await this.db.get('lightTx:' + key);
-    return JSON.parse(result);
+    return result;
   }
 
   getReceipt = async (key) => {
     let result = await this.db.get('receipt:' + key);
-    return JSON.parse(result);
+    return result;
   }
 
   setLightTx = async (key, value) => {
-    await this.db.put('lightTx:' + key, JSON.stringify(value));
+    await this.db.put('lightTx:' + key, value);
   }
 
-  setReceipt = async (key, value) => {
+  setReceipt = async (key, receiptJson) => {
     try {
-      await this.db.put('receipt:' + key, JSON.stringify(value));
-      await this._appendReceiptHash(value.receiptData.stageHeight, value.receiptHash);
+      let address = '0x' + this._infinitechain.signer.getAddress();
+      await this.db.put('receipt:' + key, receiptJson);
+      await this._appendReceiptHash(receiptJson.receiptData.stageHeight, receiptJson.receiptHash);
+      await this.syncer.uploadReceipt(address, receiptJson);
     } catch (e) {
       console.log(e);
     }
@@ -45,12 +55,24 @@ class Level {
     try {
       receiptHashes = await this.db.get(stageHeight);
     } catch (e) {
-      receiptHashes = JSON.stringify([]);
+      receiptHashes = [];
     } finally {
-      receiptHashes = JSON.parse(receiptHashes);
       receiptHashes.push(receiptHash);
-      await this.db.put(stageHeight, JSON.stringify(receiptHashes));
+      await this.db.put(stageHeight, receiptHashes);
     }
+  }
+
+  getSyncerToken = async () => {
+    try {
+      return await this.db.get('syncToken');
+    } catch (e) {
+      return null;
+    }
+  }
+
+  saveSyncerToken = async (token) => {
+    this.syncer.setToken(token);
+    await this.db.put('syncToken', token);
   }
 }
 

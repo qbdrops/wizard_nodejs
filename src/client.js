@@ -178,28 +178,12 @@ class Client {
     return this._sha3((Math.random()).toString());
   }
 
-  _computeRootHashFromSlice (slice) {
-    let firstNode = slice.shift();
-
-    let rootNode = slice.reduce((acc, curr) => {
-      if (acc.treeNodeIndex % 2 == 0) {
-        acc.treeNodeHash = this._sha3(acc.treeNodeHash.concat(curr.treeNodeHash));
-      } else {
-        acc.treeNodeHash = this._sha3(curr.treeNodeHash.concat(acc.treeNodeHash));
-      }
-      acc.treeNodeIndex = parseInt(acc.treeNodeIndex / 2);
-      return acc;
-    }, firstNode);
-
-    return rootNode.treeNodeHash;
+  getSyncerToken = async () => {
+    return await this._storage.getSyncerToken();
   }
 
-  _computeTreeNodeHash = (lightTxHashArray) => {
-    let hash = lightTxHashArray.reduce((acc, curr) => {
-      return acc.concat(curr);
-    });
-
-    return this._sha3(hash);
+  refreshToken = async (token) => {
+    await this._storage.saveSyncerToken(token);
   }
 }
 
