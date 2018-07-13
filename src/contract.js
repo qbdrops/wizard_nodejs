@@ -41,7 +41,7 @@ class Contract {
     let sidechainAddress = this._sidechainAddress;
 
     try {
-      let txMethodData = this.sidechain().delegateToLib.getData(
+      let txMethodData = this.sidechain().delegateToCryptoFlowLib.getData(
         '0x68ff1929',
         [
           '0x' + receipt.lightTxHash,
@@ -52,13 +52,14 @@ class Contract {
           '0x' + receipt.lightTxData.fee,
           '0x' + receipt.lightTxData.nonce,
           '0x' + receipt.lightTxData.logID,
-          '0x' + receipt.lightTxData.metadataHash,
+          '0x' + receipt.lightTxData.clientMetadataHash,
           receipt.sig.clientLightTx.v,
           receipt.sig.clientLightTx.r,
           receipt.sig.clientLightTx.s,
           '0x' + receipt.receiptData.GSN,
           '0x' + receipt.receiptData.fromBalance,
           '0x' + receipt.receiptData.toBalance,
+          '0x' + receipt.receiptData.serverMetadataHash,
           receipt.sig.serverLightTx.v,
           receipt.sig.serverLightTx.r,
           receipt.sig.serverLightTx.s,
@@ -83,7 +84,7 @@ class Contract {
     let sidechainAddress = this._sidechainAddress;
 
     try {
-      let txMethodData = this.sidechain().delegateToLib.getData(
+      let txMethodData = this.sidechain().delegateToCryptoFlowLib.getData(
         '0x7b9d7d74',
         [
           '0x' + receipt.lightTxHash,
@@ -94,13 +95,14 @@ class Contract {
           '0x' + receipt.lightTxData.fee,
           '0x' + receipt.lightTxData.nonce,
           '0x' + receipt.lightTxData.logID,
-          '0x' + receipt.lightTxData.metadataHash,
+          '0x' + receipt.lightTxData.clientMetadataHash,
           receipt.sig.clientLightTx.v,
           receipt.sig.clientLightTx.r,
           receipt.sig.clientLightTx.s,
           '0x' + receipt.receiptData.GSN,
           '0x' + receipt.receiptData.fromBalance,
           '0x' + receipt.receiptData.toBalance,
+          '0x' + receipt.receiptData.serverMetadataHash,
           receipt.sig.serverLightTx.v,
           receipt.sig.serverLightTx.r,
           receipt.sig.serverLightTx.s,
@@ -147,7 +149,7 @@ class Contract {
     let sidechainAddress = this._sidechainAddress;
 
     try {
-      let txMethodData = this.sidechain().delegateToLib.getData(
+      let txMethodData = this.sidechain().delegateToCryptoFlowLib.getData(
         '0xbe1946da',
         [
           '0x' + receipt.lightTxHash,
@@ -158,13 +160,14 @@ class Contract {
           '0x' + receipt.lightTxData.fee,
           '0x' + receipt.lightTxData.nonce,
           '0x' + receipt.lightTxData.logID,
-          '0x' + receipt.lightTxData.metadataHash,
+          '0x' + receipt.lightTxData.clientMetadataHash,
           receipt.sig.clientLightTx.v,
           receipt.sig.clientLightTx.r,
           receipt.sig.clientLightTx.s,
           '0x' + receipt.receiptData.GSN,
           '0x' + receipt.receiptData.fromBalance,
           '0x' + receipt.receiptData.toBalance,
+          '0x' + receipt.receiptData.serverMetadataHash,
           receipt.sig.serverLightTx.v,
           receipt.sig.serverLightTx.r,
           receipt.sig.serverLightTx.s,
