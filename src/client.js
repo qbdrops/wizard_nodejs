@@ -82,7 +82,7 @@ class Client {
 
   saveReceipt = async (receipt) => {
     assert(receipt instanceof Receipt, 'Parameter \'receipt\' should be instance of \'Receipt\'.');
-    await this._storage.setReceipt(receipt.receiptHash, receipt.toJson());
+    await this._storage.setReceipt(receipt.lightTxHash, receipt.toJson(), true);
   }
 
   getLightTx = async (lightTxHash) => {
@@ -103,41 +103,6 @@ class Client {
 
   getAllReceiptHashes = async (stageHeight) => {
     return await this._storage.getReceiptHashesByStageHeight(stageHeight);
-  }
-
-  audit = async (lightTxHash, customLogic) => {
-    try {
-      let booster = this._infinitechain.booster;
-
-      // Get payment from storage
-      let payment = await this.getPayment(lightTxHash);
-
-      // 1. Get slice and compute root hash
-      let body = await booster.getSlice(payment.stageHeight, lightTxHash);
-      let slice = body.data.slice;
-      let lightTxHashArray = body.data.lightTxHashArray;
-      var localStageRootHash = '';
-      if (lightTxHashArray.includes(lightTxHash)) {
-
-        localStageRootHash = '0x' + this._computeRootHashFromSlice(slice);
-        // 2. Get root hash from blockchain
-        let stageHash = '0x' + payment.stageHash;
-        let stageRootHash = await booster.getStageRootHash(stageHash);
-
-        // 3. Check if custom rewrite the business logic function and compare
-        if (typeof customLogic === "function"){
-          let businessLogicBool = customLogic();
-          return (businessLogicBool && (localStageRootHash == stageRootHash));
-        } else {
-          return (localStageRootHash == stageRootHash);
-        }
-          
-      } else {
-        return false;
-      }
-    } catch (e) {
-      console.error(e);
-    }
   }
 
   takeObjection = async (payment) => {

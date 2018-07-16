@@ -4,36 +4,36 @@ class GoogleDrive {
   setCredentials (clientId, clientSecret, redirectUris) {
     this._infinitechain = null;
     this.oauth2Client = new google.auth.OAuth2(clientId, clientSecret, redirectUris[0]);
+    let auth = this.oauth2Client;
+    this.drive = google.drive({ version: 'v3', auth });
   }
 
   initToken = async () => {
     try {
       let existedToken = await this._infinitechain.client.getSyncerToken();
       if (existedToken) {
-        await this._refreshToken(existedToken);
+        this.oauth2Client.refreshAccessToken(async (err, tokens) => {
+          if (err) {
+            console.log(err);
+          } else {
+            if (tokens.refresh_token) {
+              this.oauth2Client.setCredentials(tokens);
+              await this._infinitechain.client.refreshToken(tokens);
+            }
+          }
+        });
       }
     } catch (e) {
       console.error(e);
     }
   }
 
-  _refreshToken = async (existedToken = null) => {
+  refreshToken = async (existedToken = null) => {
     try {
       if (existedToken) {
         this.oauth2Client.setCredentials(existedToken);
+        await this._infinitechain.client.refreshToken(existedToken);
       }
-      this.oauth2Client.refreshAccessToken(async (err, tokens) => {
-        if (err) return;
-        if (tokens.refresh_token) {
-          let token = tokens.refresh_token;
-          this.oauth2Client.setCredentials({
-            refresh_token: token
-          });
-          await this._infinitechain.client.refreshToken(token);
-        }
-      });
-      let auth = this.oauth2Client;
-      this.drive = google.drive({ version: 'v3', auth });
     } catch (e) {
       console.error(e);
     }
@@ -43,13 +43,8 @@ class GoogleDrive {
     this._infinitechain = infinitechain;
   }
 
-  setToken = async (token) => {
-    await this._refreshToken(token);
-  }
-
   getReceiptsOfFolder = async (address) => {
     try {
-      await this._refreshToken();
       let targetFolderName = 'receipts-' + address;
       let targetFolderId;
       let res = await this.drive.files.list({
@@ -73,20 +68,18 @@ class GoogleDrive {
         q: `'${targetFolderId}' in parents`
       });
 
-      let files = [];
-      for (let i = 0; i < response.data.files.length ;i++) {
-        let fileId = response.data.files[i].id;
-        let file = await this.drive.files.get({
-          fileId: fileId,
-          alt: 'media'
-        });
-        files.push(file.data);
-      }
-
-      return files;
+      return response.data.files;
     } catch (e) {
       console.log(e);
     }
+  }
+
+  async download (fileId) {
+    let file = await this.drive.files.get({
+      fileId: fileId,
+      alt: 'media'
+    });
+    return file.data;
   }
 
   async uploadReceipt (address, receipt) {
@@ -104,30 +97,31 @@ class GoogleDrive {
       }
     }
 
-    await this._refreshToken();
-
     if (!targetFolderId) {
       targetFolderId = await this._createFolder(address);
     }
     this._uploadReceipt(targetFolderId, receipt);
   }
 
-  _createFolder (address) {
+  _createFolder = async (address) => {
     return new Promise(async (resolve) => {
       var fileMetadata = {
         name: 'receipts-' + address,
         mimeType: 'application/vnd.google-apps.folder'
       };
-      this.drive.files.create({
-        resource: fileMetadata,
-        fields: 'id'
-      }, function (err, response) {
-        if (err) {
-          console.error(err);
-        } else {
-          resolve(response.data.id);
-        }
-      });
+
+      if (address) {
+        this.drive.files.create({
+          resource: fileMetadata,
+          fields: 'id'
+        }, function (err, response) {
+          if (err) {
+            console.error(err);
+          } else {
+            resolve(response.data.id);
+          }
+        });
+      }
     }).catch(console.error);
   }
 

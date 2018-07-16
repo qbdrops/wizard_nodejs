@@ -52,7 +52,7 @@ class InfinitechainBuilder {
   }
 
   setSyncerToken (token) {
-    this.syncer.setToken(token);
+    this.token = token;
     return this;
   }
 
@@ -140,6 +140,7 @@ class InfinitechainBuilder {
     if (this.syncer) {
       infinitechain.syncer = this.syncer;
       this.syncer.setInfinitechain(infinitechain);
+      this.syncer.refreshToken(this.token);
     }
 
     return infinitechain;
