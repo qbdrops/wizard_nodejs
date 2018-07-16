@@ -8,68 +8,68 @@ class Event {
   }
 
   onProposeDeposit (cb) {
-    let sidechain = this._infinitechain.contract.sidechain();
-    sidechain.ProposeDeposit(this._eventOpt).watch((err, result) => {
+    let booster = this._infinitechain.contract.booster();
+    booster.ProposeDeposit(this._eventOpt).watch((err, result) => {
       if (err) { console.trace; }
       cb(err, result);
     });
   }
 
   onDeposit (cb) {
-    let sidechain = this._infinitechain.contract.sidechain();
-    sidechain.VerifyReceipt({ _type: types.deposit }, this._eventOpt).watch(async (err, result) => {
+    let booster = this._infinitechain.contract.booster();
+    booster.VerifyReceipt({ _type: types.deposit }, this._eventOpt).watch(async (err, result) => {
       if (err) { console.trace; }
       cb(err, result);
     });
   }
 
   onProposeWithdrawal (cb) {
-    let sidechain = this._infinitechain.contract.sidechain();
-    sidechain.VerifyReceipt({ _type: types.withdrawal }, this._eventOpt).watch((err, result) => {
+    let booster = this._infinitechain.contract.booster();
+    booster.VerifyReceipt({ _type: types.withdrawal }, this._eventOpt).watch((err, result) => {
       if (err) { console.trace; }
       cb(err, result);
     });
   }
 
   onInstantWithdraw (cb) {
-    let sidechain = this._infinitechain.contract.sidechain();
-    sidechain.VerifyReceipt({ _type: types.instantWithdrawal }, this._eventOpt).watch((err, result) => {
+    let booster = this._infinitechain.contract.booster();
+    booster.VerifyReceipt({ _type: types.instantWithdrawal }, this._eventOpt).watch((err, result) => {
       if (err) { console.trace; }
       cb(err, result);
     });
   }
 
   onAttach (cb) {
-    let sidechain = this._infinitechain.contract.sidechain();
+    let booster = this._infinitechain.contract.booster();
 
-    sidechain.Attach(this._eventOpt).watch((err, result) => {
+    booster.Attach(this._eventOpt).watch((err, result) => {
       if (err) { console.trace; }
       cb(err, result);
     });
   }
 
   onChallenge (cb) {
-    let sidechain = this._infinitechain.contract.sidechain();
+    let booster = this._infinitechain.contract.booster();
 
-    sidechain.Challenge(this._eventOpt).watch((err, result) => {
+    booster.Challenge(this._eventOpt).watch((err, result) => {
       if (err) { console.trace; }
       cb(err, result);
     });
   }
 
   onDefend (cb) {
-    let sidechain = this._infinitechain.contract.sidechain();
+    let booster = this._infinitechain.contract.booster();
 
-    sidechain.Defend(this._eventOpt).watch((err, result) => {
+    booster.Defend(this._eventOpt).watch((err, result) => {
       if (err) { console.trace; }
       cb(err, result);
     });
   }
 
   onFinalize (cb) {
-    let sidechain = this._infinitechain.contract.sidechain();
+    let booster = this._infinitechain.contract.booster();
 
-    sidechain.Finalize(this._eventOpt).watch((err, result) => {
+    booster.Finalize(this._eventOpt).watch((err, result) => {
       if (err) { console.trace; }
       cb(err, result);
     });
