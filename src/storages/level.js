@@ -74,6 +74,12 @@ class Level {
     this.syncer.setToken(token);
     await this.db.put('syncToken', token);
   }
+
+  syncReceipts = async () => {
+    let address = '0x' + this._infinitechain.signer.getAddress();
+    let receipts = await this.syncer.getReceiptsOfFolder(address);
+    console.log(receipts);
+  }
 }
 
 export default Level;

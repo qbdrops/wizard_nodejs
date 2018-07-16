@@ -47,6 +47,48 @@ class GoogleDrive {
     await this._refreshToken(token);
   }
 
+  getReceiptsOfFolder = async (address) => {
+    try {
+      await this._refreshToken();
+      let targetFolderName = 'receipts-' + address;
+      let targetFolderId;
+      let res = await this.drive.files.list({
+        includeRemoved: false,
+        spaces: 'drive',
+        q: `fullText contains '${targetFolderName}'`
+      });
+      for (let i = 0; i < res.data.files.length; i++) {
+        let file = res.data.files[i];
+        if (file.name == targetFolderName) {
+          targetFolderId = file.id;
+          break;
+        }
+      }
+  
+      if (!targetFolderId) {
+        throw new Error('Folder not found.');
+      }
+
+      let response = await this.drive.files.list({
+        q: `'${targetFolderId}' in parents`
+      });
+
+      let files = [];
+      for (let i = 0; i < response.data.files.length ;i++) {
+        let fileId = response.data.files[i].id;
+        let file = await this.drive.files.get({
+          fileId: fileId,
+          alt: 'media'
+        });
+        files.push(file.data);
+      }
+
+      return files;
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
   async uploadReceipt (address, receipt) {
     let targetFolderName = 'receipts-' + address;
     let targetFolderId;
@@ -61,6 +103,8 @@ class GoogleDrive {
         break;
       }
     }
+
+    await this._refreshToken();
 
     if (!targetFolderId) {
       targetFolderId = await this._createFolder(address);

@@ -185,6 +185,10 @@ class Client {
   refreshToken = async (token) => {
     await this._storage.saveSyncerToken(token);
   }
+
+  syncReceipts = async () => {
+    await this._storage.syncReceipts();
+  }
 }
 
 export default Client;
