@@ -89,8 +89,8 @@ describe('Signer', () => {
 
       let result = {
         serverReceipt: {
-          r: '0x126bfa2e456ddab5f9eb616604f3537c468b39420d32a1c35b0ad98c7e1493b2',
-          s: '0x6371bb2bc432f2f8fe2e4da1abdcefc60845aca2cc90f6e2d3577f88d6f2af7b',
+          r: '0xcf3a96a9e0b519ac65199c8e35c76fcfe147025762f2160d9a0e3892dbd6520d',
+          s: '0x5c9bec097573a14b423ce7309b9d0a30832fbea0c4ff2448bc762f446a7e3743',
           v: 27
         }
       };

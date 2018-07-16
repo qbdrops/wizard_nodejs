@@ -19,7 +19,7 @@ describe('LightTransaction', () => {
       };
 
       let lightTx = new LightTransaction(data);
-      assert.deepEqual(Object.keys(lightTx.lightTxData), ['from', 'to', 'assetID', 'value', 'fee', 'nonce', 'logID', 'metadataHash']);
+      assert.deepEqual(Object.keys(lightTx.lightTxData), ['from', 'to', 'assetID', 'value', 'fee', 'nonce', 'logID', 'clientMetadataHash']);
     });
 
     it('checks if all lightTxData keys are included', () => {
@@ -69,7 +69,8 @@ describe('LightTransaction', () => {
           nonce: '123',
           assetID: 1,
           logID: 1
-        }
+        },
+        metadata: { client: { foo: 'bar' } }
       };
 
       let lightTx = new LightTransaction(data);
@@ -83,10 +84,12 @@ describe('LightTransaction', () => {
           fee: '00000000000000000000000000000000000000000000000029a2241af62c0000',
           nonce: '0000000000000000000000000000000000000000000000000000000000000123',
           logID: '0000000000000000000000000000000000000000000000000000000000000001',
-          metadataHash: 'b48d38f93eaa084033fc5970bf96e559c33c4cdc07d889ab00b4d63f9590739d'
+          clientMetadataHash: '0c67568ef95afd46944fae1abc2b7d6227aa410e6250a554cbaab0fb17074205'
         },
-        lightTxHash: '8e9f816255c81393118a34049e39b91d900f1f1350abdd3ba03db444e6a7bac7',
+        lightTxHash: 'c18486c560fec2f7f13381e44402c2aa916f04277ac5c493ed86fcca04e29e00'
       };
+
+      console.log(lightTx);
 
       assert.deepEqual(lightTx.lightTxData, result.lightTxData);
       assert.deepEqual(lightTx.lightTxHash, result.lightTxHash);
@@ -180,9 +183,12 @@ describe('LightTransaction', () => {
           fee: '000000000000000000000000000000000000000000000000016345785d8a0000',
           nonce: '0000000000000000000000000000000000000000000000000000000000000005',
           logID: '0000000000000000000000000000000000000000000000000000000000000001',
-          metadataHash: 'b48d38f93eaa084033fc5970bf96e559c33c4cdc07d889ab00b4d63f9590739d'
+          clientMetadataHash: 'b48d38f93eaa084033fc5970bf96e559c33c4cdc07d889ab00b4d63f9590739d'
         },
-        metadata: {},
+        metadata: {
+          client: {},
+          server: {}
+        },
         sig: {
           clientLightTx: {},
           serverLightTx: {}
@@ -219,13 +225,16 @@ describe('LightTransaction', () => {
           fee: '000000000000000000000000000000000000000000000000016345785d8a0000',
           nonce: '0000000000000000000000000000000000000000000000000000000000000005',
           logID: '0000000000000000000000000000000000000000000000000000000000000001',
-          metadataHash: 'b48d38f93eaa084033fc5970bf96e559c33c4cdc07d889ab00b4d63f9590739d'
+          clientMetadataHash: 'b48d38f93eaa084033fc5970bf96e559c33c4cdc07d889ab00b4d63f9590739d'
         },
         sig: {
           clientLightTx: {},
           serverLightTx: {}
         },
-        metadata: {}
+        metadata: {
+          client: {},
+          server: {}
+        }
       });
 
       assert.equal(lightTx.toString(), expected);

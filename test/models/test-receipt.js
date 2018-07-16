@@ -31,11 +31,12 @@ describe('Receipt', () => {
 
     let correctLightTx = new LightTransaction(lightTxJson);
     let correctReceiptData = {
-      stageHeight: 1,
+      stageHeight: '0000000000000000000000000000000000000000000000000000000000000001',
       GSN: '0000000000000000000000000000000000000000000000000000000000000015',
       lightTxHash: correctLightTx.lightTxHash,
       fromBalance: '0000000000000000000000000000000000000000000000000000000000000032',
-      toBalance: '00000000000000000000000000000000000000000000000000000000000001f4'
+      toBalance: '00000000000000000000000000000000000000000000000000000000000001f4',
+      serverMetadataHash: 'c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470'
     };
 
     it('check if lightTx"s serverLightTx signature is empty or not.', () => {
@@ -112,7 +113,7 @@ describe('Receipt', () => {
 
       let receipt = new Receipt(receiptJson);
       let result = {
-        receiptHash: 'cb6b25c182c6ffbb694b077263015f4ed5a1fed27918ea992178ff5c73211db1',
+        receiptHash: '5fc3039fab71c620282f161319a2cd74dad789d987b6a23f91fd991cc68d5f78',
         receiptData: correctReceiptData
       };
 
