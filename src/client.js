@@ -194,60 +194,6 @@ class Client {
     return rootNode.treeNodeHash;
   }
 
-  _makeUnsignedPayment = (rawPayment) => {
-    assert(this._validateRawPayment(rawPayment), 'Wrong rawPayment format.');
-
-    let stageHash = EthUtils.sha3(rawPayment.stageHeight.toString()).toString('hex');
-
-    let lightTxHashAndCiphers = this._computeLightTxHashAndCiphers(rawPayment);
-    let lightTxHash = lightTxHashAndCiphers.lightTxHash;
-    let ciphers = lightTxHashAndCiphers.ciphers;
-
-    return {
-      stageHeight: rawPayment.stageHeight,
-      stageHash: stageHash.toString('hex'),
-      lightTxHash: lightTxHash.toString('hex'),
-      cipherClient: ciphers.cipherClient,
-      cipherStakeholder: ciphers.cipherStakeholder
-    };
-  }
-
-  _validateRawPayment = (rawPayment) => {
-    if (!rawPayment.hasOwnProperty('from') ||
-        !rawPayment.hasOwnProperty('to') ||
-        !rawPayment.hasOwnProperty('value') ||
-        !rawPayment.hasOwnProperty('localSequenceNumber') ||
-        !rawPayment.hasOwnProperty('stageHeight') ||
-        !rawPayment.hasOwnProperty('data')) {
-      return false;
-    }
-
-    let data = rawPayment.data;
-
-    if (!data.hasOwnProperty('pkClient') ||
-        !data.hasOwnProperty('pkStakeholder')) {
-      return false;
-    }
-
-    return true;
-  }
-
-  _computeLightTxHashAndCiphers = (rawPayment) => {
-    let crypto = this._infinitechain.crypto;
-    let serializedRawPayment = Buffer.from(JSON.stringify(rawPayment)).toString('hex');
-    let cipherClient = crypto.encrypt(serializedRawPayment, rawPayment.data.pkClient);
-    let cipherStakeholder = crypto.encrypt(serializedRawPayment, rawPayment.data.pkStakeholder);
-    let lightTxHash = EthUtils.sha3(cipherClient + cipherStakeholder).toString('hex');
-
-    return {
-      lightTxHash: lightTxHash,
-      ciphers: {
-        cipherClient: cipherClient,
-        cipherStakeholder: cipherStakeholder,
-      }
-    };
-  }
-
   _computeTreeNodeHash = (lightTxHashArray) => {
     let hash = lightTxHashArray.reduce((acc, curr) => {
       return acc.concat(curr);
