@@ -34,6 +34,9 @@ class Infinitechain {
   initialize = async () => {
     await this.contract.fetchBooster();
     await this.verifier.fetchServerAddress();
+    if (this.syncer) {
+      await this.syncer.initToken();
+    }
   }
 }
 

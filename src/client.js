@@ -82,7 +82,7 @@ class Client {
 
   saveReceipt = async (receipt) => {
     assert(receipt instanceof Receipt, 'Parameter \'receipt\' should be instance of \'Receipt\'.');
-    await this._storage.setReceipt(receipt.receiptHash, receipt.toJson());
+    await this._storage.setReceipt(receipt.lightTxHash, receipt.toJson(), true);
   }
 
   getLightTx = async (lightTxHash) => {
@@ -103,41 +103,6 @@ class Client {
 
   getAllReceiptHashes = async (stageHeight) => {
     return await this._storage.getReceiptHashesByStageHeight(stageHeight);
-  }
-
-  audit = async (lightTxHash, customLogic) => {
-    try {
-      let booster = this._infinitechain.booster;
-
-      // Get payment from storage
-      let payment = await this.getPayment(lightTxHash);
-
-      // 1. Get slice and compute root hash
-      let body = await booster.getSlice(payment.stageHeight, lightTxHash);
-      let slice = body.data.slice;
-      let lightTxHashArray = body.data.lightTxHashArray;
-      var localStageRootHash = '';
-      if (lightTxHashArray.includes(lightTxHash)) {
-
-        localStageRootHash = '0x' + this._computeRootHashFromSlice(slice);
-        // 2. Get root hash from blockchain
-        let stageHash = '0x' + payment.stageHash;
-        let stageRootHash = await booster.getStageRootHash(stageHash);
-
-        // 3. Check if custom rewrite the business logic function and compare
-        if (typeof customLogic === "function"){
-          let businessLogicBool = customLogic();
-          return (businessLogicBool && (localStageRootHash == stageRootHash));
-        } else {
-          return (localStageRootHash == stageRootHash);
-        }
-          
-      } else {
-        return false;
-      }
-    } catch (e) {
-      console.error(e);
-    }
   }
 
   takeObjection = async (payment) => {
@@ -178,28 +143,16 @@ class Client {
     return this._sha3((Math.random()).toString());
   }
 
-  _computeRootHashFromSlice (slice) {
-    let firstNode = slice.shift();
-
-    let rootNode = slice.reduce((acc, curr) => {
-      if (acc.treeNodeIndex % 2 == 0) {
-        acc.treeNodeHash = this._sha3(acc.treeNodeHash.concat(curr.treeNodeHash));
-      } else {
-        acc.treeNodeHash = this._sha3(curr.treeNodeHash.concat(acc.treeNodeHash));
-      }
-      acc.treeNodeIndex = parseInt(acc.treeNodeIndex / 2);
-      return acc;
-    }, firstNode);
-
-    return rootNode.treeNodeHash;
+  getSyncerToken = async () => {
+    return await this._storage.getSyncerToken();
   }
 
-  _computeTreeNodeHash = (lightTxHashArray) => {
-    let hash = lightTxHashArray.reduce((acc, curr) => {
-      return acc.concat(curr);
-    });
+  refreshToken = async (token) => {
+    await this._storage.saveSyncerToken(token);
+  }
 
-    return this._sha3(hash);
+  syncReceipts = async () => {
+    await this._storage.syncReceipts();
   }
 }
 

@@ -2,3 +2,5 @@ node_modules/
 lib/
 dist/
 *.DS_Store
+client_secret.json
+credentials.json

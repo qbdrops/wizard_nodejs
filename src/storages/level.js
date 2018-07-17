@@ -1,7 +1,16 @@
 class Level {
   constructor (db) {
-    // Use level db
     this.db = db;
+    this.syncer;
+    this._infinitechain;
+  }
+
+  setInfinitechain (infinitechain) {
+    this._infinitechain = infinitechain;
+  }
+
+  setReceiptSyncer (syncer) {
+    this.syncer = syncer;
   }
 
   getReceiptHashesByStageHeight = async (stageHeight) => {
@@ -9,47 +18,116 @@ class Level {
     try {
       result = await this.db.get(stageHeight);
     } catch (e) {
-      result = JSON.stringify([]);
-    } finally {
-      result = JSON.parse(result);
+      result = [];
     }
     return result;
   }
 
-
-  getLightTx = async (key) => {
-    let result = await this.db.get('lightTx:' + key);
-    return JSON.parse(result);
-  }
-
   getReceipt = async (key) => {
-    let result = await this.db.get('receipt:' + key);
-    return JSON.parse(result);
-  }
-
-  setLightTx = async (key, value) => {
-    await this.db.put('lightTx:' + key, JSON.stringify(value));
-  }
-
-  setReceipt = async (key, value) => {
+    let result = null;
     try {
-      await this.db.put('receipt:' + key, JSON.stringify(value));
-      await this._appendReceiptHash(value.receiptData.stageHeight, value.receiptHash);
+      result = await this.db.get('receipt:' + key);
+    } catch (e) {
+      if (e.type != 'NotFoundError') {
+        console.error(e);
+      }
+    }
+    return result;
+  }
+
+  setReceipt = async (key, receiptJson, upload = false) => {
+    try {
+      let address = '0x' + this._infinitechain.signer.getAddress();
+      await this.db.put('receipt:' + key, receiptJson);
+      await this._appendReceiptHash(receiptJson.receiptData.stageHeight, receiptJson.lightTxHash);
+      if (upload) {
+        await this.syncer.uploadReceipt(address, receiptJson);
+      }
     } catch (e) {
       console.log(e);
     }
   }
 
-  _appendReceiptHash = async (stageHeight, receiptHash) => {
-    let receiptHashes;
+  _appendReceiptHash = async (stageHeight, lightTxHash) => {
+    let lightTxHashes;
     try {
-      receiptHashes = await this.db.get(stageHeight);
+      lightTxHashes = await this.db.get(stageHeight);
     } catch (e) {
-      receiptHashes = JSON.stringify([]);
+      lightTxHashes = [];
     } finally {
-      receiptHashes = JSON.parse(receiptHashes);
-      receiptHashes.push(receiptHash);
-      await this.db.put(stageHeight, JSON.stringify(receiptHashes));
+      lightTxHashes.push(lightTxHash);
+      await this.db.put(stageHeight, lightTxHashes);
+    }
+  }
+
+  getSyncerToken = async () => {
+    try {
+      return await this.db.get('syncToken');
+    } catch (e) {
+      return null;
+    }
+  }
+
+  saveSyncerToken = async (token) => {
+    await this.db.put('syncToken', token);
+  }
+
+  syncReceipts = async () => {
+    let address = '0x' + this._infinitechain.signer.getAddress();
+    let receipts = await this.syncer.getReceiptsOfFolder(address);
+    let boosterContract = this._infinitechain.contract.booster();
+    let stageHeight = await boosterContract.stageHeight();
+    stageHeight = parseInt(stageHeight);
+    stageHeight += 1;
+
+    try {
+      let lightTxHashesOfReceipts = await this.db.get(stageHeight);
+      // compare to lightTxHashesOfReceipts, store the rest, upload new receipts
+      let receiptsInCloud = receipts.map((receipt) => {
+        return receipt.name;
+      });
+
+      let shouldStoreReceipts = receiptsInCloud.filter((i) => {return lightTxHashesOfReceipts.indexOf(i) < 0;});
+      let shouldUploadReceipts = lightTxHashesOfReceipts.filter((i) => {return receiptsInCloud.indexOf(i) < 0;});
+
+      for (let i = 0; i < shouldStoreReceipts.length; i++) {
+        let lightTxHash = shouldStoreReceipts[i];
+        for (let j = 0; j < receipts.length; j++) {
+          let receipt = receipts[j];
+          if (lightTxHash == receipt.name) {
+            try {
+              let receiptJson = await this.syncer.download(receipt.id);
+              console.log(receiptJson);
+              if (receiptJson) {
+                await this.setReceipt(receiptJson.lightTxHash, receiptJson);
+              }
+            } catch (e) {
+              console.error(e);
+            }
+          }
+        }
+      }
+
+      shouldUploadReceipts.forEach(async (lightTxHash) => {
+        let receipt = await this.getReceipt(lightTxHash);
+        await this.syncer.uploadReceipt(address, receipt);
+      });
+    } catch (e) {
+      if (e.type == 'NotFoundError') {
+        await this.db.put(stageHeight, []);
+        receipts.forEach(async (receipt) => {
+          try {
+            let receiptJson = await this.syncer.download(receipt.id);
+            if (receiptJson) {
+              await this.setReceipt(receiptJson.lightTxHash, receiptJson);
+            }
+          } catch (e) {
+            console.error(e);
+          }
+        });
+      } else {
+        console.error(e);
+      }
     }
   }
 }

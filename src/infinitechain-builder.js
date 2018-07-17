@@ -10,6 +10,7 @@ import Gringotts from '@/gringotts';
 import Contract from '@/contract';
 import Memory from '@/storages/memory';
 import Level from '@/storages/level';
+import GoogleDrive from './sync/google-drive';
 
 class InfinitechainBuilder {
   setNodeUrl (url) {
@@ -39,10 +40,28 @@ class InfinitechainBuilder {
     return this;
   }
 
+  setReceiptSyncer (driveName, credentials) {
+    if (driveName == 'googleDrive') {
+      let syncer = new GoogleDrive();
+      let installed = credentials.installed;
+      syncer.setCredentials(installed.client_id, installed.client_secret, installed.redirect_uris[0]);
+      this.syncer = syncer;
+    }
+
+    return this;
+  }
+
+  setSyncerToken (token) {
+    this.token = token;
+    return this;
+  }
+
   build () {
     assert(this._nodeUrl != undefined, '\'nodeUrl\' is not provided.');
     assert(this._web3Url != undefined, '\'web3Url\' is not provided.');
     assert(this._storage != undefined, '\'storage\' is not provided.');
+
+    this._storage.setReceiptSyncer(this.syncer);
 
     let clientConfig = {
       web3Url: this._web3Url,
@@ -116,6 +135,13 @@ class InfinitechainBuilder {
     // Create server object after signer and contract in order to use them in server
     let server = new Server(serverConfig, infinitechain);
     infinitechain.setServer(server);
+
+    this._storage.setInfinitechain(infinitechain);
+    if (this.syncer) {
+      infinitechain.syncer = this.syncer;
+      this.syncer.setInfinitechain(infinitechain);
+      this.syncer.refreshToken(this.token);
+    }
 
     return infinitechain;
   }

@@ -4,6 +4,14 @@ class Memory {
     this.receipts = {};
   }
 
+  setInfinitechain (infinitechain) {
+    this._infinitechain = infinitechain;
+  }
+
+  setReceiptSyncer (syncer) {
+    this.syncer = syncer;
+  }
+
   getReceiptHashesByStageHeight = async (stageHeight) => {
     return Object.keys(this.data).map(key => {
       return this.data[key];
@@ -26,8 +34,10 @@ class Memory {
     this.lightTxs[key] = value;
   }
 
-  setReceipt = async (key, value) => {
-    this.receipts[key] = value;
+  setReceipt = async (key, receiptJson) => {
+    this.receipts[key] = receiptJson;
+    let address = '0x' + this._infinitechain.signer.getAddress();
+    await this.syncer.uploadReceipt(address, receiptJson);
   }
 }
 
