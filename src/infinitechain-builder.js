@@ -85,7 +85,8 @@ class InfinitechainBuilder {
 
     let eventConfig = {
       web3Url: this._web3Url,
-      nodeUrl: this._nodeUrl
+      nodeUrl: this._nodeUrl,
+      storage: this._storage
     };
 
     let gringottsConfig = {

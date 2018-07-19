@@ -12,50 +12,85 @@ class Client {
     this._nodeUrl = clientConfig.nodeUrl;
   }
 
-  makeProposeDeposit = (assetID) => {
-    if (!assetID) {
-      assetID = 0;
-    }
+  getProposeDeposit = (rawData = {}) => {
     return new Promise((resolve, reject) => {
+      this._infinitechain.event.getProposeDeposit(async (err, events) => {
+        if (err) {
+          reject(err);
+        } else {
+          let fee = rawData.fee? rawData.fee : 0;
+          let metadata = rawData.metadata? rawData.metadata : null;
+          let signedLightTxs = [];
+          events.forEach(async (event) => {
+            let logID = event.args._dsn;
+            let nonce = this._getNonce();
+            let value = event.args._value;
+            let assetID = event.args._assetID;
+            let lightTxData = {
+              assetID: assetID,
+              value: value,
+              fee: fee,
+              nonce: nonce,
+              logID: logID,
+              metadata: metadata
+            };
+
+            let signedLightTx = await this.makeLightTx(types.deposit, lightTxData, lightTxData.metadata);
+            signedLightTxs.push(signedLightTx)
+          });
+          resolve(signedLightTxs);
+        }
+      });
+    });
+  }
+
+  makeProposeDeposit = (rawData = {}) => {
+    return new Promise(async (resolve, reject) => {
       this._infinitechain.event.onProposeDeposit(async (err, result) => {
         if (err) {
           reject(err);
         } else {
+          let fee = rawData.fee? rawData.fee : 0;
+          let metadata = rawData.metadata? rawData.metadata : null;
           let logID = result.args._dsn;
           let nonce = this._getNonce();
           let value = result.args._value;
+          let assetID = result.args._assetID;
           let lightTxData = {
             assetID: assetID,
             value: value,
-            fee: 0.01,
+            fee: fee,
             nonce: nonce,
-            logID: logID
+            logID: logID,
+            metadata: metadata
           };
 
-          let signedLightTx = await this.makeLightTx(types.deposit, lightTxData);
+          let signedLightTx = await this.makeLightTx(types.deposit, lightTxData, lightTxData.metadata);
           resolve(signedLightTx);
         }
       });
     });
   }
 
-  makeProposeWithdrawal = async (assetID, value) => {
-    if (!assetID) {
-      assetID = 0;
-    }
+  makeProposeWithdrawal = async (rawData) => {
+    assert(rawData.assetID != undefined, '\'assetID\' is not provided.');
+    assert(rawData.value != undefined, '\'value\' is not provided.');
+    let fee = rawData.fee? rawData.fee : 0;
+    let metadata = rawData.metadata? rawData.metadata : null;
     let nonce = this._getNonce();
     let clientAddress = this._infinitechain.signer.getAddress();
     let normalizedClientAddress = clientAddress.slice(-40).padStart(64, '0').slice(-64);
     let logID = this._sha3(normalizedClientAddress + nonce);
     let lightTxData = {
-      assetID: assetID,
-      value: value,
-      fee: 0.01,
+      assetID: rawData.assetID,
+      value: rawData.value,
+      fee: fee,
       nonce: nonce,
-      logID: logID
+      logID: logID,
+      metadata: metadata
     };
 
-    let signedLightTx = await this.makeLightTx(types.withdrawal, lightTxData);
+    let signedLightTx = await this.makeLightTx(types.withdrawal, lightTxData, lightTxData.metadata);
     return signedLightTx;
   }
 
