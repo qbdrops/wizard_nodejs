@@ -12,30 +12,27 @@ class Auditor {
     this._nodeUrl = auditorConfig.nodeUrl;
   }
 
-  audit = async (stageHeight, receipts = null, balances = null, bond = null) => {
+  audit = async (stageHeight, receipts = null, balances = {}, bond = null) => {
     let gringotts = this._infinitechain.gringotts;
     if (!receipts) {
-      let resReceipts = await gringotts.getOffchainReceipts(stageHeight);
-      receipts = resReceipts.data.receipts;
+      let res = await gringotts.getOffchainReceipts(stageHeight);
+      receipts = res.data;
     }
 
-    if (!balances) {
-      let resBalance = await gringotts.getAccountBalances();
-      balances = resBalance.data.balances;
+    if (JSON.stringify(balances) == '{}' && stageHeight != 1) {
+      let res = await gringotts.getAccountBalances(stageHeight - 1);
+      balances = res.data;
     }
 
     if (!bond) {
       bond = (1000*1e18).toString(16);
     }
-
     // Reconstruct receiptTree from treeNodes
     let receiptTree = new IndexedMerkleTree(stageHeight, receipts.map(receipt => receipt.receiptHash));
-
     // Sort the receipts by GSN
     receipts = receipts.sort(function (r1, r2) {
       return parseInt(r1.receiptData.GSN, 16) - parseInt(r2.receiptData.GSN, 16);
     }).map(receiptJson => new Receipt(receiptJson));
-
     // Group the sorted receipts by addresses
     let receiptsGroup = receipts.reduce((acc, receipt) => {
       let type = receipt.type();
@@ -53,7 +50,6 @@ class Auditor {
       }
       return acc;
     }, {});
-
     let receiptsWithRepeatedGSN = this._repeatedGSNFilter(receipts);
     let receiptsWithWrongBalance = this._wrongBalanceFilter(receiptsGroup, balances, bond);
     let receiptsWithSkippedGSN = this._skippedGSNFilter(receipts);
@@ -72,6 +68,16 @@ class Auditor {
       obj[key].push(value);
     } else {
       obj[key] = [value];
+    }
+    return obj;
+  }
+
+  _addOrNew = (obj, key, value) => {
+    if (obj[key]) {
+      obj[key].plus(value);
+    } else {
+      obj[key] = new BigNumber(0);
+      obj[key].plus(value);
     }
     return obj;
   }
@@ -108,70 +114,79 @@ class Auditor {
   _wrongBalanceFilter = (receiptsGroup, balances) => {
     let filterResult = Object.keys(receiptsGroup).reduce((acc, address) => { // each address check the balance by their own receipts
       let receipts = receiptsGroup[address];
-      let initBalance = new BigNumber(balances[address], 16);
-
+      let initBalance = balances[address];
+      if (!initBalance) {
+        initBalance = {};
+      }
       let wrongBalanceResult = receipts.reduce((acc, receipt) => {
         let type = receipt.type();
         let value = new BigNumber(receipt.lightTxData.value, 16);
+        let assetID = receipt.lightTxData.assetID;
+        if (acc.balances[assetID] == undefined) {
+          acc.balances[assetID] = '0000000000000000000000000000000000000000000000000000000000000000';
+        }
+        let assetBalance = acc.balances[assetID];
+        if (typeof assetBalance == 'string') {
+          assetBalance = new BigNumber(acc.balances[assetID], 16);
+        }
         if (type == types.deposit) {
-          let expectedBalance = acc.balance.plus(value);
+          let expectedBalance = assetBalance.plus(value);
           let receiptBalance = new BigNumber(receipt.receiptData.toBalance, 16);
           let diff = expectedBalance.minus(receiptBalance).abs();
-
           if (diff != 0) {
-            acc.wrongBalanceSum = acc.wrongBalanceSum.plus(diff);
-            acc.wrongBalanceReceipts.push([acc.prevReceipt, receipt]);
+            acc.wrongBalanceSum = this._addOrNew(acc.wrongBalanceSum, assetID, diff);
+            acc.wrongBalanceReceipts.push([acc.prevReceipt[assetID], receipt]);
           }
-          acc.balance = receiptBalance;
+          acc.balances[assetID] = receiptBalance;
         } else if (type == types.withdrawal || type == types.instantWithdrawal) {
-          let expectedBalance = acc.balance.minus(value);
+          let expectedBalance = assetBalance.minus(value);
           let receiptBalance = new BigNumber(receipt.receiptData.fromBalance, 16);
           let diff = expectedBalance.minus(receiptBalance).abs();
 
           if (diff != 0) {
-            acc.wrongBalanceSum = acc.wrongBalanceSum.plus(diff);
-            acc.wrongBalanceReceipts.push([acc.prevReceipt, receipt]);
+            acc.wrongBalanceSum = this._addOrNew(acc.wrongBalanceSum, assetID, diff);
+            acc.wrongBalanceReceipts.push([acc.prevReceipt[assetID], receipt]);
           }
-          acc.balance = receiptBalance;
+          acc.balances[assetID] = receiptBalance;
         } else {// remittance
           if (address == receipt.lightTxData.from) {
-            let expectedBalance = acc.balance.minus(value);
+            let expectedBalance = assetBalance.minus(value);
             let receiptBalance = new BigNumber(receipt.receiptData.fromBalance, 16);
             let diff = expectedBalance.minus(receiptBalance).abs();
-
             if (diff != 0) {
-              acc.wrongBalanceSum = acc.wrongBalanceSum.plus(diff);
-              acc.wrongBalanceReceipts.push([acc.prevReceipt, receipt]);
+              acc.wrongBalanceSum = this._addOrNew(acc.wrongBalanceSum, assetID, diff);
+              acc.wrongBalanceReceipts.push([acc.prevReceipt[assetID], receipt]);
             }
-            acc.balance = receiptBalance;
+            acc.balances[assetID] = receiptBalance;
           } else {
-            let expectedBalance = acc.balance.plus(value);
+            let expectedBalance = assetBalance.plus(value);
             let receiptBalance = new BigNumber(receipt.receiptData.toBalance, 16);
             let diff = expectedBalance.minus(receiptBalance).abs();
-
             if (diff != 0) {
-              acc.wrongBalanceSum = acc.wrongBalanceSum.plus(diff);
-              acc.wrongBalanceReceipts.push([acc.prevReceipt, receipt]);
+              acc.wrongBalanceSum = this._addOrNew(acc.wrongBalanceSum, assetID, diff);
+              acc.wrongBalanceReceipts.push([acc.prevReceipt[assetID], receipt]);
             }
-            acc.balance = receiptBalance;
+            acc.balances[assetID] = receiptBalance;
           }
         }
-        acc.prevReceipt = receipt;
+        acc.prevReceipt[assetID] = receipt;
         return acc;
       }, {
-        balance: initBalance,
+        balances: initBalance,
         wrongBalanceReceipts: [],
-        prevReceipt: null,
-        wrongBalanceSum: new BigNumber(0)
+        prevReceipt: {},
+        wrongBalanceSum: {}
       });
       wrongBalanceResult.wrongBalanceReceipts.forEach(receipts => {
         acc.wrongBalanceReceipts.push(receipts);
       });
-      acc.wrongBalanceSum = acc.wrongBalanceSum.plus(wrongBalanceResult.wrongBalanceSum);
+      Object.keys(wrongBalanceResult.wrongBalanceSum).forEach(assetID =>{
+        acc.wrongBalanceSum = this._addOrNew(acc.wrongBalanceSum, assetID, wrongBalanceResult.wrongBalanceSum[assetID]);
+      });
       return acc;
     }, {
       wrongBalanceReceipts: [],
-      wrongBalanceSum: new BigNumber(0)
+      wrongBalanceSum: {}
     });
 
     return filterResult.wrongBalanceReceipts;
@@ -179,11 +194,9 @@ class Auditor {
 
   _integrityFilter = async (receipts, tree) => {
     let contract = this._infinitechain.contract;
-
     // 1. Get receiptRootHash from blockchain
     let rootHashes = await contract.getStageRootHash(tree.stageHeight);
     let receiptRootHash = rootHashes[0];
-
     let result = receipts.reduce((acc, receipt) => {
       // 2. Get slice and compute root hash
       let slice = tree.getSlice(receipt.receiptHash);

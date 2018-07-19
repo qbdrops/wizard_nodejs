@@ -79,8 +79,8 @@ class Gringotts {
     return axios.get(url);
   }
 
-  getAccountBalances = async () => {
-    let url = this._nodeUrl + '/balances';
+  getAccountBalances = async (stageHeight) => {
+    let url = this._nodeUrl + '/accounts/' + stageHeight;
     return axios.get(url);
   }
 }
