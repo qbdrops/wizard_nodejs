@@ -2,6 +2,7 @@ class Memory {
   constructor () {
     this.lightTxs = {};
     this.receipts = {};
+    this.blockNumber = 0;
   }
 
   setInfinitechain (infinitechain) {
@@ -28,6 +29,15 @@ class Memory {
   getReceipt = async (key) => {
     let result = this.receipts[key];
     return result;
+  }
+
+  getBlockNumber = () => {
+    let result = this.blockNumber;
+    return result;
+  }
+
+  setBlockNumber = (value) => {
+    this.blockNumber = value;
   }
 
   setLightTx = async (key, value) => {

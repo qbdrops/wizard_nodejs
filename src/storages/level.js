@@ -35,6 +35,20 @@ class Level {
     return result;
   }
 
+  getBlockNumber = async () => {
+    let result;
+    try {
+      result = await this.db.get('blockNumber');
+    } catch (e) {
+      result = 0;
+    }
+    return result;
+  }
+
+  setBlockNumber = async (value) => {
+    await this.db.put('blockNumber', value);
+  }
+
   setReceipt = async (key, receiptJson, upload = false) => {
     try {
       let address = '0x' + this._infinitechain.signer.getAddress();

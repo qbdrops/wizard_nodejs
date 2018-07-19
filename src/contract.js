@@ -33,6 +33,11 @@ class Contract {
     return this._booster;
   }
 
+  web3 = () => {
+    assert(this._web3, 'Infinitechain is not initialized yet');
+    return this._web3;
+  }
+
   proposeWithdrawal = (receipt, nonce = null) => {
     assert(receipt instanceof Receipt, 'Parameter \'lightTx\' should be instance of Receipt.');
 
@@ -305,7 +310,7 @@ class Contract {
   _signRawTransaction = (txMethodData, from, to, value, nonce = null) => {
     if (nonce == null) {
       let address = '0x' + this._infinitechain.signer.getAddress();
-      nonce = this._web3.toHex(this._web3.eth.getTransactionCount(address));
+      nonce = this._web3.toHex(this._web3.eth.getTransactionCount(address, 'pending'));
     }
 
     let txParams = {
