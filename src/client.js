@@ -110,14 +110,9 @@ class Client {
     return signedLightTx;
   }
 
-  saveLightTx = async (lightTx) => {
-    assert(lightTx instanceof LightTransaction, 'Parameter \'lightTx\' should be instance of \'LightTransaction\'.');
-    await this._storage.setLightTx(lightTx.lightTxHash, lightTx.toJson());
-  }
-
-  saveReceipt = async (receipt) => {
+  saveReceipt = async (receipt, upload = false) => {
     assert(receipt instanceof Receipt, 'Parameter \'receipt\' should be instance of \'Receipt\'.');
-    await this._storage.setReceipt(receipt.lightTxHash, receipt.toJson(), true);
+    await this._storage.setReceipt(receipt.lightTxHash, receipt.toJson(), upload);
   }
 
   getLightTx = async (lightTxHash) => {
