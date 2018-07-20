@@ -115,17 +115,9 @@ class Client {
     await this._storage.setReceipt(receipt.lightTxHash, receipt.toJson(), upload);
   }
 
-  getLightTx = async (lightTxHash) => {
+  getReceipt = async (lightTxHash) => {
     try {
-      return await this._storage.getLightTx(lightTxHash);
-    } catch (e) {
-      console.log(e);
-    }
-  }
-
-  getReceipt = async (receiptHash) => {
-    try {
-      return await this._storage.getReceipt(receiptHash);
+      return await this._storage.getReceipt(lightTxHash);
     } catch (e) {
       console.log(e);
     }

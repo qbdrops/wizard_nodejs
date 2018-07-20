@@ -61,7 +61,7 @@ class GoogleDrive {
       }
   
       if (!targetFolderId) {
-        throw new Error('Folder not found.');
+        targetFolderId = await this._createFolder(address);
       }
 
       let response = await this.drive.files.list({

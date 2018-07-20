@@ -23,10 +23,10 @@ class Level {
     return result;
   }
 
-  getReceipt = async (key) => {
+  getReceipt = async (lightTxHash) => {
     let result = null;
     try {
-      result = await this.db.get('receipt:' + key);
+      result = await this.db.get('receipt:' + lightTxHash);
     } catch (e) {
       if (e.type != 'NotFoundError') {
         console.error(e);
@@ -49,10 +49,10 @@ class Level {
     await this.db.put('blockNumber', value);
   }
 
-  setReceipt = async (key, receiptJson, upload = false) => {
+  setReceipt = async (lightTxHash, receiptJson, upload = false) => {
     try {
       let address = '0x' + this._infinitechain.signer.getAddress();
-      await this.db.put('receipt:' + key, receiptJson);
+      await this.db.put('receipt:' + lightTxHash, receiptJson);
       await this._appendReceiptHash(receiptJson.receiptData.stageHeight, receiptJson.lightTxHash);
       if (upload) {
         await this.syncer.uploadReceipt(address, receiptJson);
@@ -95,7 +95,7 @@ class Level {
     stageHeight += 1;
 
     try {
-      let lightTxHashesOfReceipts = await this.db.get(stageHeight);
+      let lightTxHashesOfReceipts = await this.db.get(stageHeight.toString(16).padStart(64, '0').slice(-64));
       // compare to lightTxHashesOfReceipts, store the rest, upload new receipts
       let receiptsInCloud = receipts.map((receipt) => {
         return receipt.name;
@@ -103,7 +103,6 @@ class Level {
 
       let shouldStoreReceipts = receiptsInCloud.filter((i) => {return lightTxHashesOfReceipts.indexOf(i) < 0;});
       let shouldUploadReceipts = lightTxHashesOfReceipts.filter((i) => {return receiptsInCloud.indexOf(i) < 0;});
-
       for (let i = 0; i < shouldStoreReceipts.length; i++) {
         let lightTxHash = shouldStoreReceipts[i];
         for (let j = 0; j < receipts.length; j++) {
