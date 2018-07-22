@@ -1,3 +1,5 @@
+import assert from 'assert';
+
 class Level {
   constructor (db) {
     this.db = db;
@@ -87,6 +89,8 @@ class Level {
   }
 
   syncReceipts = async () => {
+    assert(this.syncer, 'Syncer is not provided.');
+
     let address = '0x' + this._infinitechain.signer.getAddress();
     let receipts = await this.syncer.getReceiptsOfFolder(address);
     let boosterContract = this._infinitechain.contract.booster();
