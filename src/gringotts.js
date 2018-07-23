@@ -83,6 +83,12 @@ class Gringotts {
     let url = this._nodeUrl + '/accounts/' + stageHeight;
     return axios.get(url);
   }
+
+  getAssetList = async () => {
+    let url = this._nodeUrl + '/assetlist';
+    let res = await axios.get(url);
+    return res.data.assetList;
+  }
 }
 
 export default Gringotts;
