@@ -131,8 +131,8 @@ class IndexedMerkleTree {
   }
 
   _getLeafIndexRange () {
-    let l = 2 ** (this.treeHeight - 1);
-    let u = 2 ** (this.treeHeight) - 1;
+    let l = Math.pow(2, this.treeHeight - 1);
+    let u = Math.pow(2, this.treeHeight) - 1;
     var s = [];
     for (let i = l; i <= u; i++) {
       s.push(i);
