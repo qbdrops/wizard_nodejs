@@ -176,6 +176,10 @@ class Client {
   syncReceipts = async () => {
     await this._storage.syncReceipts();
   }
+
+  fetchSupportedTokens = async () => {
+    return await this._infinitechain.gringotts.getAssetList();
+  }
 }
 
 export default Client;
