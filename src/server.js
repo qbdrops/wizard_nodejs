@@ -1,4 +1,3 @@
-import EthUtils from 'ethereumjs-util';
 import axios from 'axios';
 import types from '@/models/types';
 
