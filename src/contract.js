@@ -125,6 +125,31 @@ class Contract {
     }
   }
 
+  proposeTokenDeposit = (proposeData, nonce = null) => {
+    let txValue = '0x0';
+    let clientAddress = '0x' + this._infinitechain.signer.getAddress();
+    let boosterAddress = this._boosterAddress;
+    let depositAddress = proposeData.depositAddress.slice(-40).padStart(64, '0').slice(-64);
+    let depositValue = this._to32BytesHex(proposeData.depositValue, false);
+    let depositAssetAddress = proposeData.depositAssetAddress.toString(16).padStart(64, '0').slice(-64);
+    try {
+      let txMethodData = this.booster().delegateToCryptoFlowLib.getData(
+        '0xdcf12aba',
+        [
+          '0x' + depositAddress,
+          '0x' + depositValue,
+          '0x' + depositAssetAddress
+        ]
+      );
+
+      let serializedTx = this._signRawTransaction(txMethodData, clientAddress, boosterAddress, txValue, nonce);
+      let txHash = this._sendRawTransaction(serializedTx);
+      return txHash;
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
   withdraw = (receipt, nonce = null) => {
     let txValue = '0x0';
     let clientAddress = '0x' + this._infinitechain.signer.getAddress();
@@ -336,6 +361,22 @@ class Contract {
 
   _sha3 = (content) => {
     return EthUtils.sha3(content).toString('hex');
+  }
+
+  _to32BytesHex = (n, toWei) => {
+    let startWith0x = ((n.toString().slice(0, 2) == '0x') && (n.toString().substring(2).length == 64));
+    let lengthIs64Bytes = (n.toString().length == 64);
+
+    if (startWith0x || lengthIs64Bytes) {
+      n = n.slice(-64);
+    } else {
+      let m = parseFloat(n);
+      m = toWei ? (m * 1e18) : m;
+      let h = m.toString(16);
+      assert(h != 'NaN', '\'' + n + '\' can not be parsed to an integer.');
+      n = h.padStart(64, '0');
+    }
+    return n;
   }
 }
 

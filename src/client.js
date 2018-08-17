@@ -36,7 +36,7 @@ class Client {
             };
 
             let signedLightTx = await this.makeLightTx(types.deposit, lightTxData, lightTxData.metadata);
-            signedLightTxs.push(signedLightTx)
+            signedLightTxs.push(signedLightTx);
           });
           resolve(signedLightTxs);
         }
@@ -70,6 +70,12 @@ class Client {
         }
       });
     });
+  }
+
+  proposeTokenDeposit = (proposeData) => {
+    let contract = this._infinitechain.contract;
+    let txHash = contract.proposeTokenDeposit(proposeData);
+    return txHash;
   }
 
   makeProposeWithdrawal = async (rawData) => {
