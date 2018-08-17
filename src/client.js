@@ -129,7 +129,7 @@ class Client {
     }
   }
 
-  getBooterBalance = async (clientAddress, assetID) => {
+  getBooterBalance = async (clientAddress, assetID = null) => {
     return await this._infinitechain.gringotts.getBoosterBalance(clientAddress, assetID);
   }
 
