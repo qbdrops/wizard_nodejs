@@ -129,6 +129,10 @@ class Client {
     }
   }
 
+  getBooterBalance = async (clientAddress, assetID) => {
+    return await this._infinitechain.gringotts.getBoosterBalance(clientAddress, assetID);
+  }
+
   getAllReceiptHashes = async (stageHeight) => {
     return await this._storage.getReceiptHashesByStageHeight(stageHeight);
   }

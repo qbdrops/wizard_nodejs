@@ -84,6 +84,11 @@ class Gringotts {
     return axios.get(url);
   }
 
+  getBoosterBalance = async (clientAddress, assetID) => {
+    let url = this._nodeUrl + '/balance/' + clientAddress + '?assetID=' + assetID;
+    return await axios.get(url);
+  }
+
   getAssetList = async () => {
     let url = this._nodeUrl + '/assetlist';
     let res = await axios.get(url);
