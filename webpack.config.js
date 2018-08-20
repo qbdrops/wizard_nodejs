@@ -12,7 +12,7 @@ module.exports = {
       exclude: /node_modules/,
       loader: 'babel-loader',
       query: {
-        presets: ['es2015', 'es2016', 'es2017'],
+        presets: ['env'],
         plugins: ['babel-plugin-transform-runtime', 'babel-plugin-transform-class-properties']
       }
     },
