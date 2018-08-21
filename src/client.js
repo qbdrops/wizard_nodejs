@@ -103,7 +103,13 @@ class Client {
   makeLightTx = async (type, lightTxData, metadata = null) => {
     // Prepare lightTxData
     lightTxData = await this._prepare(type, lightTxData);
-
+    if (metadata) {
+      if (typeof metadata.client == 'object') {
+        metadata.client = JSON.stringify(metadata.client);
+      } else {
+        metadata.client = metadata.client.toString();
+      }
+    }
     let lightTxJson = { lightTxData: lightTxData, metadata: metadata };
 
     // Create lightTx

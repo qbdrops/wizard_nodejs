@@ -1,5 +1,6 @@
 import axios from 'axios';
 import types from '@/models/types';
+import { AssertionError } from 'assert';
 
 class Server {
   constructor (serverConfig, infinitechain) {
@@ -50,6 +51,19 @@ class Server {
     }
   }
 
+  addServerMetadata = async (lightTx, serverMetadata) => {
+    if (serverMetadata) {
+      if (typeof serverMetadata == 'object') {
+        serverMetadata = JSON.stringify(serverMetadata);
+      } else {
+        serverMetadata = serverMetadata.toString();
+      }
+      lightTx.metadata.server = serverMetadata;
+    } else {
+      lightTx.metadata.server = '';
+    }
+    return lightTx;
+  }
   finalize = async (stageHeight) => {
     return this._infinitechain.booster.finalize(stageHeight);
   }

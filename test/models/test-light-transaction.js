@@ -70,7 +70,7 @@ describe('LightTransaction', () => {
           assetID: 1,
           logID: 1
         },
-        metadata: { client: { foo: 'bar' } }
+        metadata: { client: JSON.stringify({ foo: 'bar' }) }
       };
 
       let lightTx = new LightTransaction(data);
@@ -88,8 +88,6 @@ describe('LightTransaction', () => {
         },
         lightTxHash: 'c18486c560fec2f7f13381e44402c2aa916f04277ac5c493ed86fcca04e29e00'
       };
-
-      console.log(lightTx);
 
       assert.deepEqual(lightTx.lightTxData, result.lightTxData);
       assert.deepEqual(lightTx.lightTxHash, result.lightTxHash);
@@ -174,7 +172,7 @@ describe('LightTransaction', () => {
       let lightTx = new LightTransaction(data);
 
       let expected = {
-        lightTxHash: 'fbaafca2816a1a4f49941f1f02f63cb547a6c8119667b2dcd0d176bd4c971b2a',
+        lightTxHash: '5fa88f565b52e2bfcd78ac6f3fbbed8df5e88692e0b1a537a0bb8e3d11a5bb22',
         lightTxData: {
           from: '000000000000000000000000ce44fa4565747558066266061786e69336b5f3a2',
           to: '000000000000000000000000fb44fa0865747558066266061786e69336b5f3a2',
@@ -183,11 +181,11 @@ describe('LightTransaction', () => {
           fee: '000000000000000000000000000000000000000000000000016345785d8a0000',
           nonce: '0000000000000000000000000000000000000000000000000000000000000005',
           logID: '0000000000000000000000000000000000000000000000000000000000000001',
-          clientMetadataHash: 'b48d38f93eaa084033fc5970bf96e559c33c4cdc07d889ab00b4d63f9590739d'
+          clientMetadataHash: 'c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470'
         },
         metadata: {
-          client: {},
-          server: {}
+          client: '',
+          server: ''
         },
         sig: {
           clientLightTx: {},
@@ -216,7 +214,7 @@ describe('LightTransaction', () => {
       let lightTx = new LightTransaction(data);
 
       let expected = JSON.stringify({
-        lightTxHash: 'fbaafca2816a1a4f49941f1f02f63cb547a6c8119667b2dcd0d176bd4c971b2a',
+        lightTxHash: '5fa88f565b52e2bfcd78ac6f3fbbed8df5e88692e0b1a537a0bb8e3d11a5bb22',
         lightTxData: {
           from: '000000000000000000000000ce44fa4565747558066266061786e69336b5f3a2',
           to: '000000000000000000000000fb44fa0865747558066266061786e69336b5f3a2',
@@ -225,15 +223,15 @@ describe('LightTransaction', () => {
           fee: '000000000000000000000000000000000000000000000000016345785d8a0000',
           nonce: '0000000000000000000000000000000000000000000000000000000000000005',
           logID: '0000000000000000000000000000000000000000000000000000000000000001',
-          clientMetadataHash: 'b48d38f93eaa084033fc5970bf96e559c33c4cdc07d889ab00b4d63f9590739d'
+          clientMetadataHash: 'c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470'
         },
         sig: {
           clientLightTx: {},
           serverLightTx: {}
         },
         metadata: {
-          client: {},
-          server: {}
+          client: '',
+          server: ''
         }
       });
 
