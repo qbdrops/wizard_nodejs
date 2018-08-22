@@ -56,7 +56,11 @@ describe('Server', () => {
       lightTxHash: signedLightTx.lightTxHash,
       lightTxData: signedLightTx.lightTxData,
       sig: signedLightTx.sig,
-      receiptData: receiptData
+      receiptData: receiptData,
+      metadata: {
+        client: '',
+        server: ''
+      }
     };
 
     let receipt = new Receipt(receiptJson);

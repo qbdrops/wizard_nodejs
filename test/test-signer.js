@@ -53,7 +53,11 @@ describe('Signer', () => {
     lightTxData: lightTx.lightTxData,
     lightTxHash: lightTx.lightTxHash,
     sig: lightTx.sig,
-    receiptData: receiptData
+    receiptData: receiptData,
+    metadata: {
+      client: '',
+      server: ''
+    }
   };
 
   let receipt = new Receipt(receiptJson);
@@ -72,8 +76,8 @@ describe('Signer', () => {
 
       let result = {
         serverLightTx: {
-          r: '0x05a8b10fb54d2ad21e8f0462231631c054e78aca3fde2b69045dc8b20010c481',
-          s: '0x1b28f3e8dd1a6ad1951657a265bad910440ca7ac9dccefe23879816d86b4e052',
+          r: '0x9031d1f9cf13f7014826558375501e7802b796072a0934c8aed661bac9718407',
+          s: '0x4d98c83c20b54f30d329e6e49a088a36dad38c272226375245379a4d5e529fc4',
           v: 28
         }
       };
@@ -89,8 +93,8 @@ describe('Signer', () => {
 
       let result = {
         serverReceipt: {
-          r: '0x21a799d185c3dc101f6cd2be3ed5f14087a7168729531f8941822eed4631e00b',
-          s: '0x5d657f128900b3aa1a74e5db564745dd8a9e54c81dc34ccb5c3be603f898251a',
+          r: '0xc28d6957877c6ea5b970bf58131eb3a16ef0d8b2699891453ba476f493e99694',
+          s: '0x1062a197399268942b6433014b3b34eb68ef70ab90420c815cc7afc3fdc39bcb',
           v: 28
         }
       };
@@ -114,8 +118,8 @@ describe('Signer', () => {
 
       let result = {
         clientLightTx: {
-          r: '0x05a8b10fb54d2ad21e8f0462231631c054e78aca3fde2b69045dc8b20010c481',
-          s: '0x1b28f3e8dd1a6ad1951657a265bad910440ca7ac9dccefe23879816d86b4e052',
+          r: '0x9031d1f9cf13f7014826558375501e7802b796072a0934c8aed661bac9718407',
+          s: '0x4d98c83c20b54f30d329e6e49a088a36dad38c272226375245379a4d5e529fc4',
           v: 28
         }
       };

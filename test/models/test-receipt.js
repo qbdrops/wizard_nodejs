@@ -60,7 +60,11 @@ describe('Receipt', () => {
         lightTxData: wrongLightTx.lightTxData,
         lightTxHash: wrongLightTx.lightTxHash,
         sig: wrongLightTx.sig,
-        receiptData: correctReceiptData
+        receiptData: correctReceiptData,
+        metadata: {
+          client: '',
+          server: ''
+        }
       };
 
       assert.throws(() => { new Receipt(receiptJson); }, Error, 'Client signature is empty.');
@@ -72,13 +76,21 @@ describe('Receipt', () => {
         GSN: 21,
         lightTxHash:'12345',
         toBalance: 500,
-        hello: 'hello'
+        hello: 'hello',
+        metadata: {
+          client: '',
+          server: ''
+        }
       };
 
       let receiptJson = {
         lightTxData: correctLightTx.lightTxData,
         sig: correctLightTx.sig,
-        receiptData: wrongReceiptData
+        receiptData: wrongReceiptData,
+        metadata: {
+          client: '',
+          server: ''
+        }
       };
 
       assert.throws(() => { new Receipt(receiptJson); }, Error, 'Parameter \'receiptJson\' does not include key \'lightTxHash\'.');
@@ -90,14 +102,22 @@ describe('Receipt', () => {
         GSN: 21,
         lightTxHash:'12345',
         toBalance: 500,
-        hello: 'hello'
+        hello: 'hello',
+        metadata: {
+          client: '',
+          server: ''
+        }
       };
 
       let receiptJson = {
         lightTxData: correctLightTx.lightTxData,
         lightTxHash: correctLightTx.lightTxHash,
         sig: correctLightTx.sig,
-        receiptData: wrongReceiptData
+        receiptData: wrongReceiptData,
+        metadata: {
+          client: '',
+          server: ''
+        }
       };
 
       assert.throws(() => { new Receipt(receiptJson); }, Error, 'Parameter \'receiptData\' does not include key \'to\'.');
@@ -108,12 +128,16 @@ describe('Receipt', () => {
         lightTxData: correctLightTx.lightTxData,
         lightTxHash: correctLightTx.lightTxHash,
         sig: correctLightTx.sig,
-        receiptData: correctReceiptData
+        receiptData: correctReceiptData,
+        metadata: {
+          client: '',
+          server: ''
+        }
       };
 
       let receipt = new Receipt(receiptJson);
       let result = {
-        receiptHash: '5fc3039fab71c620282f161319a2cd74dad789d987b6a23f91fd991cc68d5f78',
+        receiptHash: '785543c310a2f2793b8c2340a4bf8744e5428ae8e5c6ce8633b034e52a8fd2e4',
         receiptData: correctReceiptData
       };
 
