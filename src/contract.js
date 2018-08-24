@@ -24,8 +24,8 @@ class Contract {
 
     assert(boosterAddress, 'Can not fetch booster address.');
     this._boosterAddress = boosterAddress;
-    this._web3 = new Web3(new Web3.providers.HttpProvider(this._web3Url));
-    this._booster = this._web3.eth.contract(Booster.abi).at(boosterAddress);
+    this._web3 = new Web3(this._web3Url);
+    this._booster = new this._web3.eth.Contract(Booster.abi, boosterAddress);
   }
 
   booster = () => {
@@ -38,7 +38,7 @@ class Contract {
     return this._web3;
   }
 
-  proposeWithdrawal = (receipt, nonce = null) => {
+  proposeWithdrawal = async (receipt, nonce = null) => {
     assert(receipt instanceof Receipt, 'Parameter \'lightTx\' should be instance of Receipt.');
 
     let txValue = '0x0';
@@ -46,7 +46,7 @@ class Contract {
     let boosterAddress = this._boosterAddress;
 
     try {
-      let txMethodData = this.booster().delegateToCryptoFlowLib.getData(
+      let txMethodData = this.booster().methods.delegateToCryptoFlowLib(
         '0x68ff1929',
         [
           '0x' + receipt.lightTxHash,
@@ -72,16 +72,16 @@ class Contract {
           receipt.sig.serverReceipt.r,
           receipt.sig.serverReceipt.s,
         ]
-      );
-      let serializedTx = this._signRawTransaction(txMethodData, clientAddress, boosterAddress, txValue, nonce);
-      let txHash = this._sendRawTransaction(serializedTx);
+      ).encodeABI();
+      let serializedTx = await this._signRawTransaction(txMethodData, clientAddress, boosterAddress, txValue, nonce);
+      let txHash = await this._sendRawTransaction(serializedTx);
       return txHash;
     } catch (e) {
       console.error(e);
     }
   }
 
-  deposit = (receipt, nonce = null) => {
+  deposit = async (receipt, nonce = null) => {
     assert(receipt instanceof Receipt, 'Parameter \'lightTx\' should be instance of Receipt.');
 
     let txValue = '0x0';
@@ -89,7 +89,7 @@ class Contract {
     let boosterAddress = this._boosterAddress;
 
     try {
-      let txMethodData = this.booster().delegateToCryptoFlowLib.getData(
+      let txMethodData = this.booster().methods.delegateToCryptoFlowLib(
         '0x7b9d7d74',
         [
           '0x' + receipt.lightTxHash,
@@ -115,17 +115,17 @@ class Contract {
           receipt.sig.serverReceipt.r,
           receipt.sig.serverReceipt.s
         ]
-      );
+      ).encodeABI();
 
-      let serializedTx = this._signRawTransaction(txMethodData, clientAddress, boosterAddress, txValue, nonce);
-      let txHash = this._sendRawTransaction(serializedTx);
+      let serializedTx = await this._signRawTransaction(txMethodData, clientAddress, boosterAddress, txValue, nonce);
+      let txHash = await this._sendRawTransaction(serializedTx);
       return txHash;
     } catch (e) {
       console.error(e);
     }
   }
 
-  proposeTokenDeposit = (proposeData, nonce = null) => {
+  proposeTokenDeposit = async (proposeData, nonce = null) => {
     let txValue = '0x0';
     let clientAddress = '0x' + this._infinitechain.signer.getAddress();
     let boosterAddress = this._boosterAddress;
@@ -133,45 +133,45 @@ class Contract {
     let depositValue = this._to32BytesHex(proposeData.depositValue, false);
     let depositAssetAddress = proposeData.depositAssetAddress.toString(16).padStart(64, '0').slice(-64);
     try {
-      let txMethodData = this.booster().delegateToCryptoFlowLib.getData(
+      let txMethodData = this.booster().methods.delegateToCryptoFlowLib(
         '0xdcf12aba',
         [
           '0x' + depositAddress,
           '0x' + depositValue,
           '0x' + depositAssetAddress
         ]
-      );
+      ).encodeABI();
 
-      let serializedTx = this._signRawTransaction(txMethodData, clientAddress, boosterAddress, txValue, nonce);
-      let txHash = this._sendRawTransaction(serializedTx);
+      let serializedTx = await this._signRawTransaction(txMethodData, clientAddress, boosterAddress, txValue, nonce);
+      let txHash = await this._sendRawTransaction(serializedTx);
       return txHash;
     } catch (e) {
       console.error(e);
     }
   }
 
-  withdraw = (receipt, nonce = null) => {
+  withdraw = async (receipt, nonce = null) => {
     let txValue = '0x0';
     let clientAddress = '0x' + this._infinitechain.signer.getAddress();
     let boosterAddress = this._boosterAddress;
 
     try {
-      let txMethodData = this.booster().delegateToCryptoFlowLib.getData(
+      let txMethodData = this.booster().methods.delegateToCryptoFlowLib(
         '0xfe2b3924',
         [
           '0x' + receipt.lightTxHash
         ]
-      );
+      ).encodeABI();
 
-      let serializedTx = this._signRawTransaction(txMethodData, clientAddress, boosterAddress, txValue, nonce);
-      let txHash = this._sendRawTransaction(serializedTx);
+      let serializedTx = await this._signRawTransaction(txMethodData, clientAddress, boosterAddress, txValue, nonce);
+      let txHash = await this._sendRawTransaction(serializedTx);
       return txHash;
     } catch (e) {
       console.error(e);
     }
   }
 
-  instantWithdraw = (receipt, nonce = null) => {
+  instantWithdraw = async (receipt, nonce = null) => {
     assert(receipt instanceof Receipt, 'Parameter \'lightTx\' should be instance of Receipt.');
 
     let txValue = '0x0';
@@ -179,7 +179,7 @@ class Contract {
     let boosterAddress = this._boosterAddress;
 
     try {
-      let txMethodData = this.booster().delegateToCryptoFlowLib.getData(
+      let txMethodData = this.booster().methods.delegateToCryptoFlowLib(
         '0xbe1946da',
         [
           '0x' + receipt.lightTxHash,
@@ -205,102 +205,102 @@ class Contract {
           receipt.sig.serverReceipt.r,
           receipt.sig.serverReceipt.s
         ]
-      );
+      ).encodeABI();
 
-      let serializedTx = this._signRawTransaction(txMethodData, clientAddress, boosterAddress, txValue, nonce);
-      let txHash = this._sendRawTransaction(serializedTx);
+      let serializedTx = await this._signRawTransaction(txMethodData, clientAddress, boosterAddress, txValue, nonce);
+      let txHash = await this._sendRawTransaction(serializedTx);
       return txHash;
     } catch (e) {
       console.error(e);
     }
   }
 
-  attach = (receiptRootHash, accountRootHash, data, nonce = null) => {
+  attach = async (receiptRootHash, accountRootHash, data, nonce = null) => {
     let txValue = '0x0';
     let clientAddress = '0x' + this._infinitechain.signer.getAddress();
     let boosterAddress = this._boosterAddress;
 
     try {
-      let txMethodData = this.booster().delegateToChallengedLib.getData(
+      let txMethodData = this.booster().methods.delegateToChallengedLib(
         '0x95aa4aac',
         [
           '0x' + receiptRootHash,
           '0x' + accountRootHash,
           '0x' + data
         ]
-      );
-      let serializedTx = this._signRawTransaction(txMethodData, clientAddress, boosterAddress, txValue, nonce);
+      ).encodeABI();
+      let serializedTx = await this._signRawTransaction(txMethodData, clientAddress, boosterAddress, txValue, nonce);
       return serializedTx;
     } catch (e) {
       console.error(e);
     }
   }
 
-  challenge = (payment) => {
+  challenge = async (payment) => {
     try {
       let stageHash = '0x' + payment.stageHash;
       let lightTxHash = '0x' + payment.lightTxHash;
-      let txMethodData = this._infinitechainContract.takeObjection.getData(
+      let txMethodData = this.booster().methods.takeObjection(
         [stageHash, lightTxHash],
         payment.v,
         payment.r,
         payment.s
-      );
-      let serializedTx = this._signRawTransaction(txMethodData);
-      let txHash = this._sendRawTransaction(serializedTx);
+      ).encodeABI();
+      let serializedTx = await this._signRawTransaction(txMethodData);
+      let txHash = await this._sendRawTransaction(serializedTx);
       return txHash;
     } catch (e) {
       console.error(e);
     }
   }
 
-  finalize = (stageHeight) => {
+  finalize = async (stageHeight) => {
     try {
       let stageHash = '0x' + this._sha3(stageHeight.toString());
-      let txMethodData = this._infinitechainContract.finalize.getData(
+      let txMethodData = this.booster().methods.finalize(
         stageHash
-      );
-      let serializedTx = this._signRawTransaction(txMethodData);
-      let txHash = this._sendRawTransaction(serializedTx);
+      ).encodeABI();
+      let serializedTx = await this._signRawTransaction(txMethodData);
+      let txHash = await this._sendRawTransaction(serializedTx);
       return txHash;
     } catch (e) {
       console.error(e);
     }
   }
 
-  compensate = (stageHeight, lightTxHashes) => {
+  compensate = async (stageHeight, lightTxHashes) => {
     try {
       let stageHash = '0x' + this._sha3(stageHeight.toString());
       lightTxHashes = lightTxHashes.map(lightTxHash => '0x' + lightTxHash);
-      let txMethodData = this._infinitechainContract.payPenalty.getData(
+      let txMethodData = this.booster().methods.payPenalty(
         stageHash,
         lightTxHashes,
         '' // Work around! To prevent solidity invalid argument error.
-      );
-      let serializedTx = this._signRawTransaction(txMethodData);
-      let txHash = this._sendRawTransaction(serializedTx);
+      ).encodeABI();
+      let serializedTx = await this._signRawTransaction(txMethodData);
+      let txHash = await this._sendRawTransaction(serializedTx);
       return txHash;
     } catch (e) {
       console.error(e);
     }
   }
 
-  defend = (stageHeight, lightTxHash, treeNodeIndex, slice, collidingLightTxHashes) => {
+  defend = async (stageHeight, lightTxHash, treeNodeIndex, slice, collidingLightTxHashes) => {
     try {
       let stageHash = '0x' + this._sha3(stageHeight.toString());
       lightTxHash = '0x' + lightTxHash;
       slice = slice.map(h => '0x' + h);
       collidingLightTxHashes = collidingLightTxHashes.map(h => '0x' + h);
-      let txMethodData = this._infinitechainContract.exonerate.getData(
+      let txMethodData = this.booster().methods.exonerate(
         stageHash,
         lightTxHash,
         treeNodeIndex,
         slice,
         collidingLightTxHashes
-      );
+      ).encodeABI();
 
-      let serializedTx = this._signRawTransaction(txMethodData);
-      let txHash = this._sendRawTransaction(serializedTx);
+      let serializedTx = await this._signRawTransaction(txMethodData);
+      let txHash = await this._sendRawTransaction(serializedTx);
       return txHash;
     } catch (e) {
       console.error(e);
@@ -308,7 +308,7 @@ class Contract {
   }
 
   getStageRootHash = async (stageHeight) => {
-    let rootHashes = await this._booster.stages(stageHeight);
+    let rootHashes = await this.booster().methods.stages(stageHeight).call();
     return rootHashes;
   }
 
@@ -332,19 +332,20 @@ class Contract {
     return stage.completed();
   }
 
-  _signRawTransaction = (txMethodData, from, to, value, nonce = null) => {
+  _signRawTransaction = async (txMethodData, from, to, value, nonce = null, gas = 4700000, gasPrice = '0x2540be400') => {
     if (nonce == null) {
       let address = '0x' + this._infinitechain.signer.getAddress();
-      nonce = this._web3.toHex(this._web3.eth.getTransactionCount(address, 'pending'));
+      nonce = await this.web3().eth.getTransactionCount(address, 'pending');
+      nonce = this.web3().utils.toHex(nonce);
     }
-
     let txParams = {
       data: txMethodData,
       from: from,
       to: to,
       value: value,
       nonce: nonce,
-      gas: 4700000
+      gas: gas,
+      gasPrice: gasPrice
     };
 
     let tx = new EthereumTx(txParams);
@@ -354,9 +355,9 @@ class Contract {
     return serializedTx;
   }
 
-  _sendRawTransaction = (serializedTx) => {
-    let txHash = this._web3.eth.sendRawTransaction(serializedTx);
-    return txHash;
+  _sendRawTransaction = async (serializedTx) => {
+    let receipt = await this._web3.eth.sendSignedTransaction(serializedTx);
+    return receipt.transactionHash;
   }
 
   _sha3 = (content) => {
@@ -368,13 +369,14 @@ class Contract {
     let lengthIs64Bytes = (n.toString().length == 64);
 
     if (startWith0x || lengthIs64Bytes) {
-      n = n.slice(-64);
+      n = n.slice(-64).toLowerCase();
     } else {
       let m = parseFloat(n);
       m = toWei ? (m * 1e18) : m;
+      m = Math.floor(m);
       let h = m.toString(16);
       assert(h != 'NaN', '\'' + n + '\' can not be parsed to an integer.');
-      n = h.padStart(64, '0');
+      n = h.padStart(64, '0').toLowerCase();
     }
     return n;
   }

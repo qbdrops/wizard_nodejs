@@ -12,7 +12,7 @@ describe('InfinitechainBuilder', () => {
     it('returns infinitechain object', () => {
       let infinitechain = new InfinitechainBuilder().
         setNodeUrl('http://localhost:3000').
-        setWeb3Url('http://localhost:8545').
+        setWeb3Url('ws://localhost:8546').
         setSignerKey('41b1a0649752af1b28b3dc29a1556eee781e4a4c3a1f7f53f90fa834de098c4d').
         setStorage('memory').
         build();

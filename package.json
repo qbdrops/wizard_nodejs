@@ -8,6 +8,7 @@
   },
   "main": "dist/wizard_nodejs.js",
   "scripts": {
+    "install": "node fix.js",
     "test": "mocha-webpack --recursive",
     "testAuditor": "mocha-webpack test/test-auditor.js",
     "build": "webpack",
@@ -23,13 +24,15 @@
     "babel-plugin-transform-runtime": "^6.23.0",
     "babel-preset-env": "^1.7.0",
     "chokidar": "^2.0.4",
+    "electron": "^2.0.8",
     "eslint": "^5.4.0",
     "json-loader": "^0.5.7",
     "mocha": "^5.2.0",
     "mocha-webpack": "^1.1.0",
     "nock": "^9.6.1",
     "path": "^0.12.7",
-    "webpack": "^3.12.0"
+    "webpack": "^3.12.0",
+    "websocket": "^1.0.26"
   },
   "dependencies": {
     "axios": "^0.17.1",
@@ -42,6 +45,6 @@
     "googleapis": "^32.0.0",
     "js-sha3": "^0.6.1",
     "keythereum": "^1.0.3",
-    "web3": "^0.20.6"
+    "web3": "^1.0.0-beta.33"
   }
 }

@@ -44,10 +44,12 @@ class Memory {
     this.lightTxs[key] = value;
   }
 
-  setReceipt = async (key, receiptJson) => {
+  setReceipt = async (key, receiptJson, upload = false) => {
     this.receipts[key] = receiptJson;
     let address = '0x' + this._infinitechain.signer.getAddress();
-    await this.syncer.uploadReceipt(address, receiptJson);
+    if (upload) {
+      await this.syncer.uploadReceipt(address, receiptJson);
+    }
   }
 }
 

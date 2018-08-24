@@ -94,7 +94,7 @@ class Level {
     let address = '0x' + this._infinitechain.signer.getAddress();
     let receipts = await this.syncer.getReceiptsOfFolder(address);
     let boosterContract = this._infinitechain.contract.booster();
-    let stageHeight = await boosterContract.stageHeight();
+    let stageHeight = await boosterContract.methods.stageHeight().call();
     stageHeight = parseInt(stageHeight);
     stageHeight += 1;
 
