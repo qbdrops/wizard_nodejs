@@ -11,7 +11,7 @@ nock('http://localhost:3000')
 describe('Signer', () => {
   let ifc = new InfinitechainBuilder().
     setNodeUrl('http://localhost:3000').
-    setWeb3Url('http://localhost:8545').
+    setWeb3Url('ws://localhost:8546').
     setSignerKey('41b1a0649752af1b28b3dc29a1556eee781e4a4c3a1f7f53f90fa834de098c4d').
     setStorage('memory').
     build();
@@ -76,8 +76,8 @@ describe('Signer', () => {
 
       let result = {
         serverLightTx: {
-          r: '0x9031d1f9cf13f7014826558375501e7802b796072a0934c8aed661bac9718407',
-          s: '0x4d98c83c20b54f30d329e6e49a088a36dad38c272226375245379a4d5e529fc4',
+          r: '0x18fa9cc76adda45a236a72c9dc7cfde3c673eefcd9cf70d811b8362889863043',
+          s: '0x700446c703472c25e2623a48e1aeaeca35bfa57e3ca0188bd5baa429eb330804',
           v: 28
         }
       };
@@ -93,8 +93,8 @@ describe('Signer', () => {
 
       let result = {
         serverReceipt: {
-          r: '0xc28d6957877c6ea5b970bf58131eb3a16ef0d8b2699891453ba476f493e99694',
-          s: '0x1062a197399268942b6433014b3b34eb68ef70ab90420c815cc7afc3fdc39bcb',
+          r: '0x78588f4e2fe4772ee67b127f3a45524964a8a498395cc30f1630184cb7188640',
+          s: '0x670c9e79677b2eeee1b4e9635b48b02bac5a6f62734c19aa1aff6c8809c997f3',
           v: 28
         }
       };
@@ -118,8 +118,8 @@ describe('Signer', () => {
 
       let result = {
         clientLightTx: {
-          r: '0x9031d1f9cf13f7014826558375501e7802b796072a0934c8aed661bac9718407',
-          s: '0x4d98c83c20b54f30d329e6e49a088a36dad38c272226375245379a4d5e529fc4',
+          r: '0x18fa9cc76adda45a236a72c9dc7cfde3c673eefcd9cf70d811b8362889863043',
+          s: '0x700446c703472c25e2623a48e1aeaeca35bfa57e3ca0188bd5baa429eb330804',
           v: 28
         }
       };

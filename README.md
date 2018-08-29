@@ -11,7 +11,7 @@ npm install wizard_nodejs
 ```javascript
 {infinitechain = new wizard.InfinitechainBuilder()
   .setNodeUrl('http://0.0.0.0:3000')
-  .setWeb3Url('http://0.0.0.0:8545')
+  .setWeb3Url('ws://0.0.0.0:8546')
   .setSignerKey('22b8af6522a7cf410b54eb8be2969c2ee20d30e89a1a2dc5476a8cccc1be8592')
   .setStorage('memory')
   .build();

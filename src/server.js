@@ -16,16 +16,15 @@ class Server {
     let signer = this._infinitechain.signer;
     let receipt = await gringotts.sendLightTx(lightTx);
     receipt = signer.signWithServerKey(receipt);
-
     switch (receipt.type()) {
     case types.deposit:
-      contract.deposit(receipt);
+      await contract.deposit(receipt);
       break;
     case types.withdrawal:
-      contract.proposeWithdrawal(receipt);
+      await contract.proposeWithdrawal(receipt);
       break;
     case types.instantWithdrawal:
-      contract.instantWithdraw(receipt);
+      await contract.instantWithdraw(receipt);
       break;
     case types.remittance:
       break;
@@ -38,7 +37,7 @@ class Server {
     let res = await gringotts.fetchRootHashes(stageHeight);
 
     if (res.data.ok) {
-      let serializedTx = this._infinitechain.contract.attach(
+      let serializedTx = await this._infinitechain.contract.attach(
         res.data.trees.receiptRootHash,
         res.data.trees.accountRootHash,
         '',

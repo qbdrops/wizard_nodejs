@@ -21,11 +21,11 @@ class Client {
           let fee = rawData.fee? rawData.fee : 0;
           let metadata = rawData.metadata? rawData.metadata : null;
           let signedLightTxs = [];
-          events.forEach(async (event) => {
-            let logID = event.args._dsn;
+          for (let i=0; i<events.length; i++) {
+            let logID = events[i].returnValues._dsn;
             let nonce = this._getNonce();
-            let value = event.args._value;
-            let assetID = event.args._assetID;
+            let value = events[i].returnValues._value;
+            let assetID = events[i].returnValues._assetID;
             let lightTxData = {
               assetID: assetID,
               value: value,
@@ -37,7 +37,7 @@ class Client {
 
             let signedLightTx = await this.makeLightTx(types.deposit, lightTxData, lightTxData.metadata);
             signedLightTxs.push(signedLightTx);
-          });
+          }
           resolve(signedLightTxs);
         }
       });
@@ -52,10 +52,10 @@ class Client {
         } else {
           let fee = rawData.fee? rawData.fee : 0;
           let metadata = rawData.metadata? rawData.metadata : null;
-          let logID = result.args._dsn;
+          let logID = result.returnValues._dsn;
           let nonce = this._getNonce();
-          let value = result.args._value;
-          let assetID = result.args._assetID;
+          let value = result.returnValues._value;
+          let assetID = result.returnValues._assetID;
           let lightTxData = {
             assetID: assetID,
             value: value,
@@ -72,9 +72,9 @@ class Client {
     });
   }
 
-  proposeTokenDeposit = (proposeData) => {
+  proposeTokenDeposit = async (proposeData) => {
     let contract = this._infinitechain.contract;
-    let txHash = contract.proposeTokenDeposit(proposeData);
+    let txHash = await contract.proposeTokenDeposit(proposeData);
     return txHash;
   }
 
