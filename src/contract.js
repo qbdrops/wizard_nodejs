@@ -46,8 +46,7 @@ class Contract {
     let boosterAddress = this._boosterAddress;
 
     try {
-      let txMethodData = this.booster().methods.delegateToCryptoFlowLib(
-        '0x68ff1929',
+      let txMethodData = this.booster().methods.proposeWithdrawal(
         [
           '0x' + receipt.lightTxHash,
           '0x' + receipt.lightTxData.from,
@@ -89,8 +88,7 @@ class Contract {
     let boosterAddress = this._boosterAddress;
 
     try {
-      let txMethodData = this.booster().methods.delegateToCryptoFlowLib(
-        '0x7b9d7d74',
+      let txMethodData = this.booster().methods.deposit(
         [
           '0x' + receipt.lightTxHash,
           '0x' + receipt.lightTxData.from,
@@ -133,8 +131,7 @@ class Contract {
     let depositValue = this._to32BytesHex(proposeData.depositValue, false);
     let depositAssetAddress = proposeData.depositAssetAddress.toString(16).padStart(64, '0').slice(-64);
     try {
-      let txMethodData = this.booster().methods.delegateToCryptoFlowLib(
-        '0xdcf12aba',
+      let txMethodData = this.booster().methods.proposeTokenDeposit(
         [
           '0x' + depositAddress,
           '0x' + depositValue,
@@ -156,10 +153,10 @@ class Contract {
     let boosterAddress = this._boosterAddress;
 
     try {
-      let txMethodData = this.booster().methods.delegateToCryptoFlowLib(
-        '0xfe2b3924',
+      let txMethodData = this.booster().methods.withdraw(
         [
-          '0x' + receipt.lightTxHash
+          '0x' + receipt.lightTxData.from,
+          '0x' + receipt.lightTxData.nonce
         ]
       ).encodeABI();
 
@@ -179,8 +176,7 @@ class Contract {
     let boosterAddress = this._boosterAddress;
 
     try {
-      let txMethodData = this.booster().methods.delegateToCryptoFlowLib(
-        '0xbe1946da',
+      let txMethodData = this.booster().methods.instantWithdraw(
         [
           '0x' + receipt.lightTxHash,
           '0x' + receipt.lightTxData.from,
@@ -221,8 +217,7 @@ class Contract {
     let boosterAddress = this._boosterAddress;
 
     try {
-      let txMethodData = this.booster().methods.delegateToChallengedLib(
-        '0x95aa4aac',
+      let txMethodData = this.booster().methods.attach(
         [
           '0x' + receiptRootHash,
           '0x' + accountRootHash,
