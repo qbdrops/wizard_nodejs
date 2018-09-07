@@ -68,6 +68,17 @@ class Event {
     });
   }
 
+  onWithdraw (cb) {
+    let booster = this._infinitechain.contract.booster();
+    booster.events.Withdraw({
+      filter: { _client: this._address },
+      toBlock: 'latest'
+    }, (err, result) => {
+      if (err) { console.trace; }
+      cb(err, result);
+    });
+  }
+
   onInstantWithdraw (cb) {
     let booster = this._infinitechain.contract.booster();
     booster.events.VerifyReceipt({
