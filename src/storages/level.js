@@ -18,7 +18,7 @@ class Level {
   getReceiptHashesByStageHeight = async (stageHeight) => {
     let result;
     try {
-      result = await this.db.get(stageHeight);
+      result = await this.db.get(parseInt(stageHeight));
     } catch (e) {
       result = [];
     }
@@ -55,7 +55,7 @@ class Level {
     try {
       let address = '0x' + this._infinitechain.signer.getAddress();
       await this.db.put('receipt:' + lightTxHash, receiptJson);
-      await this._appendReceiptHash(receiptJson.receiptData.stageHeight, receiptJson.lightTxHash);
+      await this._appendReceiptHash(parseInt(receiptJson.receiptData.stageHeight), receiptJson.receiptHash);
       if (upload) {
         await this.syncer.uploadReceipt(address, receiptJson);
       }
@@ -64,15 +64,15 @@ class Level {
     }
   }
 
-  _appendReceiptHash = async (stageHeight, lightTxHash) => {
-    let lightTxHashes;
+  _appendReceiptHash = async (stageHeight, receiptHash) => {
+    let receiptHashes;
     try {
-      lightTxHashes = await this.db.get(stageHeight);
+      receiptHashes = await this.db.get(stageHeight);
     } catch (e) {
-      lightTxHashes = [];
+      receiptHashes = [];
     } finally {
-      lightTxHashes.push(lightTxHash);
-      await this.db.put(stageHeight, lightTxHashes);
+      receiptHashes.push(receiptHash);
+      await this.db.put(stageHeight, receiptHashes);
     }
   }
 

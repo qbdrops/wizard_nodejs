@@ -139,6 +139,10 @@ class Client {
     return await this._infinitechain.gringotts.getBoosterBalance(clientAddress, assetID);
   }
 
+  getProof = async (stageHeight, receiptHash) => {
+    return await this._infinitechain.gringotts.getProof(stageHeight, receiptHash);
+  }
+
   getAllReceiptHashes = async (stageHeight) => {
     return await this._storage.getReceiptHashesByStageHeight(stageHeight);
   }
@@ -195,6 +199,40 @@ class Client {
 
   fetchSupportedTokens = async () => {
     return await this._infinitechain.gringotts.getAssetList();
+  }
+
+  auidtReceiptProof = async (stageHeight, receiptHash, proof) => {
+    let success = false;
+    let contract = this._infinitechain.contract;
+    // 1. Get receiptRootHash from blockchain
+    let rootHashes = await contract.getStageRootHash(stageHeight);
+    let receiptRootHash = rootHashes[0];
+    // 2. Compute root hash
+    let computedReceiptRootHash;
+    if (proof.receiptHashArray.includes(receiptHash)) {
+      computedReceiptRootHash = '0x' + this._computeRootHashFromSlice(proof.slice, stageHeight);
+      // 3. Compare
+      if (computedReceiptRootHash == receiptRootHash) {
+        success = true;
+      }
+    }
+    return success;
+  }
+
+  _computeRootHashFromSlice (slice, stageHeight) {
+    let firstNode = slice.shift();
+
+    let rootNode = slice.reduce((acc, curr) => {
+      if (acc.treeNodeIndex % 2 == 0) {
+        acc.treeNodeHash = this._sha3(acc.treeNodeHash.concat(curr.treeNodeHash));
+      } else {
+        acc.treeNodeHash = this._sha3(curr.treeNodeHash.concat(acc.treeNodeHash));
+      }
+      acc.treeNodeIndex = parseInt(acc.treeNodeIndex / 2);
+      return acc;
+    }, firstNode);
+
+    return this._sha3(rootNode.treeNodeHash + stageHeight.toString(16).padStart(64, '0'));
   }
 }
 
