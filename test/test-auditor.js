@@ -13,7 +13,7 @@ import receiptsWithoutIntegrity from '#/test-auditor-data/integrity.json';
 
 nock('http://localhost:3000').
   get('/booster/address').
-  reply(200, { address: '0x7da24d4a346e0c4bb6e1f03c303a846faa467beb' }).
+  reply(200, { contractAddress: '0x68c34a54ec562b2b6efc8e61c54f9314b93b1a44', accountAddress: '0x68c34a54ec562b2b6efc8e61c54f9314b93b1a44' }).
   get('/server/address').
   reply(200, { address: '0xfb44fa0865747558066266061786e69336b5f3a2' });
 

@@ -47,14 +47,9 @@ class Signer {
     let klass;
     if (object instanceof LightTransaction) {
       klass = 'lightTx';
-    } else if (object instanceof Receipt) {
-      klass = 'receipt';
     } else {
       throw new Error('\'object\' should be instance of \'LightTransaction\' or \'Receipt\'.');
     }
-
-    // 'Client' can not sign the receipt.
-    assert(!(caller === 'client' && klass === 'receipt'), '\'client\' is not permitted to sign receipt.');
 
     let hashKey = klass + 'Hash';
     let h = object[hashKey];

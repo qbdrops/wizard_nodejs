@@ -13,9 +13,11 @@ class Server {
   sendLightTx = async (lightTx) => {
     let gringotts = this._infinitechain.gringotts;
     let contract = this._infinitechain.contract;
-    let signer = this._infinitechain.signer;
+    let verifier = this._infinitechain.verifier;
     let receipt = await gringotts.sendLightTx(lightTx);
-    receipt = signer.signWithServerKey(receipt);
+    if (verifier.verifyReceipt(receipt) !== true) {
+      throw new Error('Wrong signature when verify receipt received from booster.');
+    }
     switch (receipt.type()) {
     case types.deposit:
       await contract.deposit(receipt);
