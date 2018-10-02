@@ -28,7 +28,7 @@ class Verifier {
 
   _verify = (object) => {
     let isValid;
-
+    let clientAddress;
     let klass;
     if (object instanceof LightTransaction) {
       klass = 'lightTx';
@@ -39,38 +39,36 @@ class Verifier {
     }
 
     switch (object.type()) {
-    case types.deposit: {
-      let clientAddress = object.lightTxData.to.slice(-40);
-      let serverAddress = EthUtils.stripHexPrefix(this._serverAddress);
-      let isClientLightTxSigValid = true;
-      let isServerLightTxSigValid = true;
-      let isBoosterReceiptSigValid = true;
-
-      if (object.hasClientLightTxSig()) {
-        isClientLightTxSigValid = (clientAddress == this._recover(object.lightTxHash, object.sig.clientLightTx));
-      }
-
-      if (object.hasServerLightTxSig()) {
-        isServerLightTxSigValid = (serverAddress == this._recover(object.lightTxHash, object.sig.serverLightTx));
-      }
-
-      if (klass == 'receipt') {
-        let boosterAccountAddress = EthUtils.stripHexPrefix(this._infinitechain.contract.boosterAccountAddress);
-        if (object.hasBoosterReceiptSig()) {
-          isBoosterReceiptSigValid = (boosterAccountAddress == this._recover(object.receiptHash, object.sig.boosterReceipt));
-        }
-      }
-
-      isValid = (isClientLightTxSigValid && isServerLightTxSigValid && isBoosterReceiptSigValid);
+    case types.deposit:
+      clientAddress = object.lightTxData.to.slice(-40);
       break;
-    }
     case types.withdrawal:
-      break;
     case types.instantWithdrawal:
-      break;
     case types.remittance:
+      clientAddress = object.lightTxData.from.slice(-40);
       break;
     }
+    let serverAddress = EthUtils.stripHexPrefix(this._serverAddress);
+    let isClientLightTxSigValid = true;
+    let isServerLightTxSigValid = true;
+    let isBoosterReceiptSigValid = true;
+
+    if (object.hasClientLightTxSig()) {
+      isClientLightTxSigValid = (clientAddress == this._recover(object.lightTxHash, object.sig.clientLightTx));
+    }
+
+    if (object.hasServerLightTxSig()) {
+      isServerLightTxSigValid = (serverAddress == this._recover(object.lightTxHash, object.sig.serverLightTx));
+    }
+
+    if (klass == 'receipt') {
+      let boosterAccountAddress = EthUtils.stripHexPrefix(this._infinitechain.contract.boosterAccountAddress);
+      if (object.hasBoosterReceiptSig()) {
+        isBoosterReceiptSigValid = (boosterAccountAddress == this._recover(object.receiptHash, object.sig.boosterReceipt));
+      }
+    }
+
+    isValid = (isClientLightTxSigValid && isServerLightTxSigValid && isBoosterReceiptSigValid);
     return isValid;
   }
 
