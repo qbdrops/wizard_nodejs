@@ -41,10 +41,10 @@ class Verifier {
     switch (object.type()) {
     case types.deposit: {
       let clientAddress = object.lightTxData.to.slice(-40);
-      let serverAddress = this._serverAddress;
+      let serverAddress = EthUtils.stripHexPrefix(this._serverAddress);
       let isClientLightTxSigValid = true;
       let isServerLightTxSigValid = true;
-      let isServerReceiptSigValid = true;
+      let isBoosterReceiptSigValid = true;
 
       if (object.hasClientLightTxSig()) {
         isClientLightTxSigValid = (clientAddress == this._recover(object.lightTxHash, object.sig.clientLightTx));
@@ -55,12 +55,13 @@ class Verifier {
       }
 
       if (klass == 'receipt') {
-        if (object.hasServerReceiptSig()) {
-          isServerReceiptSigValid = (serverAddress == this._recover(object.lightTxHash, object.sig.serverLightTx));
+        let boosterAccountAddress = EthUtils.stripHexPrefix(this._infinitechain.contract.boosterAccountAddress);
+        if (object.hasBoosterReceiptSig()) {
+          isBoosterReceiptSigValid = (boosterAccountAddress == this._recover(object.receiptHash, object.sig.boosterReceipt));
         }
       }
 
-      isValid = (isClientLightTxSigValid && isServerLightTxSigValid && isServerReceiptSigValid);
+      isValid = (isClientLightTxSigValid && isServerLightTxSigValid && isBoosterReceiptSigValid);
       break;
     }
     case types.withdrawal:

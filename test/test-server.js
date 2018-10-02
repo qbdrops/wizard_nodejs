@@ -7,7 +7,7 @@ import types from '@/models/types';
 
 nock('http://localhost:3000').
   get('/booster/address').
-  reply(200, { address: '0x30e2098182a70ff37721783b3ae22dc09b84f254' }).
+  reply(200, { contractAddress: '0x68c34a54ec562b2b6efc8e61c54f9314b93b1a44', accountAddress: '0x68c34a54ec562b2b6efc8e61c54f9314b93b1a44' }).
   get('/server/address').
   reply(200, { address: '0x6c559983c9b0ec5dd61df4671cbe12e1d9aeefc5' }).
   get('/viable/stage/height').
@@ -64,8 +64,6 @@ describe('Server', () => {
     };
 
     let receipt = new Receipt(receiptJson);
-    let signer = infinitechain.signer;
-    signedReceipt = signer.signWithServerKey(receipt);
   });
 
   describe('#deposit', () => {

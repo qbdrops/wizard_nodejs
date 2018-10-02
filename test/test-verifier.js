@@ -5,7 +5,7 @@ import LightTransaction from '@/models/light-transaction';
 
 nock('http://localhost:3000')
   .get('/booster/address')
-  .reply(200, { address: '0x68c34a54ec562b2b6efc8e61c54f9314b93b1a44' })
+  .reply(200, { contractAddress: '0x68c34a54ec562b2b6efc8e61c54f9314b93b1a44', accountAddress: '0x68c34a54ec562b2b6efc8e61c54f9314b93b1a44' })
   .get('/server/address')
   .reply(200, { address: '0x68c34a54ec562b2b6efc8e61c54f9314b93b1a44' });
   

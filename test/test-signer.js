@@ -85,23 +85,6 @@ describe('Signer', () => {
       assert.equal(sig.serverLightTx.r, result.serverLightTx.r);
       assert.equal(sig.serverLightTx.s, result.serverLightTx.s);
     });
-
-    it('returns correct receipt signature', () => {
-      let object = receipt;
-
-      let sig = ifc.signer.signWithServerKey(object).sig;
-
-      let result = {
-        serverReceipt: {
-          r: '0x78588f4e2fe4772ee67b127f3a45524964a8a498395cc30f1630184cb7188640',
-          s: '0x670c9e79677b2eeee1b4e9635b48b02bac5a6f62734c19aa1aff6c8809c997f3',
-          v: 28
-        }
-      };
-
-      assert.equal(sig.serverReceipt.r, result.serverReceipt.r);
-      assert.equal(sig.serverReceipt.s, result.serverReceipt.s);
-    });
   });
 
   describe('#signWithClientKey', () => {
@@ -126,12 +109,6 @@ describe('Signer', () => {
 
       assert.equal(sig.clientLightTx.r, result.clientLightTx.r);
       assert.equal(sig.clientLightTx.s, result.clientLightTx.s);
-    });
-
-    it('rejects client receipt signature', () => {
-      let object = receipt;
-
-      assert.throws(() => { ifc.signer.signWithClientKey(object).sig; }, Error, '\'client\' is not permitted to sign receipt.');
     });
   });
 });

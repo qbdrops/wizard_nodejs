@@ -9,23 +9,28 @@ class Contract {
   constructor (config, infinitechain) {
     this._infinitechain = infinitechain;
     this._web3Url = config.web3Url;
-    this._boosterAddress = null;
+    this._boosterContractAddress = null;
+    this.boosterAccountAddress = null;
     this._booster = null;
   }
 
   fetchBooster = async () => {
-    let boosterAddress = null;
+    let boosterContractAddress = null;
+    let boosterAccountAddress = null;
     try {
       let res = await this._infinitechain.gringotts.fetchBoosterAddress();
-      boosterAddress = res.data.address;
+      boosterContractAddress = res.data.contractAddress;
+      boosterAccountAddress = res.data.accountAddress;
     } catch (e) {
       console.error(e);
     }
 
-    assert(boosterAddress, 'Can not fetch booster address.');
-    this._boosterAddress = boosterAddress;
+    assert(boosterContractAddress, 'Can not fetch booster contract address.');
+    assert(boosterAccountAddress, 'Can not fetch booster account address.');
+    this._boosterContractAddress = boosterContractAddress;
+    this.boosterAccountAddress = boosterAccountAddress;
     this._web3 = new Web3(this._web3Url);
-    this._booster = new this._web3.eth.Contract(Booster.abi, boosterAddress);
+    this._booster = new this._web3.eth.Contract(Booster.abi, boosterContractAddress);
   }
 
   booster = () => {
@@ -43,7 +48,7 @@ class Contract {
 
     let txValue = '0x0';
     let clientAddress = '0x' + this._infinitechain.signer.getAddress();
-    let boosterAddress = this._boosterAddress;
+    let boosterContractAddress = this._boosterContractAddress;
 
     try {
       let txMethodData = this.booster().methods.proposeWithdrawal(
@@ -67,12 +72,12 @@ class Contract {
           receipt.sig.serverLightTx.v,
           receipt.sig.serverLightTx.r,
           receipt.sig.serverLightTx.s,
-          receipt.sig.serverReceipt.v,
-          receipt.sig.serverReceipt.r,
-          receipt.sig.serverReceipt.s,
+          receipt.sig.boosterReceipt.v,
+          receipt.sig.boosterReceipt.r,
+          receipt.sig.boosterReceipt.s,
         ]
       ).encodeABI();
-      let serializedTx = await this._signRawTransaction(txMethodData, clientAddress, boosterAddress, txValue, nonce);
+      let serializedTx = await this._signRawTransaction(txMethodData, clientAddress, boosterContractAddress, txValue, nonce);
       let txHash = await this._sendRawTransaction(serializedTx);
       return txHash;
     } catch (e) {
@@ -85,7 +90,7 @@ class Contract {
 
     let txValue = '0x0';
     let clientAddress = '0x' + this._infinitechain.signer.getAddress();
-    let boosterAddress = this._boosterAddress;
+    let boosterContractAddress = this._boosterContractAddress;
 
     try {
       let txMethodData = this.booster().methods.deposit(
@@ -109,13 +114,13 @@ class Contract {
           receipt.sig.serverLightTx.v,
           receipt.sig.serverLightTx.r,
           receipt.sig.serverLightTx.s,
-          receipt.sig.serverReceipt.v,
-          receipt.sig.serverReceipt.r,
-          receipt.sig.serverReceipt.s
+          receipt.sig.boosterReceipt.v,
+          receipt.sig.boosterReceipt.r,
+          receipt.sig.boosterReceipt.s
         ]
       ).encodeABI();
 
-      let serializedTx = await this._signRawTransaction(txMethodData, clientAddress, boosterAddress, txValue, nonce);
+      let serializedTx = await this._signRawTransaction(txMethodData, clientAddress, boosterContractAddress, txValue, nonce);
       let txHash = await this._sendRawTransaction(serializedTx);
       return txHash;
     } catch (e) {
@@ -126,7 +131,7 @@ class Contract {
   proposeTokenDeposit = async (proposeData, nonce = null) => {
     let txValue = '0x0';
     let clientAddress = '0x' + this._infinitechain.signer.getAddress();
-    let boosterAddress = this._boosterAddress;
+    let boosterContractAddress = this._boosterContractAddress;
     let depositAddress = proposeData.depositAddress.slice(-40).padStart(64, '0').slice(-64);
     let depositValue = this._to32BytesHex(proposeData.depositValue, false);
     let depositAssetAddress = proposeData.depositAssetAddress.toString(16).padStart(64, '0').slice(-64);
@@ -139,7 +144,7 @@ class Contract {
         ]
       ).encodeABI();
 
-      let serializedTx = await this._signRawTransaction(txMethodData, clientAddress, boosterAddress, txValue, nonce);
+      let serializedTx = await this._signRawTransaction(txMethodData, clientAddress, boosterContractAddress, txValue, nonce);
       let txHash = await this._sendRawTransaction(serializedTx);
       return txHash;
     } catch (e) {
@@ -150,7 +155,7 @@ class Contract {
   withdraw = async (receipt, nonce = null) => {
     let txValue = '0x0';
     let clientAddress = '0x' + this._infinitechain.signer.getAddress();
-    let boosterAddress = this._boosterAddress;
+    let boosterContractAddress = this._boosterContractAddress;
 
     try {
       let txMethodData = this.booster().methods.withdraw(
@@ -160,7 +165,7 @@ class Contract {
         ]
       ).encodeABI();
 
-      let serializedTx = await this._signRawTransaction(txMethodData, clientAddress, boosterAddress, txValue, nonce);
+      let serializedTx = await this._signRawTransaction(txMethodData, clientAddress, boosterContractAddress, txValue, nonce);
       let txHash = await this._sendRawTransaction(serializedTx);
       return txHash;
     } catch (e) {
@@ -173,7 +178,7 @@ class Contract {
 
     let txValue = '0x0';
     let clientAddress = '0x' + this._infinitechain.signer.getAddress();
-    let boosterAddress = this._boosterAddress;
+    let boosterContractAddress = this._boosterContractAddress;
 
     try {
       let txMethodData = this.booster().methods.instantWithdraw(
@@ -197,13 +202,13 @@ class Contract {
           receipt.sig.serverLightTx.v,
           receipt.sig.serverLightTx.r,
           receipt.sig.serverLightTx.s,
-          receipt.sig.serverReceipt.v,
-          receipt.sig.serverReceipt.r,
-          receipt.sig.serverReceipt.s
+          receipt.sig.boosterReceipt.v,
+          receipt.sig.boosterReceipt.r,
+          receipt.sig.boosterReceipt.s
         ]
       ).encodeABI();
 
-      let serializedTx = await this._signRawTransaction(txMethodData, clientAddress, boosterAddress, txValue, nonce);
+      let serializedTx = await this._signRawTransaction(txMethodData, clientAddress, boosterContractAddress, txValue, nonce);
       let txHash = await this._sendRawTransaction(serializedTx);
       return txHash;
     } catch (e) {
@@ -214,7 +219,7 @@ class Contract {
   attach = async (receiptRootHash, accountRootHash, data, nonce = null) => {
     let txValue = '0x0';
     let clientAddress = '0x' + this._infinitechain.signer.getAddress();
-    let boosterAddress = this._boosterAddress;
+    let boosterContractAddress = this._boosterContractAddress;
 
     try {
       let txMethodData = this.booster().methods.attach(
@@ -224,7 +229,7 @@ class Contract {
           '0x' + data
         ]
       ).encodeABI();
-      let serializedTx = await this._signRawTransaction(txMethodData, clientAddress, boosterAddress, txValue, nonce);
+      let serializedTx = await this._signRawTransaction(txMethodData, clientAddress, boosterContractAddress, txValue, nonce);
       return serializedTx;
     } catch (e) {
       console.error(e);
