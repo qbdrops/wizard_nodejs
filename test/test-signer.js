@@ -44,6 +44,7 @@ describe('Signer', () => {
   let receiptData = {
     stageHeight: 1,
     GSN: '123',
+    preGSN: '12',
     lightTxHash: lightTx.lightTxHash,
     fromBalance: 100,
     toBalance: 0

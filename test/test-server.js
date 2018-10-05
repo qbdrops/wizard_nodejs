@@ -47,6 +47,7 @@ describe('Server', () => {
     let receiptData = {
       stageHeight: 1,
       GSN: 1,
+      preGSN: 0,
       lightTxHash: signedLightTx.lightTxHash,
       fromBalance: 20,
       toBalance: 40

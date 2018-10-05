@@ -33,6 +33,7 @@ describe('Receipt', () => {
     let correctReceiptData = {
       stageHeight: '0000000000000000000000000000000000000000000000000000000000000001',
       GSN: '0000000000000000000000000000000000000000000000000000000000000015',
+      preGSN: '0000000000000000000000000000000000000000000000000000000000000010',
       lightTxHash: correctLightTx.lightTxHash,
       fromBalance: '0000000000000000000000000000000000000000000000000000000000000032',
       toBalance: '00000000000000000000000000000000000000000000000000000000000001f4',
@@ -100,6 +101,7 @@ describe('Receipt', () => {
       let wrongReceiptData = {
         stageHeight: 1,
         GSN: 21,
+        preGSN: 11,
         lightTxHash:'12345',
         toBalance: 500,
         hello: 'hello',
@@ -137,7 +139,7 @@ describe('Receipt', () => {
 
       let receipt = new Receipt(receiptJson);
       let result = {
-        receiptHash: '70d6a00c33e0bd3ae095057c0ea6299aaaafb575a80f3c2d5babb31da9b23def',
+        receiptHash: 'aee26355f184ee95bc4771d2b2d82b4f785fa41711874161ce2c9f7ccdc123bc',
         receiptData: correctReceiptData
       };
 
