@@ -48,23 +48,25 @@ class Verifier {
       clientAddress = object.lightTxData.from.slice(-40);
       break;
     }
-    let serverAddress = EthUtils.stripHexPrefix(this._serverAddress);
+    let serverAddress = EthUtils.stripHexPrefix(this._serverAddress).toLowerCase();
     let isClientLightTxSigValid = true;
     let isServerLightTxSigValid = true;
     let isBoosterReceiptSigValid = true;
 
+    clientAddress = clientAddress.toLowerCase();
+
     if (object.hasClientLightTxSig()) {
-      isClientLightTxSigValid = (clientAddress == this._recover(object.lightTxHash, object.sig.clientLightTx));
+      isClientLightTxSigValid = (clientAddress == this._recover(object.lightTxHash, object.sig.clientLightTx).toLowerCase());
     }
 
     if (object.hasServerLightTxSig()) {
-      isServerLightTxSigValid = (serverAddress == this._recover(object.lightTxHash, object.sig.serverLightTx));
+      isServerLightTxSigValid = (serverAddress == this._recover(object.lightTxHash, object.sig.serverLightTx).toLowerCase());
     }
 
     if (klass == 'receipt') {
-      let boosterAccountAddress = EthUtils.stripHexPrefix(this._infinitechain.contract.boosterAccountAddress);
+      let boosterAccountAddress = EthUtils.stripHexPrefix(this._infinitechain.contract.boosterAccountAddress).toLowerCase();
       if (object.hasBoosterReceiptSig()) {
-        isBoosterReceiptSigValid = (boosterAccountAddress == this._recover(object.receiptHash, object.sig.boosterReceipt));
+        isBoosterReceiptSigValid = (boosterAccountAddress == this._recover(object.receiptHash, object.sig.boosterReceipt).toLowerCase());
       }
     }
 
