@@ -55,7 +55,7 @@ class Level {
     try {
       let address = '0x' + this._infinitechain.signer.getAddress();
       await this.db.put('receipt:' + lightTxHash, receiptJson);
-      await this._appendReceiptHash(parseInt(receiptJson.receiptData.stageHeight), receiptJson.receiptHash);
+      await this._appendReceiptHash(parseInt(receiptJson.receiptData.stageHeight, 16), receiptJson.receiptHash);
       if (upload) {
         await this.syncer.uploadReceipt(address, receiptJson);
       }

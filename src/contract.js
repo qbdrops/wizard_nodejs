@@ -222,26 +222,6 @@ class Contract {
     }
   }
 
-  attach = async (receiptRootHash, accountRootHash, data, nonce = null) => {
-    let txValue = '0x0';
-    let clientAddress = '0x' + this._infinitechain.signer.getAddress();
-    let boosterContractAddress = this._boosterContractAddress;
-
-    try {
-      let txMethodData = this.booster().methods.attach(
-        [
-          '0x' + receiptRootHash,
-          '0x' + accountRootHash,
-          '0x' + data
-        ]
-      ).encodeABI();
-      let serializedTx = await this._signRawTransaction(txMethodData, clientAddress, boosterContractAddress, txValue, nonce);
-      return serializedTx;
-    } catch (e) {
-      console.error(e);
-    }
-  }
-
   challenge = async (payment) => {
     try {
       let stageHash = '0x' + payment.stageHash;
@@ -251,20 +231,6 @@ class Contract {
         payment.v,
         payment.r,
         payment.s
-      ).encodeABI();
-      let serializedTx = await this._signRawTransaction(txMethodData);
-      let txHash = await this._sendRawTransaction(serializedTx);
-      return txHash;
-    } catch (e) {
-      console.error(e);
-    }
-  }
-
-  finalize = async (stageHeight) => {
-    try {
-      let stageHash = '0x' + this._sha3(stageHeight.toString());
-      let txMethodData = this.booster().methods.finalize(
-        stageHash
       ).encodeABI();
       let serializedTx = await this._signRawTransaction(txMethodData);
       let txHash = await this._sendRawTransaction(serializedTx);
