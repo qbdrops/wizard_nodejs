@@ -164,6 +164,7 @@ class Client {
     case types.deposit:
       lightTxData.from = '0';
       lightTxData.to = clientAddress;
+      lightTxData.fee = 0;
       break;
     case types.withdrawal:
       lightTxData.from = clientAddress;

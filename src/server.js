@@ -34,24 +34,6 @@ class Server {
     return receipt;
   }
 
-  attach = async (stageHeight = null, nonce = null) => {
-    let gringotts = this._infinitechain.gringotts;
-    let res = await gringotts.fetchRootHashes(stageHeight);
-
-    if (res.data.ok) {
-      let serializedTx = await this._infinitechain.contract.attach(
-        res.data.trees.receiptRootHash,
-        res.data.trees.accountRootHash,
-        '',
-        nonce
-      );
-      let attachRes = await gringotts.attach(serializedTx, res.data.stageHeight);
-      return attachRes.data.txHash;
-    } else {
-      throw new Error(res.data.message);
-    }
-  }
-
   addServerMetadata = async (lightTx, serverMetadata) => {
     if (serverMetadata) {
       if (typeof serverMetadata == 'object') {
@@ -64,9 +46,6 @@ class Server {
       lightTx.metadata.server = '';
     }
     return lightTx;
-  }
-  finalize = async (stageHeight) => {
-    return this._infinitechain.booster.finalize(stageHeight);
   }
 
   defend = async (stageHeight, lightTxHash) => {

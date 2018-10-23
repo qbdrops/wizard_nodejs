@@ -122,15 +122,6 @@ Server can use this function to send the light transaction to gringotts and wait
 1. `light transaction` - `object`: The light transaction which received from client.
 ##### Return
 `receipt` - `object`
-#### infinitechain.server.attach
-```
-infinitechain.server.attach()
-```
-If server wants to put the receipts to the main chain, it can use this function to send a request to notify gringotts. After that, gringotts will use the receipts to compute two root hashes and send them back to server. At last, server will call the attach funtion in order to add a new stage and include the two root hashes on Bolt contract.
-##### Parameter
-`None`
-##### Return
-`transaction hash` - `string`
 #### infinitechain.server.finalize ()
 #### infinitechain.server.defend ()
 
