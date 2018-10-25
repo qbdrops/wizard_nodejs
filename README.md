@@ -231,3 +231,8 @@ Listen the attach event.
 #### infinitechain.event.onChallenge
 #### infinitechain.event.onDefend
 #### infinitechain.event.onFinalize
+
+
+## License
+SSPL
+https://www.mongodb.com/licensing/server-side-public-license
