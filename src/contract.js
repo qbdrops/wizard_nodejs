@@ -130,7 +130,7 @@ class Contract {
   }
 
   instantWithdraw = async (receipt, nonce = null) => {
-    assert(receipt instanceof Receipt, 'Parameter \'lightTx\' should be instance of Receipt.');
+    assert(receipt instanceof Receipt, 'Parameter \'receipt\' should be instance of Receipt.');
 
     let txValue = '0x0';
     let clientAddress = '0x' + this._infinitechain.signer.getAddress();
@@ -159,6 +159,23 @@ class Contract {
         payment.v,
         payment.r,
         payment.s
+      ).encodeABI();
+      let serializedTx = await this._signRawTransaction(txMethodData);
+      let txHash = await this._sendRawTransaction(serializedTx);
+      return txHash;
+    } catch (e) {
+      console.error(e);
+    }
+  }
+  
+  challengedWrongBalance = async (receipt, receipt2) => {
+    try {
+      assert(receipt instanceof Receipt, 'Parameter \'receipt\' should be instance of Receipt.');
+      assert(receipt2 instanceof Receipt, 'Parameter \'receipt2\' should be instance of Receipt.');
+
+      let txMethodData = this.booster().methods.challengedWrongBalance(
+        receipt.toArray(),
+        receipt2.toArray()
       ).encodeABI();
       let serializedTx = await this._signRawTransaction(txMethodData);
       let txHash = await this._sendRawTransaction(serializedTx);
