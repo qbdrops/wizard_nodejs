@@ -141,7 +141,8 @@ class Auditor {
         } else if (type == types.withdrawal || type == types.instantWithdrawal) {
           let expectedBalance = assetBalance.minus(value);
           let receiptBalance = new BigNumber(receipt.receiptData.fromBalance, 16);
-          let diff = expectedBalance.minus(receiptBalance).abs();
+          let fee = new BigNumber(receipt.lightTxData.fee, 16);
+          let diff = expectedBalance.minus(receiptBalance).minus(fee).abs();
 
           if (diff != 0) {
             acc.wrongBalanceSum = this._addOrNew(acc.wrongBalanceSum, assetID, diff);
@@ -152,7 +153,8 @@ class Auditor {
           if (address == receipt.lightTxData.from) {
             let expectedBalance = assetBalance.minus(value);
             let receiptBalance = new BigNumber(receipt.receiptData.fromBalance, 16);
-            let diff = expectedBalance.minus(receiptBalance).abs();
+            let fee = new BigNumber(receipt.lightTxData.fee, 16);
+            let diff = expectedBalance.minus(receiptBalance).minus(fee).abs();
             if (diff != 0) {
               acc.wrongBalanceSum = this._addOrNew(acc.wrongBalanceSum, assetID, diff);
               acc.wrongBalanceReceipts.push([acc.prevReceipt[assetID], receipt]);
