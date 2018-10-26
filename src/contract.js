@@ -51,33 +51,9 @@ class Contract {
     let boosterContractAddress = this._boosterContractAddress;
 
     try {
+      let receiptData = receipt.toArray();
       let txMethodData = this.booster().methods.proposeWithdrawal(
-        [
-          '0x' + receipt.lightTxHash,
-          '0x' + receipt.lightTxData.from,
-          '0x' + receipt.lightTxData.to,
-          '0x' + receipt.lightTxData.assetID,
-          '0x' + receipt.lightTxData.value,
-          '0x' + receipt.lightTxData.fee,
-          '0x' + receipt.lightTxData.nonce,
-          '0x' + receipt.lightTxData.logID,
-          '0x' + receipt.lightTxData.clientMetadataHash,
-          receipt.sig.clientLightTx.v,
-          receipt.sig.clientLightTx.r,
-          receipt.sig.clientLightTx.s,
-          '0x' + receipt.receiptData.GSN,
-          '0x' + receipt.receiptData.fromPreGSN,
-          '0x' + receipt.receiptData.toPreGSN,
-          '0x' + receipt.receiptData.fromBalance,
-          '0x' + receipt.receiptData.toBalance,
-          '0x' + receipt.receiptData.serverMetadataHash,
-          receipt.sig.serverLightTx.v,
-          receipt.sig.serverLightTx.r,
-          receipt.sig.serverLightTx.s,
-          receipt.sig.boosterReceipt.v,
-          receipt.sig.boosterReceipt.r,
-          receipt.sig.boosterReceipt.s,
-        ]
+        receiptData
       ).encodeABI();
       let serializedTx = await this._signRawTransaction(txMethodData, clientAddress, boosterContractAddress, txValue, nonce);
       let txHash = await this._sendRawTransaction(serializedTx);
@@ -95,33 +71,9 @@ class Contract {
     let boosterContractAddress = this._boosterContractAddress;
 
     try {
+      let receiptData = receipt.toArray();
       let txMethodData = this.booster().methods.deposit(
-        [
-          '0x' + receipt.lightTxHash,
-          '0x' + receipt.lightTxData.from,
-          '0x' + receipt.lightTxData.to,
-          '0x' + receipt.lightTxData.assetID,
-          '0x' + receipt.lightTxData.value,
-          '0x' + receipt.lightTxData.fee,
-          '0x' + receipt.lightTxData.nonce,
-          '0x' + receipt.lightTxData.logID,
-          '0x' + receipt.lightTxData.clientMetadataHash,
-          receipt.sig.clientLightTx.v,
-          receipt.sig.clientLightTx.r,
-          receipt.sig.clientLightTx.s,
-          '0x' + receipt.receiptData.GSN,
-          '0x' + receipt.receiptData.fromPreGSN,
-          '0x' + receipt.receiptData.toPreGSN,
-          '0x' + receipt.receiptData.fromBalance,
-          '0x' + receipt.receiptData.toBalance,
-          '0x' + receipt.receiptData.serverMetadataHash,
-          receipt.sig.serverLightTx.v,
-          receipt.sig.serverLightTx.r,
-          receipt.sig.serverLightTx.s,
-          receipt.sig.boosterReceipt.v,
-          receipt.sig.boosterReceipt.r,
-          receipt.sig.boosterReceipt.s
-        ]
+        receiptData
       ).encodeABI();
 
       let serializedTx = await this._signRawTransaction(txMethodData, clientAddress, boosterContractAddress, txValue, nonce);
@@ -185,33 +137,9 @@ class Contract {
     let boosterContractAddress = this._boosterContractAddress;
 
     try {
+      let receiptData = receipt.toArray();
       let txMethodData = this.booster().methods.instantWithdraw(
-        [
-          '0x' + receipt.lightTxHash,
-          '0x' + receipt.lightTxData.from,
-          '0x' + receipt.lightTxData.to,
-          '0x' + receipt.lightTxData.assetID,
-          '0x' + receipt.lightTxData.value,
-          '0x' + receipt.lightTxData.fee,
-          '0x' + receipt.lightTxData.nonce,
-          '0x' + receipt.lightTxData.logID,
-          '0x' + receipt.lightTxData.clientMetadataHash,
-          receipt.sig.clientLightTx.v,
-          receipt.sig.clientLightTx.r,
-          receipt.sig.clientLightTx.s,
-          '0x' + receipt.receiptData.GSN,
-          '0x' + receipt.receiptData.fromPreGSN,
-          '0x' + receipt.receiptData.toPreGSN,
-          '0x' + receipt.receiptData.fromBalance,
-          '0x' + receipt.receiptData.toBalance,
-          '0x' + receipt.receiptData.serverMetadataHash,
-          receipt.sig.serverLightTx.v,
-          receipt.sig.serverLightTx.r,
-          receipt.sig.serverLightTx.s,
-          receipt.sig.boosterReceipt.v,
-          receipt.sig.boosterReceipt.r,
-          receipt.sig.boosterReceipt.s
-        ]
+        receiptData
       ).encodeABI();
 
       let serializedTx = await this._signRawTransaction(txMethodData, clientAddress, boosterContractAddress, txValue, nonce);
