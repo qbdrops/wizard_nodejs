@@ -225,5 +225,4 @@ Listen the attach event.
 
 
 ## License
-SSPL
-https://www.mongodb.com/licensing/server-side-public-license
+agpl-3.0
