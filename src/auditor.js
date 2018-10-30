@@ -14,6 +14,7 @@ class Auditor {
 
   audit = async (stageHeight, receipts = null, balances = {}, bond = null) => {
     let gringotts = this._infinitechain.gringotts;
+    stageHeight = parseInt(stageHeight);
     if (!receipts) {
       let res = await gringotts.getOffchainReceipts(stageHeight);
       receipts = res.data;
@@ -51,7 +52,7 @@ class Auditor {
       return acc;
     }, {});
     let receiptsWithRepeatedGSN = this._repeatedGSNFilter(receipts);
-    let receiptsWithWrongBalance = this._wrongBalanceFilter(receiptsGroup, balances, bond);
+    let receiptsWithWrongBalance = await this._wrongBalanceFilter(receiptsGroup, balances, bond);
     let receiptsWithSkippedGSN = this._skippedGSNFilter(receipts);
     let receiptWithoutIntegrity = await this._integrityFilter(receipts, receiptTree);
 
@@ -111,7 +112,9 @@ class Auditor {
     return result.receiptsWithSkippedGSN;
   }
 
-  _wrongBalanceFilter = (receiptsGroup, balances) => {
+  _wrongBalanceFilter = async (receiptsGroup, balances) => {
+    let gringotts = this._infinitechain.gringotts;
+    let missedWrongBalanceReceipts = [];
     let filterResult = Object.keys(receiptsGroup).reduce((acc, address) => { // each address check the balance by their own receipts
       let receipts = receiptsGroup[address];
       let initBalance = balances[address];
@@ -129,13 +132,21 @@ class Auditor {
         if (typeof assetBalance == 'string') {
           assetBalance = new BigNumber(acc.balances[assetID], 16);
         }
+        let prevReceipt = acc.prevReceipt[assetID];
         if (type == types.deposit) {
           let expectedBalance = assetBalance.plus(value);
           let receiptBalance = new BigNumber(receipt.receiptData.toBalance, 16);
+          // omit light tx fee
           let diff = expectedBalance.minus(receiptBalance).abs();
           if (diff != 0) {
+            if (prevReceipt === undefined || prevReceipt.receiptData.GSN !== receipt.receiptData.toPreGSN) {
+              missedWrongBalanceReceipts.push({
+                index: acc.wrongBalanceReceipts.length,
+                GSN: receipt.receiptData.toPreGSN
+              });
+            }
             acc.wrongBalanceSum = this._addOrNew(acc.wrongBalanceSum, assetID, diff);
-            acc.wrongBalanceReceipts.push([acc.prevReceipt[assetID], receipt]);
+            acc.wrongBalanceReceipts.push([prevReceipt, receipt]);
           }
           acc.balances[assetID] = receiptBalance;
         } else if (type == types.withdrawal || type == types.instantWithdrawal) {
@@ -143,10 +154,15 @@ class Auditor {
           let receiptBalance = new BigNumber(receipt.receiptData.fromBalance, 16);
           let fee = new BigNumber(receipt.lightTxData.fee, 16);
           let diff = expectedBalance.minus(receiptBalance).minus(fee).abs();
-
           if (diff != 0) {
+            if (prevReceipt === undefined || prevReceipt.receiptData.GSN !== receipt.receiptData.fromPreGSN) {
+              missedWrongBalanceReceipts.push({
+                index: acc.wrongBalanceReceipts.length,
+                GSN: receipt.receiptData.fromPreGSN
+              });
+            }
             acc.wrongBalanceSum = this._addOrNew(acc.wrongBalanceSum, assetID, diff);
-            acc.wrongBalanceReceipts.push([acc.prevReceipt[assetID], receipt]);
+            acc.wrongBalanceReceipts.push([prevReceipt, receipt]);
           }
           acc.balances[assetID] = receiptBalance;
         } else {// remittance
@@ -156,8 +172,14 @@ class Auditor {
             let fee = new BigNumber(receipt.lightTxData.fee, 16);
             let diff = expectedBalance.minus(receiptBalance).minus(fee).abs();
             if (diff != 0) {
+              if (prevReceipt === undefined || prevReceipt.receiptData.GSN !== receipt.receiptData.fromPreGSN) {
+                missedWrongBalanceReceipts.push({
+                  index: acc.wrongBalanceReceipts.length,
+                  GSN: receipt.receiptData.fromPreGSN
+                });
+              }
               acc.wrongBalanceSum = this._addOrNew(acc.wrongBalanceSum, assetID, diff);
-              acc.wrongBalanceReceipts.push([acc.prevReceipt[assetID], receipt]);
+              acc.wrongBalanceReceipts.push([prevReceipt, receipt]);
             }
             acc.balances[assetID] = receiptBalance;
           } else {
@@ -165,8 +187,14 @@ class Auditor {
             let receiptBalance = new BigNumber(receipt.receiptData.toBalance, 16);
             let diff = expectedBalance.minus(receiptBalance).abs();
             if (diff != 0) {
+              if (prevReceipt === undefined || prevReceipt.receiptData.GSN !== receipt.receiptData.toPreGSN) {
+                missedWrongBalanceReceipts.push({
+                  index: acc.wrongBalanceReceipts.length,
+                  GSN: receipt.receiptData.toPreGSN
+                });
+              }
               acc.wrongBalanceSum = this._addOrNew(acc.wrongBalanceSum, assetID, diff);
-              acc.wrongBalanceReceipts.push([acc.prevReceipt[assetID], receipt]);
+              acc.wrongBalanceReceipts.push([prevReceipt, receipt]);
             }
             acc.balances[assetID] = receiptBalance;
           }
@@ -191,6 +219,17 @@ class Auditor {
       wrongBalanceSum: {}
     });
 
+    // get missed wrong balance receipts
+    if (missedWrongBalanceReceipts.length > 0) {
+      let receipt = {};
+      let res = {};
+      for (var i=0; i<missedWrongBalanceReceipts.length; i++) {
+        res = await gringotts.getOffchainReceiptByGSN(missedWrongBalanceReceipts[i].GSN);
+        receipt = new Receipt(res.data.data);
+        filterResult.wrongBalanceReceipts[missedWrongBalanceReceipts[i].index][0] = receipt;
+      }
+    }
+
     return filterResult.wrongBalanceReceipts;
   }
 
@@ -208,6 +247,7 @@ class Auditor {
         computedReceiptRootHash = '0x' + this._computeRootHashFromSlice(slice, tree.stageHeight);
         // 3. Compare
         if (computedReceiptRootHash != receiptRootHash) {
+          console.log(slice, tree.stageHeight, computedReceiptRootHash, receiptRootHash)
           acc.receiptsWithoutIntegirty.push(receipt);
         }
       } else {
