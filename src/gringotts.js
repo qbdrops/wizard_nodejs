@@ -74,6 +74,14 @@ class Gringotts {
     return axios.get(url);
   }
 
+  getOffchainReceiptByGSN = async (GSN) => {
+    if (typeof GSN === 'number') {
+      GSN = parseInt(GSN).toString(16);
+    }
+    let url = this._nodeUrl + '/receipt_by_gsn/' + GSN;
+    return axios.get(url);
+  }
+
   getAccountBalances = async (stageHeight) => {
     let url = this._nodeUrl + '/accounts/' + stageHeight;
     return axios.get(url);
