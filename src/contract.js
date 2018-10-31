@@ -51,33 +51,9 @@ class Contract {
     let boosterContractAddress = this._boosterContractAddress;
 
     try {
+      let receiptData = receipt.toArray();
       let txMethodData = this.booster().methods.proposeWithdrawal(
-        [
-          '0x' + receipt.lightTxHash,
-          '0x' + receipt.lightTxData.from,
-          '0x' + receipt.lightTxData.to,
-          '0x' + receipt.lightTxData.assetID,
-          '0x' + receipt.lightTxData.value,
-          '0x' + receipt.lightTxData.fee,
-          '0x' + receipt.lightTxData.nonce,
-          '0x' + receipt.lightTxData.logID,
-          '0x' + receipt.lightTxData.clientMetadataHash,
-          receipt.sig.clientLightTx.v,
-          receipt.sig.clientLightTx.r,
-          receipt.sig.clientLightTx.s,
-          '0x' + receipt.receiptData.GSN,
-          '0x' + receipt.receiptData.fromPreGSN,
-          '0x' + receipt.receiptData.toPreGSN,
-          '0x' + receipt.receiptData.fromBalance,
-          '0x' + receipt.receiptData.toBalance,
-          '0x' + receipt.receiptData.serverMetadataHash,
-          receipt.sig.serverLightTx.v,
-          receipt.sig.serverLightTx.r,
-          receipt.sig.serverLightTx.s,
-          receipt.sig.boosterReceipt.v,
-          receipt.sig.boosterReceipt.r,
-          receipt.sig.boosterReceipt.s,
-        ]
+        receiptData
       ).encodeABI();
       let serializedTx = await this._signRawTransaction(txMethodData, clientAddress, boosterContractAddress, txValue, nonce);
       let txHash = await this._sendRawTransaction(serializedTx);
@@ -95,33 +71,9 @@ class Contract {
     let boosterContractAddress = this._boosterContractAddress;
 
     try {
+      let receiptData = receipt.toArray();
       let txMethodData = this.booster().methods.deposit(
-        [
-          '0x' + receipt.lightTxHash,
-          '0x' + receipt.lightTxData.from,
-          '0x' + receipt.lightTxData.to,
-          '0x' + receipt.lightTxData.assetID,
-          '0x' + receipt.lightTxData.value,
-          '0x' + receipt.lightTxData.fee,
-          '0x' + receipt.lightTxData.nonce,
-          '0x' + receipt.lightTxData.logID,
-          '0x' + receipt.lightTxData.clientMetadataHash,
-          receipt.sig.clientLightTx.v,
-          receipt.sig.clientLightTx.r,
-          receipt.sig.clientLightTx.s,
-          '0x' + receipt.receiptData.GSN,
-          '0x' + receipt.receiptData.fromPreGSN,
-          '0x' + receipt.receiptData.toPreGSN,
-          '0x' + receipt.receiptData.fromBalance,
-          '0x' + receipt.receiptData.toBalance,
-          '0x' + receipt.receiptData.serverMetadataHash,
-          receipt.sig.serverLightTx.v,
-          receipt.sig.serverLightTx.r,
-          receipt.sig.serverLightTx.s,
-          receipt.sig.boosterReceipt.v,
-          receipt.sig.boosterReceipt.r,
-          receipt.sig.boosterReceipt.s
-        ]
+        receiptData
       ).encodeABI();
 
       let serializedTx = await this._signRawTransaction(txMethodData, clientAddress, boosterContractAddress, txValue, nonce);
@@ -178,40 +130,16 @@ class Contract {
   }
 
   instantWithdraw = async (receipt, nonce = null) => {
-    assert(receipt instanceof Receipt, 'Parameter \'lightTx\' should be instance of Receipt.');
+    assert(receipt instanceof Receipt, 'Parameter \'receipt\' should be instance of Receipt.');
 
     let txValue = '0x0';
     let clientAddress = '0x' + this._infinitechain.signer.getAddress();
     let boosterContractAddress = this._boosterContractAddress;
 
     try {
+      let receiptData = receipt.toArray();
       let txMethodData = this.booster().methods.instantWithdraw(
-        [
-          '0x' + receipt.lightTxHash,
-          '0x' + receipt.lightTxData.from,
-          '0x' + receipt.lightTxData.to,
-          '0x' + receipt.lightTxData.assetID,
-          '0x' + receipt.lightTxData.value,
-          '0x' + receipt.lightTxData.fee,
-          '0x' + receipt.lightTxData.nonce,
-          '0x' + receipt.lightTxData.logID,
-          '0x' + receipt.lightTxData.clientMetadataHash,
-          receipt.sig.clientLightTx.v,
-          receipt.sig.clientLightTx.r,
-          receipt.sig.clientLightTx.s,
-          '0x' + receipt.receiptData.GSN,
-          '0x' + receipt.receiptData.fromPreGSN,
-          '0x' + receipt.receiptData.toPreGSN,
-          '0x' + receipt.receiptData.fromBalance,
-          '0x' + receipt.receiptData.toBalance,
-          '0x' + receipt.receiptData.serverMetadataHash,
-          receipt.sig.serverLightTx.v,
-          receipt.sig.serverLightTx.r,
-          receipt.sig.serverLightTx.s,
-          receipt.sig.boosterReceipt.v,
-          receipt.sig.boosterReceipt.r,
-          receipt.sig.boosterReceipt.s
-        ]
+        receiptData
       ).encodeABI();
 
       let serializedTx = await this._signRawTransaction(txMethodData, clientAddress, boosterContractAddress, txValue, nonce);
@@ -231,6 +159,23 @@ class Contract {
         payment.v,
         payment.r,
         payment.s
+      ).encodeABI();
+      let serializedTx = await this._signRawTransaction(txMethodData);
+      let txHash = await this._sendRawTransaction(serializedTx);
+      return txHash;
+    } catch (e) {
+      console.error(e);
+    }
+  }
+  
+  challengedWrongBalance = async (receipt, receipt2) => {
+    try {
+      assert(receipt instanceof Receipt, 'Parameter \'receipt\' should be instance of Receipt.');
+      assert(receipt2 instanceof Receipt, 'Parameter \'receipt2\' should be instance of Receipt.');
+
+      let txMethodData = this.booster().methods.challengedWrongBalance(
+        receipt.toArray(),
+        receipt2.toArray()
       ).encodeABI();
       let serializedTx = await this._signRawTransaction(txMethodData);
       let txHash = await this._sendRawTransaction(serializedTx);

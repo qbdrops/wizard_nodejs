@@ -48,7 +48,7 @@ class Signer {
     if (object instanceof LightTransaction) {
       klass = 'lightTx';
     } else {
-      throw new Error('\'object\' should be instance of \'LightTransaction\' or \'Receipt\'.');
+      throw new Error('\'object\' should be instance of \'LightTransaction\'.');
     }
 
     let hashKey = klass + 'Hash';
