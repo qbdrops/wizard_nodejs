@@ -11,7 +11,7 @@ class Gringotts {
 
   getSlice = async (stageHeight, lightTxHash) => {
     let url = this._nodeUrl + '/slice';
-    return axios.get(url, {
+    return await axios.get(url, {
       params: {
         stage_height: stageHeight,
         light_tx_hash: lightTxHash
@@ -21,7 +21,7 @@ class Gringotts {
 
   getTrees = async (stageHeight) => {
     let url = this._nodeUrl + '/trees';
-    return axios.get(url, {
+    return await axios.get(url, {
       params: {
         stage_height: stageHeight
       }
@@ -52,12 +52,12 @@ class Gringotts {
 
   fetchBoosterAddress = async () => {
     let url = this._nodeUrl + '/booster/address';
-    return axios.get(url);
+    return await axios.get(url);
   }
 
   fetchServerAddress = async () => {
     let url = this._nodeUrl + '/server/address';
-    return axios.get(url);
+    return await axios.get(url);
   }
 
   fetchRootHashes = async (stageHeight = null) => {
@@ -66,12 +66,12 @@ class Gringotts {
       url = url + '/' + stageHeight.toString();
     }
 
-    return axios.get(url);
+    return await axios.get(url);
   }
 
   getOffchainReceipts = async (stageHeight) => {
     let url = this._nodeUrl + '/receipts/' + stageHeight;
-    return axios.get(url);
+    return await axios.get(url);
   }
 
   getOffchainReceiptByGSN = async (GSN) => {
@@ -84,7 +84,7 @@ class Gringotts {
 
   getAccountBalances = async (stageHeight) => {
     let url = this._nodeUrl + '/accounts/' + stageHeight;
-    return axios.get(url);
+    return await axios.get(url);
   }
 
   getBoosterBalance = async (clientAddress, assetID = null) => {
