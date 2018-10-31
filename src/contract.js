@@ -2,6 +2,7 @@ import Web3 from 'web3';
 import EthUtils from 'ethereumjs-util';
 import EthereumTx from 'ethereumjs-tx';
 import Booster from '@/abi/Booster.json';
+import EIP20 from '@/abi/EIP20.json';
 import assert from 'assert';
 import Receipt from '@/models/receipt';
 
@@ -41,6 +42,12 @@ class Contract {
   web3 = () => {
     assert(this._web3, 'Infinitechain is not initialized yet');
     return this._web3;
+  }
+
+  erc20 = (address) => {
+    assert(address.slice(0, 2) == '0x' && /^[0-9a-f]{40}$/i.test(address.substring(2)), 'ERC20 token address is invalid.');
+    let erc20 = new (this.web3()).eth.Contract(EIP20.abi, address);
+    return erc20;
   }
 
   proposeWithdrawal = async (receipt, nonce = null) => {
