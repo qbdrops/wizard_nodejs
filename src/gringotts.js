@@ -97,12 +97,6 @@ class Gringotts {
     return await axios.get(url);
   }
 
-  getProof = async (stageHeight, receiptHash) => {
-    let url;
-    url = this._nodeUrl + '/slice/' + stageHeight + '/' + receiptHash;
-    return await axios.get(url);
-  }
-
   getAssetList = async () => {
     let url = this._nodeUrl + '/assetlist';
     let res = await axios.get(url);

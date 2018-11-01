@@ -139,8 +139,8 @@ class Client {
     return await this._infinitechain.gringotts.getBoosterBalance(clientAddress, assetID);
   }
 
-  getProof = async (stageHeight, receiptHash) => {
-    return await this._infinitechain.gringotts.getProof(stageHeight, receiptHash);
+  getSlice = async (stageHeight, receiptHash) => {
+    return await this._infinitechain.gringotts.getSlice(stageHeight, receiptHash);
   }
 
   getAllReceiptHashes = async (stageHeight) => {
