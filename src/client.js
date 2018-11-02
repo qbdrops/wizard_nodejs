@@ -202,7 +202,7 @@ class Client {
     return await this._infinitechain.gringotts.getAssetList();
   }
 
-  auidtReceiptProof = async (stageHeight, receiptHash, proof) => {
+  auidtReceiptSlice = async (stageHeight, receiptHash, slice) => {
     let success = false;
     let contract = this._infinitechain.contract;
     // 1. Get receiptRootHash from blockchain
@@ -210,8 +210,8 @@ class Client {
     let receiptRootHash = rootHashes[0];
     // 2. Compute root hash
     let computedReceiptRootHash;
-    if (proof.receiptHashArray.includes(receiptHash)) {
-      computedReceiptRootHash = '0x' + this._computeRootHashFromSlice(proof.slice, stageHeight);
+    if (slice.receiptHashArray.includes(receiptHash)) {
+      computedReceiptRootHash = '0x' + this._computeRootHashFromSlice(slice.slice, stageHeight);
       // 3. Compare
       if (computedReceiptRootHash == receiptRootHash) {
         success = true;
