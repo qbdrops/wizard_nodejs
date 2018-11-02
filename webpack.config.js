@@ -1,4 +1,5 @@
-var path = require('path');
+const path = require('path');
+const Webpack = require('webpack');
 
 module.exports = {
   entry: './index.js',
@@ -29,5 +30,8 @@ module.exports = {
       '#': path.resolve('test')
     }
   },
-  target: 'node'
+  target: 'node',
+  plugins: [
+    new Webpack.IgnorePlugin(/^electron$/)
+  ]
 };
