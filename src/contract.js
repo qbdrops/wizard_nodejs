@@ -11,27 +11,32 @@ class Contract {
     this._infinitechain = infinitechain;
     this._web3Url = config.web3Url;
     this._boosterContractAddress = null;
-    this.boosterAccountAddress = null;
+    this._boosterAccountAddress = null;
     this._booster = null;
   }
 
-  fetchBooster = async () => {
-    let boosterContractAddress = null;
-    let boosterAccountAddress = null;
-    try {
-      let res = await this._infinitechain.gringotts.fetchBoosterAddress();
-      boosterContractAddress = res.data.contractAddress;
-      boosterAccountAddress = res.data.accountAddress;
-    } catch (e) {
-      console.error(e);
-    }
+  fetchBoosterAddress = async () => {
+    let res = await this._infinitechain.gringotts.fetchBoosterAddress();
+    this._boosterContractAddress = res.data.contractAddress;
+    this._boosterAccountAddress = res.data.accountAddress;
+    assert(this._boosterContractAddress, 'Can not fetch booster contract address.');
+    assert(this._boosterAccountAddress, 'Can not fetch booster account address.');
+  }
 
-    assert(boosterContractAddress, 'Can not fetch booster contract address.');
-    assert(boosterAccountAddress, 'Can not fetch booster account address.');
-    this._boosterContractAddress = boosterContractAddress;
-    this.boosterAccountAddress = boosterAccountAddress;
+  fetchWebSocketConnection = async () => {
     this._web3 = new Web3(this._web3Url);
-    this._booster = new this._web3.eth.Contract(Booster.abi, boosterContractAddress);
+    this._booster = new this._web3.eth.Contract(Booster.abi, this._boosterContractAddress);
+    return new Promise((resolve, reject) => {
+      this._web3._provider.on('error', () => {
+        reject('Websocket connect to ' + this._web3Url + ' fail.');
+      });
+      this._web3._provider.on('end', () => {
+        reject('Websocket is not connected yet.');
+      });
+      this._web3._provider.on('connect', () => {
+        resolve();
+      });
+    })
   }
 
   booster = () => {
