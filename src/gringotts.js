@@ -9,14 +9,9 @@ class Gringotts {
     this._infinitechain = infinitechain;
   }
 
-  getSlice = async (stageHeight, lightTxHash) => {
-    let url = this._nodeUrl + '/slice';
-    return await axios.get(url, {
-      params: {
-        stage_height: stageHeight,
-        light_tx_hash: lightTxHash
-      }
-    });
+  getSlice = async (stageHeight, receiptHash) => {
+    let url = this._nodeUrl + '/slice/' + stageHeight + '/' + receiptHash;
+    return await axios.get(url);
   }
 
   getTrees = async (stageHeight) => {
