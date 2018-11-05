@@ -14,6 +14,7 @@ class Verifier {
   fetchServerAddress = async () => {
     let res = await this._infinitechain.gringotts.fetchServerAddress();
     this._serverAddress = res.data.address;
+    assert(this._serverAddress, 'Can not fetch server account address.');
   }
 
   verifyLightTx = (lightTx) => {
@@ -64,7 +65,7 @@ class Verifier {
     }
 
     if (klass == 'receipt') {
-      let boosterAccountAddress = EthUtils.stripHexPrefix(this._infinitechain.contract.boosterAccountAddress).toLowerCase();
+      let boosterAccountAddress = EthUtils.stripHexPrefix(this._infinitechain.contract._boosterAccountAddress).toLowerCase();
       if (object.hasBoosterReceiptSig()) {
         isBoosterReceiptSigValid = (boosterAccountAddress == this._recover(object.receiptHash, object.sig.boosterReceipt).toLowerCase());
       }
