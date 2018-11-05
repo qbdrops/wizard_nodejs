@@ -32,6 +32,21 @@ class Contract {
     this.boosterAccountAddress = boosterAccountAddress;
     this._web3 = new Web3(this._web3Url);
     this._booster = new this._web3.eth.Contract(Booster.abi, boosterContractAddress);
+    await this.websocketProvider();
+  }
+
+  websocketProvider = () => {
+    return new Promise((resolve, reject) => {
+      this._web3._provider.on('error', () => {
+        reject('Websocket connect to ' + this._web3Url + ' fail');
+      });
+      this._web3._provider.on('end', () => {
+        reject('Websocket is not connected yet');
+      });
+      this._web3._provider.on('connect', () => {
+        resolve();
+      });
+    })
   }
 
   booster = () => {
