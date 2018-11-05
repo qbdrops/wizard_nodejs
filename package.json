@@ -11,7 +11,7 @@
     "install": "node fix.js",
     "test": "mocha-webpack --recursive",
     "testAuditor": "mocha-webpack test/test-auditor.js",
-    "build": "webpack",
+    "build": "NODE_ENV=production webpack",
     "console": "node console.js"
   },
   "author": "ifc-dev <dev@infinitechain.io>",
@@ -44,6 +44,7 @@
     "googleapis": "^32.0.0",
     "js-sha3": "^0.6.1",
     "keythereum": "^1.0.3",
+    "uglifyjs-webpack-plugin": "^1.3.0",
     "web3": "^1.0.0-beta.33"
   }
 }
