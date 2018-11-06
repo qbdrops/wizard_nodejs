@@ -30,6 +30,7 @@ class Auditor {
     }
     // Reconstruct receiptTree from treeNodes
     let receiptTree = new IndexedMerkleTree(stageHeight, receipts.map(receipt => receipt.receiptHash));
+
     // Sort the receipts by GSN
     receipts = receipts.sort(function (r1, r2) {
       return parseInt(r1.receiptData.GSN, 16) - parseInt(r2.receiptData.GSN, 16);
@@ -60,6 +61,45 @@ class Auditor {
       receiptsWithRepeatedGSN: receiptsWithRepeatedGSN,
       receiptsWithWrongBalance: receiptsWithWrongBalance,
       receiptsWithSkippedGSN: receiptsWithSkippedGSN,
+      receiptWithoutIntegrity: receiptWithoutIntegrity
+    };
+  }
+
+  auditAddress = async (address, stageHeight, receipts = null, balances = {}) => {
+    let gringotts = this._infinitechain.gringotts;
+    stageHeight = parseInt(stageHeight);
+    if (!receipts) {
+      let res = await gringotts.getOffchainReceipts(stageHeight, address);
+      receipts = res.data;
+    }
+
+    if (JSON.stringify(balances) == '{}' && stageHeight != 1) {
+      let res = await gringotts.getAccountBalances(stageHeight - 1);
+      balances = res.data;
+    }
+
+    // get receipt hashes
+    let trees = await gringotts.getTrees(stageHeight);
+
+    // Reconstruct receiptTree from treeNodes
+    let receiptTree = new IndexedMerkleTree(stageHeight, trees.receiptTree.leafElements);
+
+    // Sort the receipts by GSN
+    receipts = receipts.sort(function (r1, r2) {
+      return parseInt(r1.receiptData.GSN, 16) - parseInt(r2.receiptData.GSN, 16);
+    }).map(receiptJson => new Receipt(receiptJson));
+    // Group the sorted receipts by addresses
+    let receiptsGroup = receipts.reduce((acc, receipt) => {
+      acc = this._pushOrNew(acc, address, receipt);
+      return acc;
+    }, {});
+    let receiptsWithRepeatedGSN = this._repeatedGSNFilter(receipts);
+    let receiptsWithWrongBalance = await this._wrongBalanceFilter(receiptsGroup, balances);
+    let receiptWithoutIntegrity = await this._integrityFilter(receipts, receiptTree);
+
+    return {
+      receiptsWithRepeatedGSN: receiptsWithRepeatedGSN,
+      receiptsWithWrongBalance: receiptsWithWrongBalance,
       receiptWithoutIntegrity: receiptWithoutIntegrity
     };
   }
