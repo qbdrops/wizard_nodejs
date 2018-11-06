@@ -113,6 +113,36 @@ class Receipt {
     return json;
   }
 
+  toArray = () => {
+    let arrayReceipt = [
+      '0x' + this.lightTxHash,
+      '0x' + this.lightTxData.from,
+      '0x' + this.lightTxData.to,
+      '0x' + this.lightTxData.assetID,
+      '0x' + this.lightTxData.value,
+      '0x' + this.lightTxData.fee,
+      '0x' + this.lightTxData.nonce,
+      '0x' + this.lightTxData.logID,
+      '0x' + this.lightTxData.clientMetadataHash,
+      this.sig.clientLightTx.v,
+      this.sig.clientLightTx.r,
+      this.sig.clientLightTx.s,
+      '0x' + this.receiptData.GSN,
+      '0x' + this.receiptData.fromPreGSN,
+      '0x' + this.receiptData.toPreGSN,
+      '0x' + this.receiptData.fromBalance,
+      '0x' + this.receiptData.toBalance,
+      '0x' + this.receiptData.serverMetadataHash,
+      this.sig.serverLightTx.v,
+      this.sig.serverLightTx.r,
+      this.sig.serverLightTx.s,
+      this.sig.boosterReceipt.v,
+      this.sig.boosterReceipt.r,
+      this.sig.boosterReceipt.s
+    ];
+    return arrayReceipt;
+  }
+
   _sha3 (content) {
     return EthUtils.sha3(content).toString('hex');
   }

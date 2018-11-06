@@ -2,6 +2,7 @@ import Web3 from 'web3';
 import EthUtils from 'ethereumjs-util';
 import EthereumTx from 'ethereumjs-tx';
 import Booster from '@/abi/Booster.json';
+import EIP20 from '@/abi/EIP20.json';
 import assert from 'assert';
 import Receipt from '@/models/receipt';
 
@@ -10,27 +11,32 @@ class Contract {
     this._infinitechain = infinitechain;
     this._web3Url = config.web3Url;
     this._boosterContractAddress = null;
-    this.boosterAccountAddress = null;
+    this._boosterAccountAddress = null;
     this._booster = null;
   }
 
-  fetchBooster = async () => {
-    let boosterContractAddress = null;
-    let boosterAccountAddress = null;
-    try {
-      let res = await this._infinitechain.gringotts.fetchBoosterAddress();
-      boosterContractAddress = res.data.contractAddress;
-      boosterAccountAddress = res.data.accountAddress;
-    } catch (e) {
-      console.error(e);
-    }
+  fetchBoosterAddress = async () => {
+    let res = await this._infinitechain.gringotts.fetchBoosterAddress();
+    this._boosterContractAddress = res.data.contractAddress;
+    this._boosterAccountAddress = res.data.accountAddress;
+    assert(this._boosterContractAddress, 'Can not fetch booster contract address.');
+    assert(this._boosterAccountAddress, 'Can not fetch booster account address.');
+  }
 
-    assert(boosterContractAddress, 'Can not fetch booster contract address.');
-    assert(boosterAccountAddress, 'Can not fetch booster account address.');
-    this._boosterContractAddress = boosterContractAddress;
-    this.boosterAccountAddress = boosterAccountAddress;
+  fetchWebSocketConnection = async () => {
     this._web3 = new Web3(this._web3Url);
-    this._booster = new this._web3.eth.Contract(Booster.abi, boosterContractAddress);
+    this._booster = new this._web3.eth.Contract(Booster.abi, this._boosterContractAddress);
+    return new Promise((resolve, reject) => {
+      this._web3._provider.on('error', () => {
+        reject('Websocket connect to ' + this._web3Url + ' fail.');
+      });
+      this._web3._provider.on('end', () => {
+        reject('Websocket is not connected yet.');
+      });
+      this._web3._provider.on('connect', () => {
+        resolve();
+      });
+    })
   }
 
   booster = () => {
@@ -43,6 +49,12 @@ class Contract {
     return this._web3;
   }
 
+  erc20 = (address) => {
+    assert(address.slice(0, 2) == '0x' && /^[0-9a-f]{40}$/i.test(address.substring(2)), 'ERC20 token address is invalid.');
+    let erc20 = new (this.web3()).eth.Contract(EIP20.abi, address);
+    return erc20;
+  }
+
   proposeWithdrawal = async (receipt, nonce = null) => {
     assert(receipt instanceof Receipt, 'Parameter \'lightTx\' should be instance of Receipt.');
 
@@ -51,33 +63,9 @@ class Contract {
     let boosterContractAddress = this._boosterContractAddress;
 
     try {
+      let receiptData = receipt.toArray();
       let txMethodData = this.booster().methods.proposeWithdrawal(
-        [
-          '0x' + receipt.lightTxHash,
-          '0x' + receipt.lightTxData.from,
-          '0x' + receipt.lightTxData.to,
-          '0x' + receipt.lightTxData.assetID,
-          '0x' + receipt.lightTxData.value,
-          '0x' + receipt.lightTxData.fee,
-          '0x' + receipt.lightTxData.nonce,
-          '0x' + receipt.lightTxData.logID,
-          '0x' + receipt.lightTxData.clientMetadataHash,
-          receipt.sig.clientLightTx.v,
-          receipt.sig.clientLightTx.r,
-          receipt.sig.clientLightTx.s,
-          '0x' + receipt.receiptData.GSN,
-          '0x' + receipt.receiptData.fromPreGSN,
-          '0x' + receipt.receiptData.toPreGSN,
-          '0x' + receipt.receiptData.fromBalance,
-          '0x' + receipt.receiptData.toBalance,
-          '0x' + receipt.receiptData.serverMetadataHash,
-          receipt.sig.serverLightTx.v,
-          receipt.sig.serverLightTx.r,
-          receipt.sig.serverLightTx.s,
-          receipt.sig.boosterReceipt.v,
-          receipt.sig.boosterReceipt.r,
-          receipt.sig.boosterReceipt.s,
-        ]
+        receiptData
       ).encodeABI();
       let serializedTx = await this._signRawTransaction(txMethodData, clientAddress, boosterContractAddress, txValue, nonce);
       let txHash = await this._sendRawTransaction(serializedTx);
@@ -95,33 +83,9 @@ class Contract {
     let boosterContractAddress = this._boosterContractAddress;
 
     try {
+      let receiptData = receipt.toArray();
       let txMethodData = this.booster().methods.deposit(
-        [
-          '0x' + receipt.lightTxHash,
-          '0x' + receipt.lightTxData.from,
-          '0x' + receipt.lightTxData.to,
-          '0x' + receipt.lightTxData.assetID,
-          '0x' + receipt.lightTxData.value,
-          '0x' + receipt.lightTxData.fee,
-          '0x' + receipt.lightTxData.nonce,
-          '0x' + receipt.lightTxData.logID,
-          '0x' + receipt.lightTxData.clientMetadataHash,
-          receipt.sig.clientLightTx.v,
-          receipt.sig.clientLightTx.r,
-          receipt.sig.clientLightTx.s,
-          '0x' + receipt.receiptData.GSN,
-          '0x' + receipt.receiptData.fromPreGSN,
-          '0x' + receipt.receiptData.toPreGSN,
-          '0x' + receipt.receiptData.fromBalance,
-          '0x' + receipt.receiptData.toBalance,
-          '0x' + receipt.receiptData.serverMetadataHash,
-          receipt.sig.serverLightTx.v,
-          receipt.sig.serverLightTx.r,
-          receipt.sig.serverLightTx.s,
-          receipt.sig.boosterReceipt.v,
-          receipt.sig.boosterReceipt.r,
-          receipt.sig.boosterReceipt.s
-        ]
+        receiptData
       ).encodeABI();
 
       let serializedTx = await this._signRawTransaction(txMethodData, clientAddress, boosterContractAddress, txValue, nonce);
@@ -178,40 +142,16 @@ class Contract {
   }
 
   instantWithdraw = async (receipt, nonce = null) => {
-    assert(receipt instanceof Receipt, 'Parameter \'lightTx\' should be instance of Receipt.');
+    assert(receipt instanceof Receipt, 'Parameter \'receipt\' should be instance of Receipt.');
 
     let txValue = '0x0';
     let clientAddress = '0x' + this._infinitechain.signer.getAddress();
     let boosterContractAddress = this._boosterContractAddress;
 
     try {
+      let receiptData = receipt.toArray();
       let txMethodData = this.booster().methods.instantWithdraw(
-        [
-          '0x' + receipt.lightTxHash,
-          '0x' + receipt.lightTxData.from,
-          '0x' + receipt.lightTxData.to,
-          '0x' + receipt.lightTxData.assetID,
-          '0x' + receipt.lightTxData.value,
-          '0x' + receipt.lightTxData.fee,
-          '0x' + receipt.lightTxData.nonce,
-          '0x' + receipt.lightTxData.logID,
-          '0x' + receipt.lightTxData.clientMetadataHash,
-          receipt.sig.clientLightTx.v,
-          receipt.sig.clientLightTx.r,
-          receipt.sig.clientLightTx.s,
-          '0x' + receipt.receiptData.GSN,
-          '0x' + receipt.receiptData.fromPreGSN,
-          '0x' + receipt.receiptData.toPreGSN,
-          '0x' + receipt.receiptData.fromBalance,
-          '0x' + receipt.receiptData.toBalance,
-          '0x' + receipt.receiptData.serverMetadataHash,
-          receipt.sig.serverLightTx.v,
-          receipt.sig.serverLightTx.r,
-          receipt.sig.serverLightTx.s,
-          receipt.sig.boosterReceipt.v,
-          receipt.sig.boosterReceipt.r,
-          receipt.sig.boosterReceipt.s
-        ]
+        receiptData
       ).encodeABI();
 
       let serializedTx = await this._signRawTransaction(txMethodData, clientAddress, boosterContractAddress, txValue, nonce);
@@ -231,6 +171,23 @@ class Contract {
         payment.v,
         payment.r,
         payment.s
+      ).encodeABI();
+      let serializedTx = await this._signRawTransaction(txMethodData);
+      let txHash = await this._sendRawTransaction(serializedTx);
+      return txHash;
+    } catch (e) {
+      console.error(e);
+    }
+  }
+  
+  challengedWrongBalance = async (receipt, receipt2) => {
+    try {
+      assert(receipt instanceof Receipt, 'Parameter \'receipt\' should be instance of Receipt.');
+      assert(receipt2 instanceof Receipt, 'Parameter \'receipt2\' should be instance of Receipt.');
+
+      let txMethodData = this.booster().methods.challengedWrongBalance(
+        receipt.toArray(),
+        receipt2.toArray()
       ).encodeABI();
       let serializedTx = await this._signRawTransaction(txMethodData);
       let txHash = await this._sendRawTransaction(serializedTx);

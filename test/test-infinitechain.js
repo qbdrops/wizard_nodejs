@@ -9,18 +9,29 @@ nock('http://localhost:3000')
   .reply(200, { address: '0x68c34a54ec562b2b6efc8e61c54f9314b93b1a44' });
 
 describe('Infinitechain', () => {
+  let infinitechain;
+
+  before(async () => {
+    // runs before all tests in this block
+    infinitechain = new InfinitechainBuilder().
+      setNodeUrl('http://localhost:3000').
+      setWeb3Url('wss://rinkeby.infura.io/_ws').
+      setSignerKey('41b1a0649752af1b28b3dc29a1556eee781e4a4c3a1f7f53f90fa834de098c4d').
+      setStorage('memory').
+      build();
+
+    await infinitechain.initialize();
+  });
+
   describe('#initialize', () => {
     it('booster object should not be null', async () => {
-      let infinitechain = new InfinitechainBuilder().
-        setNodeUrl('http://localhost:3000').
-        setWeb3Url('ws://localhost:8546').
-        setSignerKey('41b1a0649752af1b28b3dc29a1556eee781e4a4c3a1f7f53f90fa834de098c4d').
-        setStorage('memory').
-        build();
-
-      await infinitechain.initialize();
-
       assert.equal(infinitechain.contract.booster() !== null, true);
+    });
+    it('web3 object should not be null', async () => {
+      assert.equal(infinitechain.contract.web3() !== null, true);
+    });
+    it('erc20 object should not be null', async () => {
+      assert.equal(infinitechain.contract.erc20('0x68c34a54ec562b2b6efc8e61c54f9314b93b1a44') !== null, true);
     });
   });
 });

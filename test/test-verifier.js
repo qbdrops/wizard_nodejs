@@ -12,7 +12,7 @@ nock('http://localhost:3000')
 describe('Verifier', async () => {
   let infinitechain = new InfinitechainBuilder().
     setNodeUrl('http://localhost:3000').
-    setWeb3Url('ws://localhost:8546').
+    setWeb3Url('wss://rinkeby.infura.io/_ws').
     setSignerKey('41b1a0649752af1b28b3dc29a1556eee781e4a4c3a1f7f53f90fa834de098c4d').
     setStorage('memory').
     build();

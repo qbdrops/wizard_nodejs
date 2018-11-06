@@ -9,19 +9,14 @@ class Gringotts {
     this._infinitechain = infinitechain;
   }
 
-  getSlice = async (stageHeight, lightTxHash) => {
-    let url = this._nodeUrl + '/slice';
-    return axios.get(url, {
-      params: {
-        stage_height: stageHeight,
-        light_tx_hash: lightTxHash
-      }
-    });
+  getSlice = async (stageHeight, receiptHash) => {
+    let url = this._nodeUrl + '/slice/' + stageHeight + '/' + receiptHash;
+    return await axios.get(url);
   }
 
   getTrees = async (stageHeight) => {
     let url = this._nodeUrl + '/trees';
-    return axios.get(url, {
+    return await axios.get(url, {
       params: {
         stage_height: stageHeight
       }
@@ -52,12 +47,12 @@ class Gringotts {
 
   fetchBoosterAddress = async () => {
     let url = this._nodeUrl + '/booster/address';
-    return axios.get(url);
+    return await axios.get(url);
   }
 
   fetchServerAddress = async () => {
     let url = this._nodeUrl + '/server/address';
-    return axios.get(url);
+    return await axios.get(url);
   }
 
   fetchRootHashes = async (stageHeight = null) => {
@@ -66,17 +61,25 @@ class Gringotts {
       url = url + '/' + stageHeight.toString();
     }
 
-    return axios.get(url);
+    return await axios.get(url);
   }
 
   getOffchainReceipts = async (stageHeight) => {
     let url = this._nodeUrl + '/receipts/' + stageHeight;
+    return await axios.get(url);
+  }
+
+  getOffchainReceiptByGSN = async (GSN) => {
+    if (typeof GSN === 'number') {
+      GSN = parseInt(GSN).toString(16);
+    }
+    let url = this._nodeUrl + '/receipt_by_gsn/' + GSN;
     return axios.get(url);
   }
 
   getAccountBalances = async (stageHeight) => {
     let url = this._nodeUrl + '/accounts/' + stageHeight;
-    return axios.get(url);
+    return await axios.get(url);
   }
 
   getBoosterBalance = async (clientAddress, assetID = null) => {
@@ -86,12 +89,6 @@ class Gringotts {
     } else {
       url = this._nodeUrl + '/balance/' + clientAddress + '?assetID=' + assetID;
     }
-    return await axios.get(url);
-  }
-
-  getProof = async (stageHeight, receiptHash) => {
-    let url;
-    url = this._nodeUrl + '/slice/' + stageHeight + '/' + receiptHash;
     return await axios.get(url);
   }
 
