@@ -15,12 +15,9 @@ class Gringotts {
   }
 
   getTrees = async (stageHeight) => {
-    let url = this._nodeUrl + '/trees';
-    return await axios.get(url, {
-      params: {
-        stage_height: stageHeight
-      }
-    });
+    let url = this._nodeUrl + '/trees/' + stageHeight;
+    let res = await axios.get(url);
+    return res.data;
   }
 
   sendLightTx = async (lightTx) => {
@@ -64,8 +61,12 @@ class Gringotts {
     return await axios.get(url);
   }
 
-  getOffchainReceipts = async (stageHeight) => {
+  getOffchainReceipts = async (stageHeight, address = null) => {
     let url = this._nodeUrl + '/receipts/' + stageHeight;
+    if (address) {
+      address = address.padStart(40, '0');
+      url = `${url}?address=${address}`;
+    }
     return await axios.get(url);
   }
 
