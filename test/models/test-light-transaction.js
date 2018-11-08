@@ -1,19 +1,20 @@
 import assert from 'assert';
 import LightTransaction from '@/models/light-transaction';
 import types from '@/models/types';
+import EthUtils from 'ethereumjs-util';
 
 describe('LightTransaction', () => {
   describe('#constructor', () => {
     it('removes keys which are not in the whitelist', () => {
       let data = {
         lightTxData: {
-          fee: 3,
+          fee: '3',
           to: '0x456',
           from: '0x123',
-          value: 100,
+          value: '100',
           nonce: '123',
-          assetID: 1,
-          logID: 1,
+          assetID: '1',
+          logID: '1',
           foo: 'bar'
         }
       };
@@ -25,12 +26,12 @@ describe('LightTransaction', () => {
     it('checks if all lightTxData keys are included', () => {
       let data = {
         lightTxData: {
-          fee: 3,
+          fee: '3',
           from: '0x123',
-          value: 100,
+          value: '100',
           nonce: '123',
-          assetID: 1,
-          logID: 1
+          assetID: '1',
+          logID: '1'
         }
       };
 
@@ -40,13 +41,13 @@ describe('LightTransaction', () => {
     it('checks if all sig has correct format', () => {
       let data = {
         lightTxData: {
-          fee: 3,
+          fee: '3',
           from: '0x123',
           to: '0x456',
-          value: 100,
+          value: '100',
           nonce: '123',
           assetID: 1,
-          logID: 1
+          logID: '1'
         },
         sig: {
           clientLightTx: {
@@ -62,10 +63,10 @@ describe('LightTransaction', () => {
     it('returns correct lightTx', () => {
       let data = {
         lightTxData: {
-          fee: 3,
+          fee: '3',
           to: '0x456',
           from: '0x123',
-          value: 100,
+          value: '100',
           nonce: '123',
           assetID: 1,
           logID: 1
@@ -98,10 +99,10 @@ describe('LightTransaction', () => {
     it('returns correct lightTx type', () => {
       let data1 = {
         lightTxData: {
-          fee: 3,
+          fee: '3',
           to: '123',
           from: '0',
-          value: 10,
+          value: '10',
           nonce: '123',
           assetID: 1,
           logID: 1
@@ -110,10 +111,10 @@ describe('LightTransaction', () => {
 
       let data2 = {
         lightTxData: {
-          fee: 3,
+          fee: '3',
           to: '123',
           from: '456',
-          value: 10,
+          value: '10',
           nonce: '123',
           assetID: 1,
           logID: 1
@@ -122,10 +123,10 @@ describe('LightTransaction', () => {
 
       let data3 = {
         lightTxData: {
-          fee: 3,
+          fee: '3',
           to: '0',
           from: '123',
-          value: 1,
+          value: '1',
           nonce: '123',
           assetID: 1,
           logID: 1
@@ -134,10 +135,10 @@ describe('LightTransaction', () => {
 
       let data4 = {
         lightTxData: {
-          fee: 3,
+          fee: '3',
           to: '0',
           from: '123',
-          value: 11,
+          value: '11',
           nonce: '123',
           assetID: 1,
           logID: 1
@@ -160,9 +161,9 @@ describe('LightTransaction', () => {
       lightTxData: {
         from: 'ce44fa4565747558066266061786e69336b5f3a2',
         to: 'fb44fa0865747558066266061786e69336b5f3a2',
-        value: 0.5,
-        fee: 0.1,
-        nonce: 5,
+        value: '0.5',
+        fee: '0.1',
+        nonce: '5',
         assetID: 1,
         logID: 1
       }
@@ -202,9 +203,9 @@ describe('LightTransaction', () => {
       lightTxData : {
         from: 'ce44fa4565747558066266061786e69336b5f3a2',
         to: 'fb44fa0865747558066266061786e69336b5f3a2',
-        value: 0.5,
-        fee: 0.1,
-        nonce: 5,
+        value: '0.5',
+        fee: '0.1',
+        nonce: '5',
         assetID: 1,
         logID: 1
       }
@@ -236,6 +237,27 @@ describe('LightTransaction', () => {
       });
 
       assert.equal(lightTx.toString(), expected);
+    });
+  });
+
+  describe('#precision', () => {
+    let data = {
+      lightTxData : {
+        from: 'ce44fa4565747558066266061786e69336b5f3a2',
+        to: 'fb44fa0865747558066266061786e69336b5f3a2',
+        value: '5994.9914',
+        fee: '0.1',
+        nonce: '5',
+        assetID: 1,
+        logID: 1
+      }
+    };
+    it('ltght tx value must equal', () => {
+      let lightTx = new LightTransaction(data);
+      let expected = new EthUtils.BN(59949914);
+      let base = new EthUtils.BN(1E14);
+      expected = expected.mul(base);
+      assert.equal(lightTx.lightTxData.value, expected.toString(16).padStart(64, '0'));
     });
   });
 });

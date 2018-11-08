@@ -75,21 +75,43 @@ class LightTransaction {
   }
 
   _to32BytesHex = (n, toWei) => {
+    assert(typeof n == 'string', 'Please pass number as string to avoid precision errors.');
+
     let startWith0x = ((n.toString().slice(0, 2) == '0x') && (n.toString().substring(2).length == 64));
     let lengthIs64Bytes = (n.toString().length == 64);
 
     if (startWith0x || lengthIs64Bytes) {
       n = n.slice(-64).toLowerCase();
     } else {
-      let m = parseFloat(n);
-      m = toWei ? (m * 1e18) : m;
-      m = Math.floor(m);
-      let h = m.toString(16);
+      assert(/^(\d)+e(\+|-)?(\d)+$/i.test(n) === false, 'Do not pass numbers as scientific notation.');
+      let h = '';
+      if (toWei) {
+        let sm = n.split('.');
+        let base = this._toBN(10);
+        let exp = 18;
+        if (sm.length > 1) {
+          exp -= sm[1].length;
+        }
+        base = base.pow(this._toBN(exp));
+        sm = this._toBN(sm.join(''));
+        n = sm.mul(base);
+      } else {
+        n = this._toBN(n);
+      }
+      h = n.toString(16);
       assert(h != 'NaN', '\'' + n + '\' can not be parsed to an integer.');
       n = h.padStart(64, '0').toLowerCase();
     }
 
     return n;
+  }
+
+  _toBN = (value, base = 10) => {
+    if (typeof value !== 'number' && typeof value !== 'string') {
+      throw new Error('Unsupported type to big numnber.');
+    }
+    value = value.toString();
+    return new EthUtils.BN(value, base);
   }
 
   _remove0x = (value) => {

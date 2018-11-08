@@ -30,8 +30,8 @@ describe('Client', () => {
     lightTxData = {
       from: '0x123',
       to: '0x456',
-      value: 0.1,
-      nonce: 1,
+      value: '0.1',
+      nonce: '1',
       assetID: 1,
       logID: 1,
       fee: '0.01'
