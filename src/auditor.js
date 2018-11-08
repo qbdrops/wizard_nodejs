@@ -307,6 +307,7 @@ class Auditor {
 
   _computeRootHashFromSlice (slice, stageHeight) {
     let firstNode = slice.shift();
+    stageHeight = parseInt(stageHeight);
 
     let rootNode = slice.reduce((acc, curr) => {
       if (acc.treeNodeIndex % 2 == 0) {
