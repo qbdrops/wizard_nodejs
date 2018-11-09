@@ -55,11 +55,11 @@ class Contract {
     return erc20;
   }
 
-  proposeWithdrawal = async (receipt, nonce = null) => {
+  proposeWithdrawal = async (receipt, privateKey = null) => {
     assert(receipt instanceof Receipt, 'Parameter \'lightTx\' should be instance of Receipt.');
 
     let txValue = '0x0';
-    let clientAddress = '0x' + this._infinitechain.signer.getAddress();
+    let clientAddress = '0x' + this._infinitechain.signer.getAddress(privateKey);
     let boosterContractAddress = this._boosterContractAddress;
 
     try {
@@ -67,19 +67,19 @@ class Contract {
       let txMethodData = this.booster().methods.proposeWithdrawal(
         receiptData
       ).encodeABI();
-      let serializedTx = await this._signRawTransaction(txMethodData, clientAddress, boosterContractAddress, txValue, nonce);
+      let serializedTx = await this._signRawTransaction(txMethodData, clientAddress, boosterContractAddress, txValue, privateKey);
       let txHash = await this._sendRawTransaction(serializedTx);
       return txHash;
     } catch (e) {
-      console.error(e);
+      throw e;
     }
   }
 
-  deposit = async (receipt, nonce = null) => {
+  deposit = async (receipt, privateKey = null) => {
     assert(receipt instanceof Receipt, 'Parameter \'lightTx\' should be instance of Receipt.');
 
     let txValue = '0x0';
-    let clientAddress = '0x' + this._infinitechain.signer.getAddress();
+    let clientAddress = '0x' + this._infinitechain.signer.getAddress(privateKey);
     let boosterContractAddress = this._boosterContractAddress;
 
     try {
@@ -88,17 +88,17 @@ class Contract {
         receiptData
       ).encodeABI();
 
-      let serializedTx = await this._signRawTransaction(txMethodData, clientAddress, boosterContractAddress, txValue, nonce);
+      let serializedTx = await this._signRawTransaction(txMethodData, clientAddress, boosterContractAddress, txValue, privateKey);
       let txHash = await this._sendRawTransaction(serializedTx);
       return txHash;
     } catch (e) {
-      console.error(e);
+      throw e;
     }
   }
 
-  proposeTokenDeposit = async (proposeData, nonce = null) => {
+  proposeTokenDeposit = async (proposeData, privateKey = null) => {
     let txValue = '0x0';
-    let clientAddress = '0x' + this._infinitechain.signer.getAddress();
+    let clientAddress = '0x' + this._infinitechain.signer.getAddress(privateKey);
     let boosterContractAddress = this._boosterContractAddress;
     let depositAddress = proposeData.depositAddress.slice(-40).padStart(64, '0').slice(-64);
     let depositValue = this._to32BytesHex(proposeData.depositValue, false);
@@ -112,17 +112,17 @@ class Contract {
         ]
       ).encodeABI();
 
-      let serializedTx = await this._signRawTransaction(txMethodData, clientAddress, boosterContractAddress, txValue, nonce);
+      let serializedTx = await this._signRawTransaction(txMethodData, clientAddress, boosterContractAddress, txValue, privateKey);
       let txHash = await this._sendRawTransaction(serializedTx);
       return txHash;
     } catch (e) {
-      console.error(e);
+      throw e;
     }
   }
 
-  withdraw = async (receipt, nonce = null) => {
+  withdraw = async (receipt, privateKey = null) => {
     let txValue = '0x0';
-    let clientAddress = '0x' + this._infinitechain.signer.getAddress();
+    let clientAddress = '0x' + this._infinitechain.signer.getAddress(privateKey);
     let boosterContractAddress = this._boosterContractAddress;
 
     try {
@@ -133,19 +133,19 @@ class Contract {
         ]
       ).encodeABI();
 
-      let serializedTx = await this._signRawTransaction(txMethodData, clientAddress, boosterContractAddress, txValue, nonce);
+      let serializedTx = await this._signRawTransaction(txMethodData, clientAddress, boosterContractAddress, txValue, privateKey);
       let txHash = await this._sendRawTransaction(serializedTx);
       return txHash;
     } catch (e) {
-      console.error(e);
+      throw e;
     }
   }
 
-  instantWithdraw = async (receipt, nonce = null) => {
+  instantWithdraw = async (receipt, privateKey = null) => {
     assert(receipt instanceof Receipt, 'Parameter \'receipt\' should be instance of Receipt.');
 
     let txValue = '0x0';
-    let clientAddress = '0x' + this._infinitechain.signer.getAddress();
+    let clientAddress = '0x' + this._infinitechain.signer.getAddress(privateKey);
     let boosterContractAddress = this._boosterContractAddress;
 
     try {
@@ -154,11 +154,11 @@ class Contract {
         receiptData
       ).encodeABI();
 
-      let serializedTx = await this._signRawTransaction(txMethodData, clientAddress, boosterContractAddress, txValue, nonce);
+      let serializedTx = await this._signRawTransaction(txMethodData, clientAddress, boosterContractAddress, txValue, privateKey);
       let txHash = await this._sendRawTransaction(serializedTx);
       return txHash;
     } catch (e) {
-      console.error(e);
+      throw e;
     }
   }
 
@@ -176,7 +176,7 @@ class Contract {
       let txHash = await this._sendRawTransaction(serializedTx);
       return txHash;
     } catch (e) {
-      console.error(e);
+      throw e;
     }
   }
   
@@ -193,7 +193,7 @@ class Contract {
       let txHash = await this._sendRawTransaction(serializedTx);
       return txHash;
     } catch (e) {
-      console.error(e);
+      throw e;
     }
   }
 
@@ -210,7 +210,7 @@ class Contract {
       let txHash = await this._sendRawTransaction(serializedTx);
       return txHash;
     } catch (e) {
-      console.error(e);
+      throw e;
     }
   }
 
@@ -232,7 +232,7 @@ class Contract {
       let txHash = await this._sendRawTransaction(serializedTx);
       return txHash;
     } catch (e) {
-      console.error(e);
+      throw e;
     }
   }
 
@@ -261,12 +261,15 @@ class Contract {
     return stage.completed();
   }
 
-  _signRawTransaction = async (txMethodData, from, to, value, nonce = null, gas = 4700000, gasPrice = '0x2540be400') => {
-    if (nonce == null) {
-      let address = '0x' + this._infinitechain.signer.getAddress();
-      nonce = await this.web3().eth.getTransactionCount(address, 'pending');
-      nonce = this.web3().utils.toHex(nonce);
-    }
+  isTxFinished = async (txHash) => {
+    let txReceipt = await this.web3().eth.getTransactionReceipt(txHash);
+    return txReceipt.status == '0x1';
+  }
+
+  _signRawTransaction = async (txMethodData, from, to, value, privateKey = null, gas = 4700000, gasPrice = '0x2540be400') => {
+    let address = '0x' + this._infinitechain.signer.getAddress(privateKey);
+    let nonce = await this.web3().eth.getTransactionCount(address, 'pending');
+    nonce = this.web3().utils.toHex(nonce);
     let txParams = {
       data: txMethodData,
       from: from,
@@ -278,7 +281,7 @@ class Contract {
     };
 
     let tx = new EthereumTx(txParams);
-    let key = this._infinitechain.signer.getPrivateKey();
+    let key = this._infinitechain.signer.getPrivateKey(privateKey);
     tx.sign(Buffer.from(key, 'hex'));
     let serializedTx = '0x' + tx.serialize().toString('hex');
     return serializedTx;

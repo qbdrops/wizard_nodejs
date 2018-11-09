@@ -5,133 +5,130 @@ class Event {
     this.eventConfig = eventConfig;
     this._infinitechain = infinitechain;
     this._storage = eventConfig.storage;
-    this._eventOpt = { toBlock: 'latest' };
     (async () => {
       this._fromBlock = await this._storage.getBlockNumber();
-      this._address = '0x' + this._infinitechain.signer.getAddress().padStart(64, '0');
     })();
   }
 
-  getProposeDeposit (cb) {
+  getProposeDeposit (cb, address = null) {
+    let client = address? this._remove0x(address) : this._infinitechain.signer.getAddress();
     let booster = this._infinitechain.contract.booster();
     booster.getPastEvents('ProposeDeposit', {
-      filter: { _client: this._address },
+      filter: { _client: '0x' + client.padStart(64, '0') },
       fromBlock: 0,
       toBlock: 'latest'
     }, async (err, result) => {
-      if (err) { console.trace; }
       let events = [];
-      for (let i=0; i<result.length; i++) {
+      for (let i = 0; i < result.length; i++) {
         let depositLog = await booster.methods.depositLogs(result[i].returnValues._dsn).call();
         if (depositLog.flag == false) {
           events.push(result[i]);
         }
       }
-      cb(err, events);
       let web3 = this._infinitechain.contract.web3();
-      web3.eth.getBlockNumber().then(blockNumber => {
-        this._storage.setBlockNumber(blockNumber);
-      })
+      web3.eth.getBlockNumber().then(this._storage.setBlockNumber);
+      cb(err, events);
     });
   }
 
-  onProposeDeposit (cb) {
+  onProposeDeposit (cb, address = null) {
+    let client = address? this._remove0x(address) : this._infinitechain.signer.getAddress();
     let booster = this._infinitechain.contract.booster();
     booster.events.ProposeDeposit({
-      filter: { _client: this._address },
+      filter: { _client: '0x' + client.padStart(64, '0') },
       toBlock: 'latest'
     }, (err, result) => {
-      if (err) { console.trace; }
       cb(err, result);
     });
   }
 
-  onDeposit (cb) {
+  onDeposit (cb, address = null) {
     let booster = this._infinitechain.contract.booster();
     booster.events.VerifyReceipt({
       filter: { _type: types.deposit },
       toBlock: 'latest'
     }, (err, result) => {
-      if (err) { console.trace; }
       cb(err, result);
     });
   }
 
-  onProposeWithdrawal (cb) {
+  onProposeWithdrawal (cb, address = null) {
     let booster = this._infinitechain.contract.booster();
     booster.events.VerifyReceipt({
       filter: { _type: types.withdrawal },
       toBlock: 'latest'
     }, (err, result) => {
-      if (err) { console.trace; }
       cb(err, result);
     });
   }
 
-  onWithdraw (cb) {
+  onWithdraw (cb, address = null) {
+    let client = address? this._remove0x(address) : this._infinitechain.signer.getAddress();
     let booster = this._infinitechain.contract.booster();
     booster.events.Withdraw({
-      filter: { _client: this._address },
+      filter: { _client: '0x' + client.padStart(64, '0') },
       toBlock: 'latest'
     }, (err, result) => {
-      if (err) { console.trace; }
       cb(err, result);
     });
   }
 
-  onInstantWithdraw (cb) {
+  onInstantWithdraw (cb, address = null) {
     let booster = this._infinitechain.contract.booster();
     booster.events.VerifyReceipt({
       filter: { _type: types.instantWithdrawal },
       toBlock: 'latest'
     }, (err, result) => {
-      if (err) { console.trace; }
       cb(err, result);
     });
   }
 
-  onAttach (cb) {
+  onAttach (cb, address = null) {
     let booster = this._infinitechain.contract.booster();
 
     booster.events.Attach({
       toBlock: 'latest'
     }, (err, result) => {
-      if (err) { console.trace; }
       cb(err, result);
     });
   }
 
-  onChallenge (cb) {
+  onChallenge (cb, address = null) {
     let booster = this._infinitechain.contract.booster();
 
     booster.events.Challenge({
       toBlock: 'latest'
     }, (err, result) => {
-      if (err) { console.trace; }
       cb(err, result);
     });
   }
 
-  onDefend (cb) {
+  onDefend (cb, address = null) {
     let booster = this._infinitechain.contract.booster();
 
     booster.events.Defend({
       toBlock: 'latest'
     }, (err, result) => {
-      if (err) { console.trace; }
       cb(err, result);
     });
   }
 
-  onFinalize (cb) {
+  onFinalize (cb, address = null) {
     let booster = this._infinitechain.contract.booster();
 
     booster.events.Finalize({
       toBlock: 'latest'
     }, (err, result) => {
-      if (err) { console.trace; }
       cb(err, result);
     });
+  }
+
+  _remove0x = (value) => {
+    value = value.toString();
+    if (value.slice(0, 2) == '0x') {
+      value = value.substring(2);
+    }
+    return value;
   }
 }
 

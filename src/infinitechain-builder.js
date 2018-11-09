@@ -110,11 +110,8 @@ class InfinitechainBuilder {
     let signer = new Signer(signerConfig);
     infinitechain.setSigner(signer);
 
-    // Generate keypair if key is not configured
     if (this._signerKey) {
       signer.importPrivateKey(this._signerKey);
-    } else {
-      signer.getOrNewKeyPair();
     }
 
     let gringotts = new Gringotts(gringottsConfig, infinitechain);
