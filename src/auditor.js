@@ -1,5 +1,5 @@
 import BigNumber from 'bignumber.js';
-import Receipt from './models/receipt';
+import Receipt from '@/models/receipt';
 import types from '@/models/types';
 import EthUtils from 'ethereumjs-util';
 import IndexedMerkleTree from '@/utils/indexed-merkle-tree';

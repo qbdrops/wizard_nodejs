@@ -10,7 +10,7 @@ import Gringotts from '@/gringotts';
 import Contract from '@/contract';
 import Memory from '@/storages/memory';
 import Level from '@/storages/level';
-import GoogleDrive from './sync/google-drive';
+import GoogleDrive from '@/sync/google-drive';
 
 class InfinitechainBuilder {
   setNodeUrl (url) {
@@ -60,8 +60,9 @@ class InfinitechainBuilder {
     assert(this._nodeUrl != undefined, '\'nodeUrl\' is not provided.');
     assert(this._web3Url != undefined, '\'web3Url\' is not provided.');
     assert(this._storage != undefined, '\'storage\' is not provided.');
-
-    this._storage.setReceiptSyncer(this.syncer);
+    if (this.syncer) {
+      this._storage.setReceiptSyncer(this.syncer);
+    }
 
     let clientConfig = {
       web3Url: this._web3Url,
@@ -75,7 +76,7 @@ class InfinitechainBuilder {
       web3Url: this._web3Url,
       nodeUrl: this._nodeUrl,
       serverAddress: this._serverAddress,
-      storage: this.storage
+      storage: this._storage
     };
 
     let serverConfig = {
@@ -109,11 +110,8 @@ class InfinitechainBuilder {
     let signer = new Signer(signerConfig);
     infinitechain.setSigner(signer);
 
-    // Generate keypair if key is not configured
-    if (this._signerKey != undefined) {
+    if (this._signerKey) {
       signer.importPrivateKey(this._signerKey);
-    } else {
-      signer.getOrNewKeyPair();
     }
 
     let gringotts = new Gringotts(gringottsConfig, infinitechain);

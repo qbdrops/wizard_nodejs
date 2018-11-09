@@ -1,7 +1,7 @@
 import EthUtils from 'ethereumjs-util';
 import assert from 'assert';
 import LightTransaction from '@/models/light-transaction';
-import Receipt from './models/receipt';
+import Receipt from '@/models/receipt';
 import types from '@/models/types';
 
 class Client {
@@ -12,97 +12,93 @@ class Client {
     this._nodeUrl = clientConfig.nodeUrl;
   }
 
-  getProposeDeposit = (rawData = {}) => {
+  getProposeDeposit = (rawData = {}, address = null) => {
     return new Promise((resolve, reject) => {
-      this._infinitechain.event.getProposeDeposit(async (err, events) => {
+      this._infinitechain.event.getProposeDeposit((err, events) => {
         if (err) {
           reject(err);
         } else {
           let fee = rawData.fee? rawData.fee : 0;
           let metadata = rawData.metadata? rawData.metadata : null;
-          let signedLightTxs = [];
-          for (let i=0; i<events.length; i++) {
+          let lightTxs = [];
+          for (let i = 0; i < events.length; i++) {
             let logID = events[i].returnValues._dsn;
-            let nonce = this._getNonce();
+            let to = address? address : this._infinitechain.signer.getAddress();
             let value = events[i].returnValues._value;
             let assetID = events[i].returnValues._assetID;
             let lightTxData = {
+              to: to,
               assetID: assetID,
               value: value,
               fee: fee,
-              nonce: nonce,
               logID: logID,
               metadata: metadata
             };
 
-            let signedLightTx = await this.makeLightTx(types.deposit, lightTxData, lightTxData.metadata);
-            signedLightTxs.push(signedLightTx);
+            let lightTx = this.makeLightTx(types.deposit, lightTxData, lightTxData.metadata);
+            lightTxs.push(lightTx);
           }
-          resolve(signedLightTxs);
+          resolve(lightTxs);
         }
-      });
+      }, address);
     });
   }
 
-  makeProposeDeposit = (rawData = {}) => {
+  makeProposeDeposit = (rawData = {}, address = null) => {
     return new Promise(async (resolve, reject) => {
-      this._infinitechain.event.onProposeDeposit(async (err, result) => {
+      this._infinitechain.event.onProposeDeposit((err, result) => {
         if (err) {
           reject(err);
         } else {
           let fee = rawData.fee? rawData.fee : 0;
           let metadata = rawData.metadata? rawData.metadata : null;
           let logID = result.returnValues._dsn;
-          let nonce = this._getNonce();
+          let to = address? address : this._infinitechain.signer.getAddress();
           let value = result.returnValues._value;
           let assetID = result.returnValues._assetID;
           let lightTxData = {
+            to: to,
             assetID: assetID,
             value: value,
             fee: fee,
-            nonce: nonce,
             logID: logID,
             metadata: metadata
           };
 
-          let signedLightTx = await this.makeLightTx(types.deposit, lightTxData, lightTxData.metadata);
-          resolve(signedLightTx);
+          let lightTx = this.makeLightTx(types.deposit, lightTxData, lightTxData.metadata);
+          resolve(lightTx);
         }
-      });
+      }, address);
     });
   }
 
-  proposeTokenDeposit = async (proposeData) => {
+  proposeTokenDeposit = async (proposeData, privateKey = null) => {
     let contract = this._infinitechain.contract;
-    let txHash = await contract.proposeTokenDeposit(proposeData);
+    let txHash = await contract.proposeTokenDeposit(proposeData, privateKey);
     return txHash;
   }
 
-  makeProposeWithdrawal = async (rawData) => {
+  makeProposeWithdrawal = (rawData, address = null) => {
     assert(rawData.assetID != undefined, '\'assetID\' is not provided.');
     assert(rawData.value != undefined, '\'value\' is not provided.');
     let fee = rawData.fee? rawData.fee : 0;
     let metadata = rawData.metadata? rawData.metadata : null;
-    let nonce = this._getNonce();
-    let clientAddress = this._infinitechain.signer.getAddress();
-    let normalizedClientAddress = clientAddress.slice(-40).padStart(64, '0').slice(-64);
-    let logID = this._sha3(normalizedClientAddress + nonce);
+    let from = address? address : this._infinitechain.signer.getAddress();
     let lightTxData = {
+      from: from,
       assetID: rawData.assetID,
       value: rawData.value,
       fee: fee,
-      nonce: nonce,
-      logID: logID,
       metadata: metadata
     };
 
-    let signedLightTx = await this.makeLightTx(types.withdrawal, lightTxData, lightTxData.metadata);
-    return signedLightTx;
+    let lightTx = this.makeLightTx(types.withdrawal, lightTxData, lightTxData.metadata);
+    return lightTx;
   }
 
-  makeLightTx = async (type, lightTxData, metadata = null) => {
+  makeLightTx = (type, lightTxData, metadata = null) => {
     // Prepare lightTxData
-    lightTxData = await this._prepare(type, lightTxData);
+    lightTxData = this._prepare(type, lightTxData);
     if (metadata) {
       if (typeof metadata.client == 'object') {
         metadata.client = JSON.stringify(metadata.client);
@@ -114,24 +110,39 @@ class Client {
 
     // Create lightTx
     let lightTx = new LightTransaction(lightTxJson);
+    // Sign lightTx if has privateKey
+    let signer = this._infinitechain.signer;
+    if (signer.hasPrivateKey()) {
+      lightTx = signer.signWithClientKey(lightTx);
+    }
+    return lightTx;
+  }
 
+  signLightTx = (lightTx, privateKey = null) => {
+    if (typeof lightTx == 'string') lightTx == JSON.parse(lightTx);
+    if (typeof lightTx.metadata.client == 'object') {
+      lightTx.metadata.client = JSON.stringify(lightTx.metadata.client);
+    } else {
+      lightTx.metadata.client = lightTx.metadata.client.toString();
+    }
+    lightTx = new LightTransaction(lightTx);
     // Sign lightTx
     let signer = this._infinitechain.signer;
-    let signedLightTx = signer.signWithClientKey(lightTx);
+    let signedLightTx = signer.signWithClientKey(lightTx, privateKey);
 
     return signedLightTx;
   }
 
   saveReceipt = async (receipt, upload = false) => {
     assert(receipt instanceof Receipt, 'Parameter \'receipt\' should be instance of \'Receipt\'.');
-    await this._storage.setReceipt(receipt.lightTxHash, receipt.toJson(), upload);
+    await this._storage.setReceipt(receipt.receiptHash, receipt.toJson(), upload);
   }
 
-  getReceipt = async (lightTxHash) => {
+  getReceipt = async (receiptHash) => {
     try {
-      return await this._storage.getReceipt(lightTxHash);
+      return await this._storage.getReceipt(receiptHash);
     } catch (e) {
-      console.log(e);
+      throw e;
     }
   }
 
@@ -155,29 +166,24 @@ class Client {
     return EthUtils.sha3(content).toString('hex');
   }
 
-  _prepare = async (type, lightTxData) => {
+  _prepare = (type, lightTxData) => {
     assert(Object.values(types).includes(type), 'Parameter \'type\' should be one of \'deposit\', \'withdrawal\', \'instantWithdraw\' or \'remittance\'');
 
-    let clientAddress = this._infinitechain.signer.getAddress();
-
+    lightTxData.nonce = this._getNonce();
     switch (type) {
-    case types.deposit:
-      lightTxData.from = '0';
-      lightTxData.to = clientAddress;
-      lightTxData.fee = 0;
-      break;
-    case types.withdrawal:
-      lightTxData.from = clientAddress;
-      lightTxData.to = '0';
-      break;
-    case types.instantWithdrawal:
-      lightTxData.from = clientAddress;
-      lightTxData.to = '0';
-      break;
-    case types.remittance:
-      lightTxData.nonce = this._getNonce();
-      lightTxData.logID = '0';
-      break;
+      case types.deposit:
+        lightTxData.from = '0';
+        lightTxData.fee = '0';
+        break;
+      case types.withdrawal:
+      case types.instantWithdrawal:
+        lightTxData.to = '0';
+        let normalizedClientAddress = lightTxData.from.slice(-40).padStart(64, '0').slice(-64);
+        lightTxData.logID = this._sha3(normalizedClientAddress + lightTxData.nonce);
+        break;
+      case types.remittance:
+        lightTxData.logID = '0';
+        break;
     }
     return lightTxData;
   }
@@ -205,6 +211,7 @@ class Client {
   auidtReceiptSlice = async (stageHeight, receiptHash, slice) => {
     let success = false;
     let contract = this._infinitechain.contract;
+    stageHeight = parseInt(stageHeight);
     // 1. Get receiptRootHash from blockchain
     let rootHashes = await contract.getStageRootHash(stageHeight);
     let receiptRootHash = rootHashes[0];

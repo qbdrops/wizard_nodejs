@@ -14,7 +14,7 @@ class GoogleDrive {
       if (existedToken) {
         this.oauth2Client.refreshAccessToken(async (err, tokens) => {
           if (err) {
-            console.log(err);
+            throw err;
           } else {
             if (tokens.refresh_token) {
               this.oauth2Client.setCredentials(tokens);
@@ -24,7 +24,7 @@ class GoogleDrive {
         });
       }
     } catch (e) {
-      console.error(e);
+      throw e;
     }
   }
 
@@ -35,7 +35,7 @@ class GoogleDrive {
         await this._infinitechain.client.refreshToken(existedToken);
       }
     } catch (e) {
-      console.error(e);
+      throw e;
     }
   }
 
@@ -70,7 +70,7 @@ class GoogleDrive {
 
       return response.data.files;
     } catch (e) {
-      console.log(e);
+      throw e;
     }
   }
 
@@ -116,13 +116,15 @@ class GoogleDrive {
           fields: 'id'
         }, function (err, response) {
           if (err) {
-            console.error(err);
+            throw err;
           } else {
             resolve(response.data.id);
           }
         });
       }
-    }).catch(console.error);
+    }).catch(e => {
+      throw e;
+    });
   }
 
   _uploadReceipt (folderId, receipt) {
@@ -147,7 +149,9 @@ class GoogleDrive {
           resolve(response.data.id);
         }
       });
-    }).catch(console.error);
+    }).catch(e => {
+      throw e;
+    });
   }
 }
 

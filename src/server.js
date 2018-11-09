@@ -1,6 +1,8 @@
 import axios from 'axios';
+import assert from 'assert';
+import LightTransaction from '@/models/light-transaction';
+import Receipt from '@/models/receipt';
 import types from '@/models/types';
-import { AssertionError } from 'assert';
 
 class Server {
   constructor (serverConfig, infinitechain) {
@@ -10,31 +12,7 @@ class Server {
     this._nodeUrl = serverConfig.nodeUrl;
   }
 
-  sendLightTx = async (lightTx) => {
-    let gringotts = this._infinitechain.gringotts;
-    let contract = this._infinitechain.contract;
-    let verifier = this._infinitechain.verifier;
-    let receipt = await gringotts.sendLightTx(lightTx);
-    if (verifier.verifyReceipt(receipt) !== true) {
-      throw new Error('Wrong signature when verify receipt received from booster.');
-    }
-    switch (receipt.type()) {
-    case types.deposit:
-      await contract.deposit(receipt);
-      break;
-    case types.withdrawal:
-      await contract.proposeWithdrawal(receipt);
-      break;
-    case types.instantWithdrawal:
-      await contract.instantWithdraw(receipt);
-      break;
-    case types.remittance:
-      break;
-    }
-    return receipt;
-  }
-
-  addServerMetadata = async (lightTx, serverMetadata) => {
+  addServerMetadata = (lightTx, serverMetadata) => {
     if (serverMetadata) {
       if (typeof serverMetadata == 'object') {
         serverMetadata = JSON.stringify(serverMetadata);
@@ -46,6 +24,54 @@ class Server {
       lightTx.metadata.server = '';
     }
     return lightTx;
+  }
+
+  signLightTx = (lightTx, privateKey = null) => {
+    if (typeof lightTx == 'string') lightTx == JSON.parse(lightTx);
+    lightTx = this.addServerMetadata(lightTx, lightTx.metadata.server);
+    lightTx = new LightTransaction(lightTx);
+    // Sign lightTx
+    let signer = this._infinitechain.signer;
+    let signedLightTx = signer.signWithServerKey(lightTx, privateKey);
+
+    return signedLightTx;
+  }
+
+  sendLightTx = async (lightTx) => {
+    let gringotts = this._infinitechain.gringotts;
+    let verifier = this._infinitechain.verifier;
+    let receipt = await gringotts.sendLightTx(lightTx);
+    assert(verifier.verifyReceipt(receipt), 'Wrong signature when verify receipt received from booster.');
+    return receipt;
+  }
+
+  sendReceipt = async (receipt, privateKey = null) => {
+    let contract = this._infinitechain.contract;
+    let txHash = '';
+    let isTxFinished = false;
+    return new Promise(async (resolve, reject) => {
+      try {
+        let normalizedReceipt = new Receipt(receipt);
+        switch (normalizedReceipt.type()) {
+          case types.deposit:
+            txHash = await contract.deposit(normalizedReceipt, privateKey);
+            break;
+          case types.withdrawal:
+            txHash = await contract.proposeWithdrawal(normalizedReceipt, privateKey);
+            break;
+          case types.instantWithdrawal:
+            txHash = await contract.instantWithdraw(normalizedReceipt, privateKey);
+            break;
+          case types.remittance:
+            return resolve(txHash);
+        }
+        isTxFinished = await contract.isTxFinished(txHash);
+        if (isTxFinished) return resolve(txHash);
+        else return reject('txHash status 0x0');
+      } catch (e) {
+        return reject(e);
+      }
+    });
   }
 
   defend = async (stageHeight, lightTxHash) => {
