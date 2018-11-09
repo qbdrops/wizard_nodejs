@@ -1,7 +1,6 @@
 class Memory {
   constructor () {
-    this.lightTxs = {};
-    this.receipts = {};
+    this.db = {};
     this.blockNumber = 0;
   }
 
@@ -14,42 +13,38 @@ class Memory {
   }
 
   getReceiptHashesByStageHeight = async (stageHeight) => {
-    return Object.keys(this.data).map(key => {
-      return this.data[key];
-    }).filter(receipt => {
-      return receipt.receiptData.stageHeight == stageHeight;
-    }).map(receipt => receipt.receiptHash);
+    let receiptHashes = this.db['receiptHashes:' + parseInt(stageHeight)];
+    if (!receiptHashes) receiptHashes = [];
+    return receiptHashes;
   }
 
-  getLightTx = async (key) => {
-    let result = this.lightTxs[key];
-    return result;
-  }
-
-  getReceipt = async (key) => {
-    let result = this.receipts[key];
-    return result;
+  getReceipt = async (receiptHash) => {
+    let receipt = this.db['receipt:' + receiptHash];
+    return receipt;
   }
 
   getBlockNumber = () => {
-    let result = this.blockNumber;
-    return result;
+    let blockNumber = this.blockNumber;
+    return blockNumber;
   }
 
   setBlockNumber = (value) => {
     this.blockNumber = value;
   }
 
-  setLightTx = async (key, value) => {
-    this.lightTxs[key] = value;
+  setReceipt = async (receiptHash, receiptJson, upload = false) => {
+    try {
+      this.db['receipt:' + receiptHash] = receiptJson;
+      await this._appendReceiptHash(parseInt(receiptJson.receiptData.stageHeight, 16), receiptJson.receiptHash);
+    } catch (e) {
+      throw e;
+    }
   }
 
-  setReceipt = async (key, receiptJson, upload = false) => {
-    this.receipts[key] = receiptJson;
-    let address = '0x' + this._infinitechain.signer.getAddress();
-    if (upload) {
-      await this.syncer.uploadReceipt(address, receiptJson);
-    }
+  _appendReceiptHash = async (stageHeight, receiptHash) => {
+    let receiptHashes = await this.getReceiptHashesByStageHeight(stageHeight);
+    receiptHashes.push(receiptHash);
+    this.db['receiptHashes:' + parseInt(stageHeight)] = receiptHashes;
   }
 }
 

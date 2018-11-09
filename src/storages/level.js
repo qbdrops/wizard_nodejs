@@ -3,8 +3,6 @@ import assert from 'assert';
 class Level {
   constructor (db) {
     this.db = db;
-    this.syncer;
-    this._infinitechain;
   }
 
   setInfinitechain (infinitechain) {
@@ -16,64 +14,60 @@ class Level {
   }
 
   getReceiptHashesByStageHeight = async (stageHeight) => {
-    let result;
+    let receiptHashes;
     try {
-      result = await this.db.get(parseInt(stageHeight));
+      receiptHashes = await this.db.get('receiptHashes:' + parseInt(stageHeight));
     } catch (e) {
-      result = [];
+      receiptHashes = JSON.stringify([]);
+    } finally {
+      receiptHashes = JSON.parse(receiptHashes);
     }
-    return result;
+    return receiptHashes;
   }
 
-  getReceipt = async (lightTxHash) => {
-    let result = null;
+  getReceipt = async (receiptHash) => {
+    let receipt = null;
     try {
-      result = await this.db.get('receipt:' + lightTxHash);
+      receipt = await this.db.get('receipt:' + receiptHash);
     } catch (e) {
       if (e.type != 'NotFoundError') {
-        console.error(e);
+        throw e;
       }
     }
-    return result;
+    return receipt;
   }
 
   getBlockNumber = async () => {
-    let result;
+    let blockNumber;
     try {
-      result = await this.db.get('blockNumber');
+      blockNumber = await this.db.get('blockNumber');
     } catch (e) {
-      result = 0;
+      blockNumber = 0;
     }
-    return result;
+    return parseInt(blockNumber);
   }
 
   setBlockNumber = async (value) => {
     await this.db.put('blockNumber', value);
   }
 
-  setReceipt = async (lightTxHash, receiptJson, upload = false) => {
+  setReceipt = async (receiptHash, receiptJson, upload = false) => {
     try {
-      let address = '0x' + this._infinitechain.signer.getAddress();
-      await this.db.put('receipt:' + lightTxHash, receiptJson);
+      await this.db.put('receipt:' + receiptHash, receiptJson);
       await this._appendReceiptHash(parseInt(receiptJson.receiptData.stageHeight, 16), receiptJson.receiptHash);
       if (upload) {
+        let address = '0x' + this._infinitechain.signer.getAddress();
         await this.syncer.uploadReceipt(address, receiptJson);
       }
     } catch (e) {
-      console.log(e);
+      throw e;
     }
   }
 
   _appendReceiptHash = async (stageHeight, receiptHash) => {
-    let receiptHashes;
-    try {
-      receiptHashes = await this.db.get(stageHeight);
-    } catch (e) {
-      receiptHashes = [];
-    } finally {
-      receiptHashes.push(receiptHash);
-      await this.db.put(stageHeight, receiptHashes);
-    }
+    let receiptHashes = await this.getReceiptHashesByStageHeight(stageHeight);
+    receiptHashes.push(receiptHash);
+    await this.db.put('receiptHashes:' + parseInt(stageHeight), JSON.stringify(receiptHashes));
   }
 
   getSyncerToken = async () => {
@@ -119,7 +113,7 @@ class Level {
                 await this.setReceipt(receiptJson.lightTxHash, receiptJson);
               }
             } catch (e) {
-              console.error(e);
+              throw e;
             }
           }
         }
@@ -139,11 +133,11 @@ class Level {
               await this.setReceipt(receiptJson.lightTxHash, receiptJson);
             }
           } catch (e) {
-            console.error(e);
+            throw e;
           }
         });
       } else {
-        console.error(e);
+        throw e;
       }
     }
   }
