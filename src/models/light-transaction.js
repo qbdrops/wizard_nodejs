@@ -90,6 +90,7 @@ class LightTransaction {
         let base = this._toBN(10);
         let exp = 18;
         if (sm.length > 1) {
+          assert(sm[1].length < exp, 'The fraction number is out of limit.');
           exp -= sm[1].length;
         }
         base = base.pow(this._toBN(exp));

@@ -1,4 +1,5 @@
 import assert from 'assert';
+import { expect } from 'chai';
 import LightTransaction from '@/models/light-transaction';
 import types from '@/models/types';
 import EthUtils from 'ethereumjs-util';
@@ -252,12 +253,19 @@ describe('LightTransaction', () => {
         logID: 1
       }
     };
-    it('ltght tx value must equal', () => {
+    it('light tx value must equal', () => {
       let lightTx = new LightTransaction(data);
       let expected = new EthUtils.BN(59949914);
       let base = new EthUtils.BN(1E14);
       expected = expected.mul(base);
       assert.equal(lightTx.lightTxData.value, expected.toString(16).padStart(64, '0'));
+    });
+
+    it('throw error when fraction number is out of limit', () => {
+      expect(() => {
+        data.lightTxData.fee = '0.00008999999999999999';
+        let lightTx = new LightTransaction(data);
+      }).to.throw('The fraction number is out of limit.');
     });
   });
 });
