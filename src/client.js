@@ -18,7 +18,7 @@ class Client {
         if (err) {
           reject(err);
         } else {
-          let fee = rawData.fee? rawData.fee : 0;
+          let fee = rawData.fee? rawData.fee : '0';
           let metadata = rawData.metadata? rawData.metadata : null;
           let lightTxs = [];
           for (let i = 0; i < events.length; i++) {
@@ -50,7 +50,7 @@ class Client {
         if (err) {
           reject(err);
         } else {
-          let fee = rawData.fee? rawData.fee : 0;
+          let fee = rawData.fee? rawData.fee : '0';
           let metadata = rawData.metadata? rawData.metadata : null;
           let logID = result.returnValues._dsn;
           let to = address? address : this._infinitechain.signer.getAddress();
@@ -81,7 +81,7 @@ class Client {
   makeProposeWithdrawal = (rawData, address = null) => {
     assert(rawData.assetID != undefined, '\'assetID\' is not provided.');
     assert(rawData.value != undefined, '\'value\' is not provided.');
-    let fee = rawData.fee? rawData.fee : 0;
+    let fee = rawData.fee? rawData.fee : '0';
     let metadata = rawData.metadata? rawData.metadata : null;
     let from = address? address : this._infinitechain.signer.getAddress();
     let lightTxData = {
@@ -171,19 +171,18 @@ class Client {
 
     lightTxData.nonce = this._getNonce();
     switch (type) {
-      case types.deposit:
-        lightTxData.from = '0';
-        lightTxData.fee = '0';
-        break;
-      case types.withdrawal:
-      case types.instantWithdrawal:
-        lightTxData.to = '0';
-        let normalizedClientAddress = lightTxData.from.slice(-40).padStart(64, '0').slice(-64);
-        lightTxData.logID = this._sha3(normalizedClientAddress + lightTxData.nonce);
-        break;
-      case types.remittance:
-        lightTxData.logID = '0';
-        break;
+    case types.deposit:
+      lightTxData.from = '0';
+      lightTxData.fee = '0';
+      break;
+    case types.withdrawal:
+    case types.instantWithdrawal:
+      lightTxData.to = '0';
+      lightTxData.logID = this._sha3(lightTxData.from.slice(-40).padStart(64, '0').slice(-64) + lightTxData.nonce);
+      break;
+    case types.remittance:
+      lightTxData.logID = '0';
+      break;
     }
     return lightTxData;
   }
