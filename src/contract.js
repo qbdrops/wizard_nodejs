@@ -101,7 +101,8 @@ class Contract {
     let clientAddress = '0x' + this._infinitechain.signer.getAddress(privateKey);
     let boosterContractAddress = this._boosterContractAddress;
     let depositAddress = proposeData.depositAddress.slice(-40).padStart(64, '0').slice(-64);
-    let depositValue = this._to32BytesHex(proposeData.depositValue, false);
+    let depositValue = new EthUtils.BN(proposeData.depositValue, 10);
+    depositValue = depositValue.toString(16).substring(2).padStart(64, '0');
     let depositAssetAddress = proposeData.depositAssetAddress.toString(16).padStart(64, '0').slice(-64);
     try {
       let txMethodData = this.booster().methods.proposeTokenDeposit(
@@ -294,23 +295,6 @@ class Contract {
 
   _sha3 = (content) => {
     return EthUtils.sha3(content).toString('hex');
-  }
-
-  _to32BytesHex = (n, toWei) => {
-    let startWith0x = ((n.toString().slice(0, 2) == '0x') && (n.toString().substring(2).length == 64));
-    let lengthIs64Bytes = (n.toString().length == 64);
-
-    if (startWith0x || lengthIs64Bytes) {
-      n = n.slice(-64).toLowerCase();
-    } else {
-      let m = parseFloat(n);
-      m = toWei ? (m * 1e18) : m;
-      m = Math.floor(m);
-      let h = m.toString(16);
-      assert(h != 'NaN', '\'' + n + '\' can not be parsed to an integer.');
-      n = h.padStart(64, '0').toLowerCase();
-    }
-    return n;
   }
 }
 
