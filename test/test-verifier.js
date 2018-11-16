@@ -23,9 +23,9 @@ describe('Verifier', async () => {
     lightTxData: {
       from: '0',
       to: 'fb44fa0865747558066266061786e69336b5f3a2',
-      value: 0.5,
-      fee: 0.1,
-      nonce: 1,
+      value: '0.5',
+      fee: '0.1',
+      nonce: '1',
       assetID: 1,
       logID: 1
     }

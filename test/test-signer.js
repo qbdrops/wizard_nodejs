@@ -32,11 +32,11 @@ describe('Signer', () => {
     lightTxData: {
       from: '0x123',
       to: '0x456',
-      value: 100,
+      value: '100',
       nonce: '123',
       assetID: 1,
       logID: 1,
-      fee: 3
+      fee: '3'
     },
     sig: sig
   });
