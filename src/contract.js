@@ -102,7 +102,7 @@ class Contract {
     let boosterContractAddress = this._boosterContractAddress;
     let depositAddress = proposeData.depositAddress.slice(-40).padStart(64, '0').slice(-64);
     let depositValue = new EthUtils.BN(proposeData.depositValue, 10);
-    depositValue = depositValue.toString(16).substring(2).padStart(64, '0');
+    depositValue = depositValue.toString(16).padStart(64, '0');
     let depositAssetAddress = proposeData.depositAssetAddress.toString(16).padStart(64, '0').slice(-64);
     try {
       let txMethodData = this.booster().methods.proposeTokenDeposit(

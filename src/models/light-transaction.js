@@ -5,7 +5,6 @@ import types from '@/models/types';
 const allowedLightTxDataKeys = ['from', 'to', 'assetID', 'value', 'fee', 'nonce', 'logID', 'clientMetadataHash'];
 const allowedSigKeys = ['clientLightTx', 'serverLightTx'];
 const allowedMetadataKeys = ['client', 'server'];
-const instantWithdrawalLimit = 10;
 
 class LightTransaction {
   constructor (lightTxJson) {
@@ -36,6 +35,7 @@ class LightTransaction {
         delete metadata[key];
       }
     });
+    this.base = this._toBN(10);
 
     // Check if all lightTxData keys are included
     // Meanwhile make an ordered lightTxData
@@ -61,6 +61,7 @@ class LightTransaction {
     this.sig = sig;
     this.lightTxHash = this._sha3(Object.values(this.lightTxData).reduce((acc, curr) => acc + curr, ''));
     this.metadata = metadata;
+    this.instantWithdrawalLimit = this._toBN(1E19);
   }
 
   _normalize = (lightTxData) => {
@@ -87,13 +88,12 @@ class LightTransaction {
       let h = '';
       if (toWei) {
         let sm = n.split('.');
-        let base = this._toBN(10);
         let exp = 18;
         if (sm.length > 1) {
-          assert(sm[1].length < exp, 'The fraction number is out of limit.');
+          assert(sm[1].length <= exp, 'The fraction number is out of limit.');
           exp -= sm[1].length;
         }
-        base = base.pow(this._toBN(exp));
+        let base = this.base.pow(this._toBN(exp));
         sm = this._toBN(sm.join(''));
         n = sm.mul(base);
       } else {
@@ -123,17 +123,21 @@ class LightTransaction {
     return value;
   }
 
+  _sha3 (content) {
+    return EthUtils.sha3(content).toString('hex');
+  }
+
   type = () => {
     let res;
     let from = this.lightTxData.from;
     let to = this.lightTxData.to;
-    let value = parseInt(this.lightTxData.value, 16) / 1e18;
+    let value = this._toBN(this.lightTxData.value, 16);
 
     if (from == 0 || to == 0) {
       if (from == 0) {
         res = types.deposit;
       } else {
-        res = (value > instantWithdrawalLimit) ? types.withdrawal : types.instantWithdrawal;
+        res = (value.gt(this.instantWithdrawalLimit)) ? types.withdrawal : types.instantWithdrawal;
       }
     } else {
       res = types.remittance;
@@ -162,10 +166,6 @@ class LightTransaction {
 
   toString = () => {
     return JSON.stringify(this.toJson());
-  }
-
-  _sha3 (content) {
-    return EthUtils.sha3(content).toString('hex');
   }
 }
 

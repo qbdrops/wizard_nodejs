@@ -5,7 +5,6 @@ import types from '@/models/types';
 
 const allowedReceiptJsonKeys = ['lightTxHash', 'lightTxData', 'sig', 'receiptData', 'metadata'];
 const allowedReceiptDataKeys = ['stageHeight', 'GSN', 'fromPreGSN', 'toPreGSN', 'lightTxHash', 'fromBalance', 'toBalance', 'serverMetadataHash'];
-const instantWithdrawalLimit = 10;
 
 class Receipt {
   constructor (receiptJson) {
@@ -21,6 +20,7 @@ class Receipt {
         delete receiptJson.receiptData[key];
       }
     });
+    this.base = this._toBN(10);
 
     // Check Json format (except for 'metadata')
     allowedReceiptJsonKeys.filter(key => key != 'metadata').forEach(key => {
@@ -58,6 +58,15 @@ class Receipt {
     if (!this.sig.boosterReceipt || !this.hasBoosterReceiptSig()) {
       this.sig.boosterReceipt = {};
     }
+    this.instantWithdrawalLimit = this._toBN(1E19);
+  }
+
+  _toBN = (value, base = 10) => {
+    if (typeof value !== 'number' && typeof value !== 'string') {
+      throw new Error('Unsupported type to big numnber.');
+    }
+    value = value.toString();
+    return new EthUtils.BN(value, base);
   }
 
   _normalize = (receiptData) => {
@@ -70,17 +79,21 @@ class Receipt {
     return receiptData;
   }
 
+  _sha3 (content) {
+    return EthUtils.sha3(content).toString('hex');
+  }
+
   type = () => {
     let res;
     let from = this.lightTxData.from;
     let to = this.lightTxData.to;
-    let value = parseInt(this.lightTxData.value, 16) / 1e18;
+    let value = this._toBN(this.lightTxData.value, 16);
 
     if (from == 0 || to == 0) {
       if (from == 0) {
         res = types.deposit;
       } else {
-        res = (value > instantWithdrawalLimit) ? types.withdrawal : types.instantWithdrawal;
+        res = (value.gt(this.instantWithdrawalLimit)) ? types.withdrawal : types.instantWithdrawal;
       }
     } else {
       res = types.remittance;
@@ -141,10 +154,6 @@ class Receipt {
       this.sig.boosterReceipt.s
     ];
     return arrayReceipt;
-  }
-
-  _sha3 (content) {
-    return EthUtils.sha3(content).toString('hex');
   }
 }
 
