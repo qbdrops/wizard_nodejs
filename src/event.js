@@ -1,3 +1,4 @@
+import Util from '@/utils/util';
 import types from '@/models/types';
 
 class Event {
@@ -11,31 +12,33 @@ class Event {
   }
 
   getProposeDeposit (cb, address = null) {
-    let client = address? this._remove0x(address) : this._infinitechain.signer.getAddress();
+    let client = address? address : this._infinitechain.signer.getAddress();
     let booster = this._infinitechain.contract.booster();
     booster.getPastEvents('ProposeDeposit', {
-      filter: { _client: '0x' + client.padStart(64, '0') },
+      filter: { _client: '0x' + Util.toByte32(client) },
       fromBlock: 0,
       toBlock: 'latest'
     }, async (err, result) => {
       let events = [];
-      for (let i = 0; i < result.length; i++) {
-        let depositLog = await booster.methods.depositLogs(result[i].returnValues._dsn).call();
-        if (depositLog.flag == false) {
-          events.push(result[i]);
+      if (result) {
+        for (let i = 0; i < result.length; i++) {
+          let depositLog = await booster.methods.depositLogs(result[i].returnValues._dsn).call();
+          if (depositLog.flag == false) {
+            events.push(result[i]);
+          }
         }
+        let web3 = this._infinitechain.contract.web3();
+        web3.eth.getBlockNumber().then(this._storage.setBlockNumber);
       }
-      let web3 = this._infinitechain.contract.web3();
-      web3.eth.getBlockNumber().then(this._storage.setBlockNumber);
       cb(err, events);
     });
   }
 
   onProposeDeposit (cb, address = null) {
-    let client = address? this._remove0x(address) : this._infinitechain.signer.getAddress();
+    let client = address? address : this._infinitechain.signer.getAddress();
     let booster = this._infinitechain.contract.booster();
     booster.events.ProposeDeposit({
-      filter: { _client: '0x' + client.padStart(64, '0') },
+      filter: { _client: '0x' + Util.toByte32(client) },
       toBlock: 'latest'
     }, (err, result) => {
       cb(err, result);
@@ -63,10 +66,10 @@ class Event {
   }
 
   onWithdraw (cb, address = null) {
-    let client = address? this._remove0x(address) : this._infinitechain.signer.getAddress();
+    let client = address? address : this._infinitechain.signer.getAddress();
     let booster = this._infinitechain.contract.booster();
     booster.events.Withdraw({
-      filter: { _client: '0x' + client.padStart(64, '0') },
+      filter: { _client: '0x' + Util.toByte32(client) },
       toBlock: 'latest'
     }, (err, result) => {
       cb(err, result);
@@ -121,14 +124,6 @@ class Event {
     }, (err, result) => {
       cb(err, result);
     });
-  }
-
-  _remove0x = (value) => {
-    value = value.toString();
-    if (value.slice(0, 2) == '0x') {
-      value = value.substring(2);
-    }
-    return value;
   }
 }
 

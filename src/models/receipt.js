@@ -1,4 +1,4 @@
-import EthUtils from 'ethereumjs-util';
+import Util from '@/utils/util';
 import assert from 'assert';
 import LightTransaction from '@/models/light-transaction';
 import types from '@/models/types';
@@ -20,7 +20,6 @@ class Receipt {
         delete receiptJson.receiptData[key];
       }
     });
-    this.base = this._toBN(10);
 
     // Check Json format (except for 'metadata')
     allowedReceiptJsonKeys.filter(key => key != 'metadata').forEach(key => {
@@ -51,43 +50,31 @@ class Receipt {
     this.lightTxData = lightTx.lightTxData;
     this.receiptData = this._normalize(orderedReceiptData);
     this.metadata = (receiptJson.metadata);
-    this.receiptData.serverMetadataHash = this._sha3(this.metadata.server);
-    this.receiptHash = this._sha3(Object.values(this.receiptData).reduce((acc, curr) => acc + curr, ''));
+    this.receiptData.serverMetadataHash = Util.sha3(this.metadata.server);
+    this.receiptHash = Util.sha3(Object.values(this.receiptData).reduce((acc, curr) => acc + curr, ''));
     this.sig = receiptJson.sig;
     // Initialize boosterReceipt sig if it is undefined.
     if (!this.sig.boosterReceipt || !this.hasBoosterReceiptSig()) {
       this.sig.boosterReceipt = {};
     }
-    this.instantWithdrawalLimit = this._toBN(1E19);
-  }
-
-  _toBN = (value, base = 10) => {
-    if (typeof value !== 'number' && typeof value !== 'string') {
-      throw new Error('Unsupported type to big numnber.');
-    }
-    value = value.toString();
-    return new EthUtils.BN(value, base);
+    this.instantWithdrawalLimit = Util.toBN(1E19);
   }
 
   _normalize = (receiptData) => {
-    receiptData.stageHeight = receiptData.stageHeight.toString(16).padStart(64, '0').slice(-64);
-    receiptData.GSN         = receiptData.GSN.toString(16).padStart(64, '0').slice(-64);
-    receiptData.fromPreGSN  = receiptData.fromPreGSN.toString(16).padStart(64, '0').slice(-64);
-    receiptData.toPreGSN    = receiptData.toPreGSN.toString(16).padStart(64, '0').slice(-64);
-    receiptData.fromBalance = receiptData.fromBalance.toString(16).padStart(64, '0').slice(-64);
-    receiptData.toBalance   = receiptData.toBalance.toString(16).padStart(64, '0').slice(-64);
+    receiptData.stageHeight = Util.toByte32(receiptData.stageHeight);
+    receiptData.GSN         = Util.toByte32(receiptData.GSN);
+    receiptData.fromPreGSN  = Util.toByte32(receiptData.fromPreGSN);
+    receiptData.toPreGSN    = Util.toByte32(receiptData.toPreGSN);
+    receiptData.fromBalance = Util.toByte32(receiptData.fromBalance);
+    receiptData.toBalance   = Util.toByte32(receiptData.toBalance);
     return receiptData;
-  }
-
-  _sha3 (content) {
-    return EthUtils.sha3(content).toString('hex');
   }
 
   type = () => {
     let res;
     let from = this.lightTxData.from;
     let to = this.lightTxData.to;
-    let value = this._toBN(this.lightTxData.value, 16);
+    let value = Util.toBN(this.lightTxData.value, 16);
 
     if (from == 0 || to == 0) {
       if (from == 0) {

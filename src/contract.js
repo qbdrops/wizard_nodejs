@@ -1,5 +1,5 @@
 import Web3 from 'web3';
-import EthUtils from 'ethereumjs-util';
+import Util from '@/utils/util';
 import EthereumTx from 'ethereumjs-tx';
 import Booster from '@/abi/Booster.json';
 import EIP20 from '@/abi/EIP20.json';
@@ -100,10 +100,9 @@ class Contract {
     let txValue = '0x0';
     let clientAddress = '0x' + this._infinitechain.signer.getAddress(privateKey);
     let boosterContractAddress = this._boosterContractAddress;
-    let depositAddress = proposeData.depositAddress.slice(-40).padStart(64, '0').slice(-64);
-    let depositValue = new EthUtils.BN(proposeData.depositValue, 10);
-    depositValue = depositValue.toString(16).padStart(64, '0');
-    let depositAssetAddress = proposeData.depositAssetAddress.toString(16).padStart(64, '0').slice(-64);
+    let depositAddress = Util.toByte32(proposeData.depositAddress);
+    let depositValue = Util.toByte32(Util.toWei(proposeData.depositValue, 18));
+    let depositAssetAddress = Util.toByte32(proposeData.depositAssetAddress);
     try {
       let txMethodData = this.booster().methods.proposeTokenDeposit(
         [
@@ -200,7 +199,7 @@ class Contract {
 
   compensate = async (stageHeight, lightTxHashes) => {
     try {
-      let stageHash = '0x' + this._sha3(stageHeight.toString());
+      let stageHash = '0x' + Util.sha3(stageHeight.toString());
       lightTxHashes = lightTxHashes.map(lightTxHash => '0x' + lightTxHash);
       let txMethodData = this.booster().methods.payPenalty(
         stageHash,
@@ -217,7 +216,7 @@ class Contract {
 
   defend = async (stageHeight, lightTxHash, treeNodeIndex, slice, collidingLightTxHashes) => {
     try {
-      let stageHash = '0x' + this._sha3(stageHeight.toString());
+      let stageHash = '0x' + Util.sha3(stageHeight.toString());
       lightTxHash = '0x' + lightTxHash;
       slice = slice.map(h => '0x' + h);
       collidingLightTxHashes = collidingLightTxHashes.map(h => '0x' + h);
@@ -291,10 +290,6 @@ class Contract {
   _sendRawTransaction = async (serializedTx) => {
     let receipt = await this._web3.eth.sendSignedTransaction(serializedTx);
     return receipt.transactionHash;
-  }
-
-  _sha3 = (content) => {
-    return EthUtils.sha3(content).toString('hex');
   }
 }
 

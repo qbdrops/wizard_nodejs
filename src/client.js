@@ -1,4 +1,4 @@
-import EthUtils from 'ethereumjs-util';
+import Util from '@/utils/util';
 import assert from 'assert';
 import LightTransaction from '@/models/light-transaction';
 import Receipt from '@/models/receipt';
@@ -18,7 +18,6 @@ class Client {
         if (err) {
           reject(err);
         } else {
-          let fee = rawData.fee? rawData.fee : '0';
           let metadata = rawData.metadata? rawData.metadata : null;
           let lightTxs = [];
           for (let i = 0; i < events.length; i++) {
@@ -30,7 +29,6 @@ class Client {
               to: to,
               assetID: assetID,
               value: value,
-              fee: fee,
               logID: logID,
               metadata: metadata
             };
@@ -50,7 +48,6 @@ class Client {
         if (err) {
           reject(err);
         } else {
-          let fee = rawData.fee? rawData.fee : '0';
           let metadata = rawData.metadata? rawData.metadata : null;
           let logID = result.returnValues._dsn;
           let to = address? address : this._infinitechain.signer.getAddress();
@@ -60,7 +57,6 @@ class Client {
             to: to,
             assetID: assetID,
             value: value,
-            fee: fee,
             logID: logID,
             metadata: metadata
           };
@@ -162,10 +158,6 @@ class Client {
     return this._infinitechain.booster.takeObjection(payment);
   }
 
-  _sha3 (content) {
-    return EthUtils.sha3(content).toString('hex');
-  }
-
   _prepare = (type, lightTxData) => {
     assert(Object.values(types).includes(type), 'Parameter \'type\' should be one of \'deposit\', \'withdrawal\', \'instantWithdraw\' or \'remittance\'');
 
@@ -178,7 +170,7 @@ class Client {
     case types.withdrawal:
     case types.instantWithdrawal:
       lightTxData.to = '0';
-      lightTxData.logID = this._sha3(lightTxData.from.slice(-40).padStart(64, '0').slice(-64) + lightTxData.nonce);
+      lightTxData.logID = Util.sha3(Util.toByte32(lightTxData.from) + lightTxData.nonce);
       break;
     case types.remittance:
       lightTxData.logID = '0';
@@ -188,7 +180,7 @@ class Client {
   }
 
   _getNonce () {
-    return this._sha3((Math.random()).toString());
+    return Util.sha3((Math.random()).toString());
   }
 
   getSyncerToken = async () => {
@@ -231,15 +223,15 @@ class Client {
 
     let rootNode = slice.reduce((acc, curr) => {
       if (acc.treeNodeIndex % 2 == 0) {
-        acc.treeNodeHash = this._sha3(acc.treeNodeHash.concat(curr.treeNodeHash));
+        acc.treeNodeHash = Util.sha3(acc.treeNodeHash.concat(curr.treeNodeHash));
       } else {
-        acc.treeNodeHash = this._sha3(curr.treeNodeHash.concat(acc.treeNodeHash));
+        acc.treeNodeHash = Util.sha3(curr.treeNodeHash.concat(acc.treeNodeHash));
       }
       acc.treeNodeIndex = parseInt(acc.treeNodeIndex / 2);
       return acc;
     }, firstNode);
 
-    return this._sha3(rootNode.treeNodeHash + stageHeight.toString(16).padStart(64, '0'));
+    return Util.sha3(rootNode.treeNodeHash + stageHeight.toString(16).padStart(64, '0'));
   }
 }
 

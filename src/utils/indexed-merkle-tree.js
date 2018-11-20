@@ -1,4 +1,4 @@
-const EthUtils = require('ethereumjs-util');
+const Util = require('@/utils/util');
 let assert = require('assert');
 
 class IndexedMerkleTree {
@@ -6,7 +6,7 @@ class IndexedMerkleTree {
     this.stageHeight = stageHeight;
     this.leafElements = leafElements;
     this.treeHeight = this._computeTreeHeight(this.leafElements.length);
-    this.emptyNodeHash = this._sha3('none');
+    this.emptyNodeHash = Util.sha3('none');
 
     let buildResult = this._build();
     this.treeNodes = buildResult.treeNodes;
@@ -38,7 +38,7 @@ class IndexedMerkleTree {
       let _concatedElements = leafElementMap[index].sort().reduce((acc, curr) => {
         return acc.concat(curr);
       }, '');
-      let treeNodeHash = this._sha3(_concatedElements);
+      let treeNodeHash = Util.sha3(_concatedElements);
       computedLeafElements[index] = treeNodeHash;
     });
 
@@ -67,14 +67,14 @@ class IndexedMerkleTree {
         nodeQueue.push(node);
       } else {
         let leftNode = nodeQueue.pop();
-        let parentNodeHash = this._sha3(leftNode.treeNodeHash.concat(node.treeNodeHash));
+        let parentNodeHash = Util.sha3(leftNode.treeNodeHash.concat(node.treeNodeHash));
         let parentNodeIndex = parseInt(leftNode.treeNodeIndex / 2);
         nodeQueue.push({ treeNodeIndex: parentNodeIndex, treeNodeHash: parentNodeHash });
       }
     }
 
     treeNodes.push(nodeQueue[0]);
-    rootHash = this._sha3(nodeQueue[0].treeNodeHash + this.stageHeight.toString(16).padStart(64, '0'));
+    rootHash = Util.sha3(nodeQueue[0].treeNodeHash + this.stageHeight.toString(16).padStart(64, '0'));
 
     return { treeNodes: treeNodes, rootHash: rootHash };
   }
@@ -117,7 +117,7 @@ class IndexedMerkleTree {
 
   computeLeafIndex (leafElement) {
     assert(this.treeHeight, 'Tree is not built yet.');
-    let h = parseInt(this._sha3(leafElement.toString()).substring(0, 12), 16);
+    let h = parseInt(Util.sha3(leafElement.toString()).substring(0, 12), 16);
     let res = (1 << (this.treeHeight - 1)) + Math.abs(h) % (1 << (this.treeHeight - 1));
     return res;
   }
@@ -142,10 +142,6 @@ class IndexedMerkleTree {
 
   _computeTreeHeight (size) {
     return parseInt(Math.log2(size)) + 1;
-  }
-
-  _sha3 (content) {
-    return EthUtils.sha3(content).toString('hex');
   }
 }
 

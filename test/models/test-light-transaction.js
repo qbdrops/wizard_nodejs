@@ -13,7 +13,7 @@ describe('LightTransaction', () => {
           to: '0x456',
           from: '0x123',
           value: '100',
-          nonce: '123',
+          nonce: '0x123',
           assetID: '1',
           logID: '1',
           foo: 'bar'
@@ -30,7 +30,7 @@ describe('LightTransaction', () => {
           fee: '3',
           from: '0x123',
           value: '100',
-          nonce: '123',
+          nonce: '0x123',
           assetID: '1',
           logID: '1'
         }
@@ -46,7 +46,7 @@ describe('LightTransaction', () => {
           from: '0x123',
           to: '0x456',
           value: '100',
-          nonce: '123',
+          nonce: '0x123',
           assetID: 1,
           logID: '1'
         },
@@ -68,7 +68,7 @@ describe('LightTransaction', () => {
           to: '0x456',
           from: '0x123',
           value: '100',
-          nonce: '123',
+          nonce: '0x123',
           assetID: 1,
           logID: 1
         },
@@ -104,7 +104,7 @@ describe('LightTransaction', () => {
           to: '123',
           from: '0',
           value: '10',
-          nonce: '123',
+          nonce: '0x123',
           assetID: 1,
           logID: 1
         }
@@ -128,7 +128,7 @@ describe('LightTransaction', () => {
           to: '0',
           from: '123',
           value: '1',
-          nonce: '123',
+          nonce: '0x123',
           assetID: 1,
           logID: 1
         }
@@ -140,7 +140,7 @@ describe('LightTransaction', () => {
           to: '0',
           from: '123',
           value: '11',
-          nonce: '123',
+          nonce: '0x123',
           assetID: 1,
           logID: 1
         }

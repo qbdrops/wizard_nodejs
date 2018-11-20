@@ -33,7 +33,7 @@ describe('Signer', () => {
       from: '0x123',
       to: '0x456',
       value: '100',
-      nonce: '123',
+      nonce: '0x123',
       assetID: 1,
       logID: 1,
       fee: '3'

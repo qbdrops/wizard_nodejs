@@ -1,4 +1,4 @@
-import EthUtils from 'ethereumjs-util';
+import Util from '@/utils/util';
 import assert from 'assert';
 import types from '@/models/types';
 
@@ -35,7 +35,6 @@ class LightTransaction {
         delete metadata[key];
       }
     });
-    this.base = this._toBN(10);
 
     // Check if all lightTxData keys are included
     // Meanwhile make an ordered lightTxData
@@ -57,81 +56,29 @@ class LightTransaction {
     });
 
     this.lightTxData = this._normalize(orderedLightTxData);
-    this.lightTxData.clientMetadataHash = this._sha3(metadata.client);
+    this.lightTxData.clientMetadataHash = Util.sha3(metadata.client);
     this.sig = sig;
-    this.lightTxHash = this._sha3(Object.values(this.lightTxData).reduce((acc, curr) => acc + curr, ''));
+    this.lightTxHash = Util.sha3(Object.values(this.lightTxData).reduce((acc, curr) => acc + curr, ''));
     this.metadata = metadata;
-    this.instantWithdrawalLimit = this._toBN(1E19);
+    this.instantWithdrawalLimit = Util.toBN(1E19);
   }
 
   _normalize = (lightTxData) => {
-    lightTxData.from    = this._remove0x(lightTxData.from).padStart(64, '0').slice(-64).toLowerCase();
-    lightTxData.to      = this._remove0x(lightTxData.to).padStart(64, '0').slice(-64).toLowerCase();
-    lightTxData.logID   = this._remove0x(lightTxData.logID).padStart(64, '0').slice(-64).toLowerCase();
-    lightTxData.nonce   = this._remove0x(lightTxData.nonce).padStart(64, '0').slice(-64).toLowerCase();
-    lightTxData.assetID = this._remove0x(lightTxData.assetID).padStart(64, '0').slice(-64).toLowerCase();
-    lightTxData.value   = this._to32BytesHex(lightTxData.value, true);
-    lightTxData.fee     = this._to32BytesHex(lightTxData.fee, true);
+    lightTxData.from    = Util.toByte32(lightTxData.from);
+    lightTxData.to      = Util.toByte32(lightTxData.to);
+    lightTxData.logID   = Util.toByte32(lightTxData.logID);
+    lightTxData.nonce   = Util.toByte32(lightTxData.nonce);
+    lightTxData.assetID = Util.toByte32(lightTxData.assetID);
+    lightTxData.value   = Util.toByte32(Util.isByte32(lightTxData.value)? lightTxData.value : Util.toWei(lightTxData.value, 18));
+    lightTxData.fee     = Util.toByte32(Util.isByte32(lightTxData.fee)? lightTxData.fee : Util.toWei(lightTxData.fee, 18));
     return lightTxData;
-  }
-
-  _to32BytesHex = (n, toWei) => {
-    assert(typeof n == 'string', 'Please pass number as string to avoid precision errors.');
-
-    let startWith0x = ((n.toString().slice(0, 2) == '0x') && (n.toString().substring(2).length == 64));
-    let lengthIs64Bytes = (n.toString().length == 64);
-
-    if (startWith0x || lengthIs64Bytes) {
-      n = n.slice(-64).toLowerCase();
-    } else {
-      assert(/^(\d)+e(\+|-)?(\d)+$/i.test(n) === false, 'Do not pass numbers as scientific notation.');
-      let h = '';
-      if (toWei) {
-        let sm = n.split('.');
-        let exp = 18;
-        if (sm.length > 1) {
-          assert(sm[1].length <= exp, 'The fraction number is out of limit.');
-          exp -= sm[1].length;
-        }
-        let base = this.base.pow(this._toBN(exp));
-        sm = this._toBN(sm.join(''));
-        n = sm.mul(base);
-      } else {
-        n = this._toBN(n);
-      }
-      h = n.toString(16);
-      assert(h != 'NaN', '\'' + n + '\' can not be parsed to an integer.');
-      n = h.padStart(64, '0').toLowerCase();
-    }
-
-    return n;
-  }
-
-  _toBN = (value, base = 10) => {
-    if (typeof value !== 'number' && typeof value !== 'string') {
-      throw new Error('Unsupported type to big numnber.');
-    }
-    value = value.toString();
-    return new EthUtils.BN(value, base);
-  }
-
-  _remove0x = (value) => {
-    value = value.toString();
-    if (value.slice(0, 2) == '0x') {
-      value = value.substring(2);
-    }
-    return value;
-  }
-
-  _sha3 (content) {
-    return EthUtils.sha3(content).toString('hex');
   }
 
   type = () => {
     let res;
     let from = this.lightTxData.from;
     let to = this.lightTxData.to;
-    let value = this._toBN(this.lightTxData.value, 16);
+    let value = Util.toBN(this.lightTxData.value, 16);
 
     if (from == 0 || to == 0) {
       if (from == 0) {

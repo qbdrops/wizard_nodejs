@@ -10,7 +10,7 @@ describe('Receipt', () => {
         to: '0x456',
         from: '0x123',
         value: '100',
-        nonce: '123',
+        nonce: '0x123',
         assetID: 1,
         logID: 1,
         foo: 'bar'
